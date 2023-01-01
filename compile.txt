@@ -1,0 +1,1 @@
+icpc -I /opt/homebrew/include -I /usr/local/Frameworks/Python.framework/Headers -O3 -Wall -shared -std=c++17 -static-intel -qmkl -qopenmp -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fPIC `python -m pybind11 --includes` -undefined dynamic_lookup ./base_compnal/pybind11_main.cpp -o compnal`python3-config --extension-suffix`

@@ -1,0 +1,64 @@
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Environments
+*.venv
+
+# Executables
+*.exe
+*.out
+*.app
+
+# visual studio
+*.vscode
+
+# Xcode Projrct File
+*.xcodeproj
+*.DS_Store
+*.entitlements
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Working Directry
+notebooks/work
+
+# Reference site
+docs
+
+*.pyc
+
+__pycache__
+
+_version.py
+
+_skbuild*
+_skbuild/*
+_cmake_test_compile

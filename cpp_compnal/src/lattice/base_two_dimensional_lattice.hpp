@@ -39,11 +39,11 @@ public:
    //! @param y_size The size of the y-direction.
    BaseTwoDimensionalLattice(const std::int32_t x_size,
                              const std::int32_t y_size) {
-      if (x_size < 0) {
-         throw std::runtime_error("x_size must be larger than or equal to 0.");
+      if (x_size <= 0) {
+         throw std::runtime_error("x_size must be larger than 0.");
       }
-      if (y_size < 0) {
-         throw std::runtime_error("y_size must be larger than or equal to 0.");
+      if (y_size <= 0) {
+         throw std::runtime_error("y_size must be larger than 0.");
       }
       
       x_size_ = x_size;
@@ -90,10 +90,10 @@ public:
    
 private:
    //! @brief Size of the x-direction.
-   std::int32_t x_size_ = 0;
+   std::int32_t x_size_ = -1;
    
    //! @brief Size of the y-direction.
-   std::int32_t y_size_ = 0;
+   std::int32_t y_size_ = -1;
    
    //! @brief Boundary condition.
    BoundaryCondition bc_ = BoundaryCondition::OBC;

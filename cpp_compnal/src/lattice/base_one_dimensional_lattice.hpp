@@ -38,8 +38,8 @@ public:
    //! @brief Constructor of BaseOneDimensionalLattice class.
    //! @param system_size System size.
    BaseOneDimensionalLattice(const std::int32_t system_size) {
-      if (system_size < 0) {
-         throw std::runtime_error("system_size must be larger than or equal to 0.");
+      if (system_size <= 0) {
+         throw std::runtime_error("system_size must be larger than 0.");
       }
       system_size_ = system_size;
    }
@@ -69,7 +69,7 @@ public:
    
 private:
    //! @brief System size.
-   std::int32_t system_size_ = 0;
+   std::int32_t system_size_ = -1;
    
    //! @brief Boundary condition.
    BoundaryCondition bc_ = BoundaryCondition::OBC;

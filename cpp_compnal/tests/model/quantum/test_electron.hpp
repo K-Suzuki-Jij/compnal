@@ -30,7 +30,28 @@ namespace test {
 
 TEST(ModelQuantum, Electron) {
    lattice::Chain chain{10};
-   model::quantum::Electron(chain, {10, 0}, 0.5, 1.0);
+   model::quantum::Electron(chain, 10, 0, 0.5, 1.0);
+   
+
+}
+
+TEST(ModelQuantum, ElectronValidateQNumber) {
+   EXPECT_TRUE((model::quantum::Electron{lattice::Chain{2}, 4, 0   , 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::Electron{lattice::Chain{2}, 3, +0.5, 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::Electron{lattice::Chain{2}, 3, -0.5, 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::Electron{lattice::Chain{2}, 2, 0   , 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::Electron{lattice::Chain{2}, 2, +1  , 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::Electron{lattice::Chain{2}, 2, -1  , 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::Electron{lattice::Chain{2}, 1, +0.5, 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::Electron{lattice::Chain{2}, 1, -0.5, 0.0, 0.0}.ValidateQNumber()));
+
+   EXPECT_FALSE((model::quantum::Electron{lattice::Chain{2}, +4, +1  , 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::Electron{lattice::Chain{2}, +3, +0  , 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::Electron{lattice::Chain{2}, +3, -1.5, 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::Electron{lattice::Chain{2}, +2, +0.5, 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::Electron{lattice::Chain{2}, +2, -0.5, 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::Electron{lattice::Chain{2}, +1, +1  , 0.0, 0.0}.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::Electron{lattice::Chain{2}, +1, -1  , 0.0, 0.0}.ValidateQNumber()));
 }
 
 

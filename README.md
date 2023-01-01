@@ -11,7 +11,7 @@ Please note that this is beta version and there may be some bugs.
 
 We test on 
 * macOS 13.1 on Apple Silicon and Intel CPU
-* Ubuntu 20.04.5 LTS on Ryzen 7950x
+* Ubuntu 20.04.5 LTS on AMD CPU
 
 ## Install
 We recommend using virtual environment.
@@ -34,8 +34,9 @@ python -m pip instal .
 ## Usage
 ### Classical Monte Carlo
 We explain classical monte carlo simulation for two-dimensional Ising model with nearest neighbor interactions on the square lattice under the periodic boundary condition ( PBC):
+
 $$
-E=J\sum_{i, j}\sigma_{i}\sigma_{j} + h\sum_{i=1}\sigma_i,\;\;\;\sigma_{i}\in \{-1, +1\}
+E=J\sum_{i, j}\sigma_{i}\sigma_{j} + h\sum_{i=1}\sigma_i,\quad\sigma_{i}\in \\{-1, +1\\}
 $$
 
 First, we import `compnal` and set up lattice:
@@ -80,10 +81,12 @@ After the simulation, you can get spin configurations:
 samples = solver.get_samples()
 ```
 
-Since we set $T=1.0$, the system in the ferromagnetic phase. We can check this by calculating 
+Since we set $T=1.0$, the system in the ferromagnetic phase. We can check this by calculating
+
 $$
-\langle |m| \rangle = \frac{1}{N\times\rm num\_samples}\sum^{\rm num\_samples}_{i=1}\left|\sum^{N}_{j=1}\sigma^{(i)}_{j}\right|.
+\langle |m| \rangle = \frac{1}{N\times\rm num\\_samples}\sum^{\rm num\\_samples}_{i=1}\left|\sum^{N}_{j=1}\sigma^{(i)}_{j}\right|.
 $$
+
 Here, $\sigma^{(i)}_{j}$ is the $j$-th spin obtained from the $i$-th simulation.
 Let us calculate this.
 ```python

@@ -81,7 +81,7 @@ After the simulation, you can get spin configurations:
 samples = solver.get_samples()
 ```
 
-Since we set $T=1.0$, the system in the ferromagnetic phase. We can check this by calculating
+Since we set $T=1.0$, the system is in the ferromagnetic phase. We can check this by calculating
 
 $$
 \langle |m| \rangle = \frac{1}{N\times\rm num\\_samples}\sum^{\rm num\\_samples}_{i=1}\left|\sum^{N}_{j=1}\sigma^{(i)}_{j}\right|.

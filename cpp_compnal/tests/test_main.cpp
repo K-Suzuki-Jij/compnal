@@ -29,6 +29,7 @@
 #include "model/quantum/test_electron.hpp"
 #include "solver/test_cmc_polynomial_ising.hpp"
 #include "solver/test_cmc_ising.hpp"
+#include "solver/test_ed_hubbard.hpp"
 #include "blas/test_crs.hpp"
 #include "gtest/gtest.h"
 

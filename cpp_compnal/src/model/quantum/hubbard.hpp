@@ -23,14 +23,45 @@
 #ifndef COMPNAL_MODEL_HUBBARD_HPP_
 #define COMPNAL_MODEL_HUBBARD_HPP_
 
+#include "./electron.hpp"
+
 namespace compnal {
 namespace model {
+namespace quantum {
 
-template<typename RealType, class LatticeType>
-class Hubbard {
+template<class LatticeType, typename RealType>
+class Hubbard: public Electron<LatticeType, RealType> {
+   
+public:
+   Hubbard(const LatticeType &lattice): Electron<LatticeType, RealType>(lattice) {}
+      
+   void SetHoppingEnergy(const RealType hoppin_genergy) {
+      hoppin_genergy_ = hoppin_genergy;
+   }
+   
+   void SetOnsiteCoulomb(const RealType onsite_coulomb) {
+      onsite_coulomb_ = onsite_coulomb;
+   }
+   
+   void SetChemicalPotential(const RealType chemical_potential) {
+      chemical_potential_ = chemical_potential;
+   }
+   
+private:
+   //! @brief Hopping energy \f$ t \f$.
+   RealType hoppin_genergy_ = 1.0;
+   
+   //! @brief The onsite density interactions \f$ U \f$.
+   RealType onsite_coulomb_ = 1.0;
+      
+   //! @brief The chemical potential \f$ mu \f$.
+   RealType chemical_potential_ = 0.0;
+   
+   
    
 };
 
+} // namespace quantum
 } // namespace model
 } // namespace compnal
 

@@ -25,6 +25,7 @@
 
 #include "../../lattice/all.hpp"
 #include "../../blas/all.hpp"
+#include "../../utility/hash.hpp"
 
 #include <vector>
 
@@ -46,27 +47,26 @@ public:
    //! @brief The type of conserved quantum number (total electron, twice the number of total sz) pair.
    using CQNType = std::pair<std::int32_t, std::int32_t>;
    
-   //! @brief The linear interaction type.
-   using LinearType = RealType;
-   
-   //! @brief The quadratic interaction type.
-   using QuadraticType = RealType;
+   using CQNHash = utility::PairHash;
    
    //! @brief Constructor for Electron class.
    //! @param lattice The lattice type.
-   //! @param linear The linear interaction.
-   //! @param quadratic The quadratic interaction.
+   Electron(const LatticeType &lattice): lattice_(lattice) {
+      SetOnsiteOperator();
+   }
+   
+   //! @brief Constructor for Electron class.
+   //! @param lattice The lattice type.
    Electron(const LatticeType &lattice,
             const std::int32_t total_electron,
-            const double total_sz,
-            const LinearType linear,
-            const QuadraticType quadratic):
-   lattice_(lattice), linear_(linear), quadratic_(quadratic) {
+            const double total_sz): lattice_(lattice) {
       SetTotalElectron(total_electron);
       SetTotalSz(total_sz);
       SetOnsiteOperator();
    }
    
+   //! @brief Set the total electrons.
+   //! @param total_electron The number of the total electrons \f$ \hat{N}_{\rm e}=\sum^{N}_{i=1}\hat{n}_{i} \f$.
    void SetTotalElectron(const std::int32_t total_electron) {
       if (total_electron <= 0) {
          std::stringstream ss;
@@ -77,6 +77,8 @@ public:
       conserved_quantum_number_.first = total_electron;
    }
    
+   //! @brief Set the total sz.
+   //! @param total_sz The total sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle=\sum^{N}_{i=1}\langle\hat{S}^{z}_{i}\rangle\f$.
    void SetTotalSz(const double total_sz) {
       if (std::floor(2 * total_sz) != 2 * total_sz) {
          std::stringstream ss;
@@ -89,7 +91,7 @@ public:
    //! @brief Check if there is a subspace specified by the input quantum numbers.
    //! @return ture if there exists corresponding subspace, otherwise false.
    bool ValidateQNumber() const {
-            
+      
       auto func = [](const auto a, const auto x, const auto b) { return (x >= a) * (1 - (x >= b)); };
       const auto system_size = lattice_.GetSystemSize();
       const auto total_electron = conserved_quantum_number_.first;
@@ -113,7 +115,7 @@ public:
    
    //! @brief Get dimension of the local Hilbert space, 4.
    //! @return The dimension of the local Hilbert space, 4.
-   int GetDimOnsite() const { return dim_onsite_; }
+   std::int32_t GetDimOnsite() const { return dim_onsite_; }
    
    //! @brief Get the number of the total electrons \f$ \langle\hat{N}_{\rm e}\rangle\f$.
    //! @return The total electrons.
@@ -188,12 +190,6 @@ public:
 private:
    //! @brief The linear interaction.
    const LatticeType lattice_;
-   
-   //! @brief The linear interaction.
-   const LinearType linear_ = 0;
-   
-   //! @brief The quadratic interaction.
-   const QuadraticType quadratic_ = 0;
    
    //! @brief Pair of the total electron \f$ \langle\hat{N}_{\rm e}\rangle\f$ and the total sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle\f$.
    CQNType conserved_quantum_number_ = {0, 0};
@@ -387,7 +383,7 @@ private:
    
 };
 
-} // quantum
+} // namespace quantum
 } // namespace model
 } // namespace compnal
 

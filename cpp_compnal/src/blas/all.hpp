@@ -24,6 +24,7 @@
 #define COMPNAL_BLAS_ALL_HPP_
 
 #include "compressed_row_storage.hpp"
+#include "blas_algorithm.hpp"
 
 
 #endif /* COMPNAL_BLAS_ALL_HPP_ */

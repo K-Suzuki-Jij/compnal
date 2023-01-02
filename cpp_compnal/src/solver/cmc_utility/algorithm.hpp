@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CMC_UTILITY_ALGORITHM_
-#define COMPNAL_SOLVER_CMC_UTILITY_ALGORITHM_
+#ifndef COMPNAL_SOLVER_CMC_UTILITY_ALGORITHM_HPP_
+#define COMPNAL_SOLVER_CMC_UTILITY_ALGORITHM_HPP_
 
 namespace compnal {
 namespace solver {
@@ -64,4 +64,4 @@ auto heat_bath_transition = [](const RealType delta_energy, const RealType beta,
 } // namespace compnal
 
 
-#endif /* COMPNAL_SOLVER_CMC_UTILITY_CMC_UPDATER_HPP_ */
+#endif /* COMPNAL_SOLVER_CMC_UTILITY_ALGORITHM_HPP_ */

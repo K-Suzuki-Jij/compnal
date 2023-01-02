@@ -1,3 +1,4 @@
+//
 //  Copyright 2022 Kohei Suzuki
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +13,39 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  Created by Kohei Suzuki on 2022/07/13.
+//  blas_algorithm.hpp
+//  compnal
+//
+//  Created by kohei on 2023/01/02.
+//  
 //
 
-#ifndef COMPNAL_SOLVER_ALL_HPP_
-#define COMPNAL_SOLVER_ALL_HPP_
+#ifndef COMPNAL_BLAS_BLAS_ALGORITHM_HPP_
+#define COMPNAL_BLAS_BLAS_ALGORITHM_HPP_
 
-#include "./classical_monte_carlo.hpp"
-#include "./exact_diagonalization.hpp"
+namespace compnal {
+namespace blas {
+
+enum DiagAlgorithm {
+  
+   LANCZOS = 0,
+   
+   LOBPCG = 1,
+   
+   DAVIDSON = 2
+   
+};
+
+enum LinearEqAlgorithm {
+   
+   CONJUGATE_GRADIENT = 0,
+   
+   MINIMUM_RESIDUAL = 1
+   
+};
+
+} // namespace blas
+} // namespace compnal
 
 
-#endif /* COMPNAL_SOLVER_ALL_HPP_ */
+#endif /* COMPNAL_BLAS_BLAS_ALGORITHM_HPP_ */

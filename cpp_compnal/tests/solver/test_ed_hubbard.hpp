@@ -13,17 +13,33 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  all.hpp
+//  test_ed_hubbard.hpp
 //  compnal
 //
-//  Created by kohei on 2022/08/13.
+//  Created by kohei on 2023/01/02.
 //  
 //
 
-#ifndef COMPNAL_MODEL_QUANTUM_ALL_HPP_
-#define COMPNAL_MODEL_QUANTUM_ALL_HPP_
+#ifndef COMPNAL_TEST_SOLVER_EXACT_DIAGONALIATION_HUBBARD_HPP_
+#define COMPNAL_TEST_SOLVER_EXACT_DIAGONALIATION_HUBBARD_HPP_
 
-#include "heisenberg.hpp"
-#include "hubbard.hpp"
+#include "../../src/solver/exact_diagonalization.hpp"
+#include "../../src/model/quantum/hubbard.hpp"
+#include <gtest/gtest.h>
 
-#endif /* COMPNAL_MODEL_QUANTUM_ALL_HPP_ */
+namespace compnal {
+namespace test {
+
+TEST(SolverExactDiagonalization, Hubbard) {
+   lattice::Chain chain{10};
+   model::quantum::Hubbard<lattice::Chain, double> hubbard{chain};
+   
+
+}
+
+
+} // namespace test
+} // namespace compnal
+
+
+#endif /* COMPNAL_TEST_SOLVER_EXACT_DIAGONALIATION_HUBBARD_HPP_ */

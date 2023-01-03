@@ -40,7 +40,7 @@ void sstev_(const char &JOBZ, const std::int32_t &N, float *D, float *E, float *
 
 extern "C" {
 void sspgv_(const std::int32_t &ITYPE, const char &JOBZ, const char &UPLO, const std::int32_t &N, float *AP, float *BP, float *W,
-            float **Z, const std::int32_t &LDZ, float *WORK, std::int32_t &INFO);
+            float *Z, const std::int32_t &LDZ, float *WORK, std::int32_t &INFO);
 };
 
 // Double
@@ -55,7 +55,7 @@ void dstev_(const char &JOBZ, const std::int32_t &N, double *D, double *E, doubl
 
 extern "C" {
 void dspgv_(const std::int32_t &ITYPE, const char &JOBZ, const char &UPLO, const std::int32_t &N, double *AP, double *BP, double *W,
-            double **Z, const std::int32_t &LDZ, double *WORK, std::int32_t &INFO);
+            double *Z, const std::int32_t &LDZ, double *WORK, std::int32_t &INFO);
 };
 
 template<typename RealType>

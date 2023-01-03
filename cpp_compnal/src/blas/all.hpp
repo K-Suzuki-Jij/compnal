@@ -25,6 +25,7 @@
 
 #include "compressed_row_storage.hpp"
 #include "blas_algorithm.hpp"
+#include "matrix_vector_product.hpp"
 
 
 #endif /* COMPNAL_BLAS_ALL_HPP_ */

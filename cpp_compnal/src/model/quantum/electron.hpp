@@ -88,6 +88,10 @@ public:
       conserved_quantum_number_.second = 2*total_sz;
    }
    
+   CQNType GetTaretSector() const {
+      return conserved_quantum_number_;
+   }
+   
    //! @brief Check if there is a subspace specified by the input quantum numbers.
    //! @return ture if there exists corresponding subspace, otherwise false.
    bool ValidateQNumber() const {

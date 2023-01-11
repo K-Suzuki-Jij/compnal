@@ -26,6 +26,7 @@
 #include "../blas/all.hpp"
 
 #include <vector>
+#include <omp.h>
 
 namespace compnal {
 namespace solver {
@@ -48,7 +49,7 @@ public:
       
       if (bases_.count(target_sector) == 0) {
          // Generate basis
-         bases_[target_sector] = model.GenerateBasis();
+         bases_[target_sector] = model_.GenerateBasis();
          inverse_bases_[target_sector] = GenerateInverseBasis(bases_.at(target_sector));
       }
       
@@ -58,10 +59,10 @@ public:
          eigenvectors_.resize(level + 1);
       }
       
-      if (diag_method_ == DiagMethod::LANCZOS) {
+      if (diag_method_ == blas::DiagAlgorithm::LANCZOS) {
          blas::EigendecompositionLanczos(&eigenvalues_[0], &eigenvectors_[0], ham, {}, flag_display_info_,
                                          diagonalization_parameters.lanczos);
-      } else if (diag_method_ == DiagMethod::LOBPCG) {
+      } else if (diag_method_ == blas::DiagAlgorithm::LOBPCG) {
          blas::EigendecompositionLOBPCG(&eigenvalues_[0], &eigenvectors_[0], ham, flag_display_info_,
                                         diagonalization_parameters.lanczos);
       } else {
@@ -105,10 +106,6 @@ private:
    
    CRS GenerateHamiltonian() const {
       const auto start = std::chrono::system_clock::now();
-      
-      if (flag_display_info_) {
-         std::cout << "Generating Hamiltonian..." << std::flush;
-      }
       
       const auto &basis = bases_.at(target_q_number_);
       const auto &basis_inv = inverse_bases_.at(target_q_number_);

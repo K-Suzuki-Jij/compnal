@@ -117,6 +117,140 @@ public:
       }
    }
    
+   //! @brief Generate bases of the target Hilbert space specified by
+   //! the system size \f$ N\f$, the number of the total electrons \f$ \langle\hat{N}_{\rm e}\rangle\f$, and the total
+   //! sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle \f$.
+   std::int64_t CalculateTargetDim() {
+      if (!ValidateQNumber()) {
+         return 0;
+      }
+      
+      const auto system_size = lattice_.GetSystemSize();
+      if (system_size <= 0) {
+         return 0;
+      }
+      const auto total_electron = conserved_quantum_number_.first;
+      const int total_2sz = conserved_quantum_number_.second;
+      const std::vector<std::vector<std::int64_t>> binom = utility::GenerateBinomialTable(system_size);
+      const int max_n_up_down = static_cast<int>(total_electron / 2);
+      std::int64_t dim = 0;
+      for (int n_up_down = 0; n_up_down <= max_n_up_down; ++n_up_down) {
+         const int n_up = static_cast<int>((total_electron - 2 * n_up_down + total_2sz) / 2);
+         const int n_down = static_cast<int>((total_electron - 2 * n_up_down - total_2sz) / 2);
+         const int n_vac = system_size - total_electron + n_up_down;
+         if (0 <= n_up && 0 <= n_down && 0 <= n_vac) {
+            // TODO: Detect Overflow
+            dim += binom[system_size][n_up] * binom[system_size - n_up][n_down] *
+                   binom[system_size - n_up - n_down][n_up_down];
+         }
+      }
+      return dim;
+   }
+   
+   //! @brief Generate bases of the target Hilbert space specified by
+   //! the system size \f$ N\f$, the number of the total electrons \f$ \langle\hat{N}_{\rm e}\rangle\f$, and the total
+   //! sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle \f$.
+   //! @return Corresponding basis.
+   std::vector<std::int64_t> GenerateBasis() const {
+
+      if (!ValidateQNumber()) {
+         std::stringstream ss;
+         ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+         ss << "Invalid parameters (system_size or total_electron or total_sz)" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      const auto system_size = lattice_.GetSystemSize();
+      
+      const auto total_electron = conserved_quantum_number_.first;
+      const auto total_2sz = conserved_quantum_number_.second;
+
+      std::vector<std::int64_t> site_constant(system_size);
+      for (std::int32_t site = 0; site < system_size; ++site) {
+         site_constant[site] = static_cast<std::int64_t>(std::pow(dim_onsite_, site));
+      }
+
+      const int max_n_up_down = static_cast<int>(total_electron / 2);
+
+      std::vector<std::vector<int>> partition_integers;
+      for (int n_up_down = 0; n_up_down <= max_n_up_down; ++n_up_down) {
+         const int n_up = (total_electron - 2 * n_up_down + total_2sz) / 2;
+         const int n_down = (total_electron - 2 * n_up_down - total_2sz) / 2;
+         const int n_vac = system_size - total_electron + n_up_down;
+         if (0 <= n_up && 0 <= n_down && 0 <= n_vac) {
+            std::vector<int> integer_list(system_size);
+            for (int s = 0; s < n_vac; ++s) {
+               integer_list[s] = 0;
+            }
+            for (int s = 0; s < n_up; ++s) {
+               integer_list[s + n_vac] = 1;
+            }
+            for (int s = 0; s < n_down; ++s) {
+               integer_list[s + n_vac + n_up] = 2;
+            }
+            for (int s = 0; s < n_up_down; ++s) {
+               integer_list[s + n_vac + n_up + n_down] = 3;
+            }
+            partition_integers.push_back(integer_list);
+         }
+      }
+
+      const std::int64_t dim_target = CalculateTargetDim();
+      std::vector<std::int64_t> basis;
+      basis.reserve(dim_target);
+
+#ifdef _OPENMP
+      const int num_threads = omp_get_max_threads();
+      std::vector<std::vector<std::int64_t>> temp_basis(num_threads);
+      for (const auto &integer_list : partition_integers) {
+         const std::int64_t size = utility::CalculateNumPermutation(integer_list);
+#pragma omp parallel num_threads(num_threads)
+         {
+            const int thread_num = omp_get_thread_num();
+            const std::int64_t loop_begin = thread_num * size / num_threads;
+            const std::int64_t loop_end = (thread_num + 1) * size / num_threads;
+            std::vector<std::int32_t> n_th_integer_list = utility::GenerateNthPermutation(integer_list, loop_begin);
+            for (std::int64_t j = loop_begin; j < loop_end; ++j) {
+               std::int64_t basis_global = 0;
+               for (std::size_t k = 0; k < n_th_integer_list.size(); ++k) {
+                  basis_global += n_th_integer_list[k] * site_constant[k];
+               }
+               temp_basis[thread_num].push_back(basis_global);
+               std::next_permutation(n_th_integer_list.begin(), n_th_integer_list.end());
+            }
+         }
+      }
+      for (auto &&it : temp_basis) {
+         basis.insert(basis.end(), it.begin(), it.end());
+         std::vector<std::int64_t>().swap(it);
+      }
+#else
+      for (std::size_t i = 0; i < partition_integers.size(); ++i) {
+         auto &integer_list = partition_integers[i];
+         std::sort(integer_list.begin(), integer_list.end());
+         do {
+            std::int64_t basis_global = 0;
+            for (std::size_t j = 0; j < integer_list.size(); ++j) {
+               basis_global += integer_list[j] * site_constant[j];
+            }
+            basis.push_back(basis_global);
+         } while (std::next_permutation(integer_list.begin(), integer_list.end()));
+      }
+#endif
+      basis.shrink_to_fit();
+
+      if (static_cast<std::int64_t>(basis.size()) != dim_target) {
+         std::stringstream ss;
+         ss << "Unknown error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+         ss << "basis.size()=" << basis.size() << ", but dim_target=" << dim_target << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+
+      std::sort(basis.begin(), basis.end());
+
+      return basis;
+   }
+   
    //! @brief Get dimension of the local Hilbert space, 4.
    //! @return The dimension of the local Hilbert space, 4.
    std::int32_t GetDimOnsite() const { return dim_onsite_; }

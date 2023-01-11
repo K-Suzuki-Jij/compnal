@@ -23,9 +23,7 @@
 #ifndef COMPNAL_BLAS_MATRIX_VECTOR_PRODUCT_HPP_
 #define COMPNAL_BLAS_MATRIX_VECTOR_PRODUCT_HPP_
 
-#ifdef _OPENMP
 #include <omp.h>
-#endif
 
 namespace compnal {
 namespace blas {
@@ -56,7 +54,7 @@ void CalculateMatrixVectorProduct(const T1 coeff,
    }
    vector_out->resize(matrix_in.row_dim);
    using T2T3 = decltype(std::declval<T2>() * std::declval<T3>());
-
+   
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
    for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
       T2T3 temp = 0;
@@ -73,7 +71,6 @@ void CalculateMatrixVectorProduct(const T1 coeff,
 //! Note that the matrix \f$ \hat{M}\f$ must be symmetric and their elements are
 //! stored only in lower triangle elements. In addition, the diagonal elements
 //! must also stored even if they are zero.
-//!
 //! @tparam T1 The value type of the coefficient \f$ c\f$.
 //! @tparam T2 The value type of the matirx \f$ \hat{M}\f$.
 //! @tparam T3 The value type of the vector \f$ \boldsymbol{v}\f$.
@@ -100,7 +97,7 @@ void CalculateSymmetricMatrixVectorProduct(const T1 coeff,
       ss << "The input matrix is not symmetric" << std::endl;
       throw std::runtime_error(ss.str());
    }
-
+   
    if (matrix_in.col_dim != vector_in.Size()) {
       std::stringstream ss;
       ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
@@ -109,18 +106,16 @@ void CalculateSymmetricMatrixVectorProduct(const T1 coeff,
       ss << "Both must be equal" << std::endl;
       throw std::runtime_error(ss.str());
    }
-
+   
    vector_out->resize(matrix_in.row_dim);
-
-#ifdef _OPENMP
+   
    if (static_cast<std::int32_t>(vectors_work->size()) != num_threads) {
       std::stringstream ss;
       ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
-      ss << "Working vector (vectors_work) must be arrays of the number of "
-            "parallel threads";
+      ss << "Working vector (vectors_work) must be arrays of the number of parallel threads";
       throw std::runtime_error(ss.str());
    }
-
+   
 #pragma omp parallel num_threads(num_threads)
    {
       const std::int32_t thread_num = omp_get_thread_num();
@@ -135,7 +130,7 @@ void CalculateSymmetricMatrixVectorProduct(const T1 coeff,
          (*vectors_work)[thread_num][i] += temp_val;
       }
    }
-
+   
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
    for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
       T4 temp_val = 0.0;
@@ -145,22 +140,7 @@ void CalculateSymmetricMatrixVectorProduct(const T1 coeff,
       }
       (*vector_out)[i] = temp_val*coeff;
    }
-
-#else
-   for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
-      (*vector_out)[i] = 0.0;
-   }
-   for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
-      const T3 temp_vec_in = vector_in[i];
-      T4 temp_val = matrix_in.val[matrix_in.row[i + 1] - 1]*temp_vec_in;
-      for (std::int64_t j = matrix_in.row[i]; j < matrix_in.row[i + 1] - 1; ++j) {
-         temp_val += matrix_in.val[j] * vector_in[matrix_in.col[j]];
-         (*vector_out)[matrix_in.col[j]] += matrix_in.val[j]*temp_vec_in;
-      }
-      (*vector_out)[i] += temp_val*coeff;
-   }
-
-#endif
+   
 }
 
 } // namespace blas

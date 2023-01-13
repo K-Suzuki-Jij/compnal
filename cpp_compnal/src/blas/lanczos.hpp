@@ -1,3 +1,4 @@
+//
 //  Copyright 2023 Kohei Suzuki
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +13,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  Created by Kohei Suzuki on 2022/07/13.
+//  lanczos.hpp
+//  compnal
+//
+//  Created by kohei on 2023/01/14.
+//  
 //
 
-#ifndef COMPNAL_HPP_
-#define COMPNAL_HPP_
-
-#include "solver/all.hpp"
-#include "model/all.hpp"
-#include "utility/all.hpp"
-#include "blas/all.hpp"
+#ifndef lanczos_h
+#define lanczos_h
 
 
-#endif /* COMPNAL_HPP_ */
+#endif /* lanczos_h */

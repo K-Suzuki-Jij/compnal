@@ -26,6 +26,10 @@
 #include "compressed_row_storage.hpp"
 #include "blas_algorithm.hpp"
 #include "matrix_vector_product.hpp"
-
+#include "lanczos.hpp"
+#include "lapack_wrapper.hpp"
+#include "orthonormalize.hpp"
+#include "conjugate_gradient.hpp"
+#include "inverse_iteration.hpp"
 
 #endif /* COMPNAL_BLAS_ALL_HPP_ */

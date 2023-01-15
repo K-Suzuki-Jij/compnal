@@ -39,10 +39,10 @@ namespace blas {
 //! @param vector_in The vector \f$ \boldsymbol{v} \f$.
 //! @param vector_out The result of matrix vector product \f$ \boldsymbol{v}_{\rm out} = c\hat{M}\cdot\boldsymbol{v}\f$.
 template<typename T1, typename T2, typename T3, typename T4>
-void CalculateMatrixVectorProduct(const T1 coeff,
-                                  const CRS<T2> &matrix_in,
-                                  const std::vector<T3> &vector_in,
-                                  std::vector<T4> *vector_out,
+void CalculateMatrixVectorProduct(std::vector<T1> *vector_out,
+                                  const T2 coeff,
+                                  const CRS<T3> &matrix_in,
+                                  const std::vector<T4> &vector_in,
                                   const std::int32_t num_threads = 1) {
    if (matrix_in.col_dim != vector_in.size()) {
       std::stringstream ss;
@@ -53,13 +53,13 @@ void CalculateMatrixVectorProduct(const T1 coeff,
       throw std::runtime_error(ss.str());
    }
    vector_out->resize(matrix_in.row_dim);
-   using T2T3 = decltype(std::declval<T2>() * std::declval<T3>());
+   using T3T4 = decltype(std::declval<T3>()*std::declval<T4>());
    
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
    for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
-      T2T3 temp = 0;
+      T3T4 temp = 0;
       for (std::int64_t j = matrix_in.row[i]; j < matrix_in.row[i + 1]; ++j) {
-         temp += matrix_in.val[j] * vector_in[matrix_in.col[j]];
+         temp += matrix_in.val[j]*vector_in[matrix_in.col[j]];
       }
       (*vector_out)[i] = temp*coeff;
    }
@@ -84,11 +84,11 @@ void CalculateMatrixVectorProduct(const T1 coeff,
 //! for calculations. Their elements must be zero. Note that this working array
 //! is used only when openmp is active.
 template<typename T1, typename T2, typename T3, typename T4>
-void CalculateSymmetricMatrixVectorProduct(const T1 coeff,
-                                           const CRS<T2> &matrix_in,
-                                           const std::vector<T3> &vector_in,
-                                           std::vector<T4> *vector_out,
-                                           std::vector<std::vector<T4>> *vectors_work,
+void CalculateSymmetricMatrixVectorProduct(std::vector<T1> *vector_out,
+                                           std::vector<std::vector<T1>> *vectors_work,
+                                           const T2 coeff,
+                                           const CRS<T3> &matrix_in,
+                                           const std::vector<T4> &vector_in,
                                            const std::int32_t num_threads = 1) {
    
    if (matrix_in.row_dim != matrix_in.col_dim) {
@@ -121,8 +121,8 @@ void CalculateSymmetricMatrixVectorProduct(const T1 coeff,
       const std::int32_t thread_num = omp_get_thread_num();
 #pragma omp for schedule(guided)
       for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
-         const T3 temp_vec_in = vector_in[i];
-         T4 temp_val = matrix_in.val[matrix_in.row[i + 1] - 1] * temp_vec_in;
+         const T4 temp_vec_in = vector_in[i];
+         T1 temp_val = matrix_in.val[matrix_in.row[i + 1] - 1]*temp_vec_in;
          for (std::int64_t j = matrix_in.row[i]; j < matrix_in.row[i + 1] - 1; ++j) {
             temp_val += matrix_in.val[j]*vector_in[matrix_in.col[j]];
             (*vectors_work)[thread_num][matrix_in.col[j]] += matrix_in.val[j]*temp_vec_in;
@@ -133,10 +133,10 @@ void CalculateSymmetricMatrixVectorProduct(const T1 coeff,
    
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
    for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
-      T4 temp_val = 0.0;
+      T1 temp_val = 0.0;
       for (std::int32_t thread_num = 0; thread_num < num_threads; ++thread_num) {
          temp_val += (*vectors_work)[thread_num][i];
-         (*vectors_work)[thread_num][i] = 0.0;
+         (*vectors_work)[thread_num][i] = 0;
       }
       (*vector_out)[i] = temp_val*coeff;
    }

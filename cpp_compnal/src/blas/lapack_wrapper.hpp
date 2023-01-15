@@ -59,10 +59,11 @@ void dspgv_(const std::int32_t &ITYPE, const char &JOBZ, const char &UPLO, const
 };
 
 template<typename RealType>
-void LapackSYEV(const std::int32_t target_level,
-                const CRS<RealType> &matrix_in,
-                RealType *gs_value,
-                std::vector<RealType> *gs_vector) {
+void LapackSYEV(RealType *gs_value,
+                std::vector<RealType> *gs_vector,
+                const std::int32_t target_level,
+                const CRS<RealType> &matrix_in
+                ) {
    
    if (matrix_in.row_dim != matrix_in.col_dim || matrix_in.row_dim < 1 || matrix_in.col_dim < 1) {
       std::stringstream ss;
@@ -111,10 +112,11 @@ void LapackSYEV(const std::int32_t target_level,
 }
 
 template<typename RealType>
-void LapackSTEV(const std::vector<RealType> &diag,
-                const std::vector<RealType> &off_diag,
-                RealType *gs_value,
-                std::vector<RealType> *gs_vector) {
+void LapackSTEV(RealType *gs_value,
+                std::vector<RealType> *gs_vector,
+                const std::vector<RealType> &diag,
+                const std::vector<RealType> &off_diag
+                ) {
    
    if (off_diag.size() + 1 != diag.size()) {
       std::stringstream ss;

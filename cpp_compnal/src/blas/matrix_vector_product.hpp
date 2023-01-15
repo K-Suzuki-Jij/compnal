@@ -98,11 +98,11 @@ void CalculateSymmetricMatrixVectorProduct(std::vector<T1> *vector_out,
       throw std::runtime_error(ss.str());
    }
    
-   if (matrix_in.col_dim != vector_in.Size()) {
+   if (matrix_in.col_dim != vector_in.size()) {
       std::stringstream ss;
       ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
       ss << "The column of the input matrix is " << matrix_in.col_dim << std::endl;
-      ss << "The dimension of the input vector is " << vector_in.Size() << std::endl;
+      ss << "The dimension of the input vector is " << vector_in.size() << std::endl;
       ss << "Both must be equal" << std::endl;
       throw std::runtime_error(ss.str());
    }

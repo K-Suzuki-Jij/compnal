@@ -24,6 +24,7 @@
 #define COMPNAL_MODEL_HUBBARD_HPP_
 
 #include "./electron.hpp"
+#include "../../blas/compressed_row_storage.hpp"
 
 namespace compnal {
 namespace model {
@@ -47,6 +48,17 @@ public:
       chemical_potential_ = chemical_potential;
    }
    
+   void SetMagneticField(const RealType magnetic_field) {
+      magnetic_field_ = magnetic_field;
+   }
+   
+   blas::CRS<RealType> GenarateOnsiteOperatorHam() const {
+      return
+      magnetic_field_*this->GetOnsiteOperatorSz() +
+      onsite_coulomb_*this->GetOnsiteOperatorNCUp()*this->GetOnsiteOperatorNCDown() +
+      chemical_potential_*this->GetOnsiteOperatorNC();
+   }
+   
 private:
    //! @brief Hopping energy \f$ t \f$.
    RealType hoppin_genergy_ = 1.0;
@@ -56,6 +68,10 @@ private:
       
    //! @brief The chemical potential \f$ mu \f$.
    RealType chemical_potential_ = 0.0;
+   
+   RealType magnetic_field_ = 0.0;
+   
+
    
    
    

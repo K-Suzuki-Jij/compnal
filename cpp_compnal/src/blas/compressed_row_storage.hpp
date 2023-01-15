@@ -704,7 +704,7 @@ auto CalculateMatrixMatrixSum(const T1 coeff_1, const CRS<T2> &matrix_1, const T
    CRS<T1T2T3T4> matrix_out(matrix_1.row_dim, matrix_1.col_dim);
    
    for (std::int64_t i = 0; i < matrix_1.row_dim; ++i) {
-      int check = 0;
+      std::int32_t check = 0;
       std::int64_t count_1 = 0;
       std::int64_t count_2 = 0;
       

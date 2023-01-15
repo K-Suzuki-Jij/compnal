@@ -26,8 +26,8 @@ namespace test {
 
 TEST(UtilityInteger, GenerateAllCombinations) {
    
-   std::vector<std::vector<int>> combinations;
-   std::vector<int> seed = {1, 2, 3, 4};
+   std::vector<std::vector<std::int32_t>> combinations;
+   std::vector<std::int32_t> seed = {1, 2, 3, 4};
    
    combinations = utility::GenerateAllCombinations(seed, 0);
    EXPECT_EQ(combinations.size(), 0);

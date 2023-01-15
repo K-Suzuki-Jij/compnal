@@ -25,6 +25,7 @@
 
 #include "../utility/all.hpp"
 #include "orthonormalize.hpp"
+#include "lapack_wrapper.hpp"
 #include <omp.h>
 
 namespace compnal {
@@ -123,7 +124,7 @@ void EigendecompositionLanczos(RealType *target_value_out,
       CalculateMatrixVectorProduct(&vector_1, 1, matrix_in, vector_0, params.num_threads);
    }
 
-   diagonal_value.push_back(vector_0*vector_1);
+   diagonal_value.push_back(CalculateInnerProduct(vector_0, vector_1, params.num_threads));
    krylov_eigen_value[0] = diagonal_value[0];
    CalculateVectorVectorSum(&vector_1, 1, vector_1, -krylov_eigen_value[0], vector_0, params.num_threads);
 
@@ -148,7 +149,7 @@ void EigendecompositionLanczos(RealType *target_value_out,
       if (step >= params.min_step) {
          LapackSTEV<RealType>(&krylov_eigen_value[step + 1], &krylov_eigen_vector, diagonal_value, off_diagonal_value);
          const RealType residual_error = std::abs(krylov_eigen_value[step + 1] - krylov_eigen_value[step]);
-         
+         printf("residual_error=%.15lf\n", residual_error);
          if (residual_error < params.acc) {
             *target_value_out = krylov_eigen_value[step + 1];
             converge_step_number = step + 1;
@@ -212,7 +213,7 @@ void EigendecompositionLanczos(RealType *target_value_out,
 
       CalculateVectorVectorSum(&vector_1, 1, vector_1, -krylov_eigen_value[0], vector_0, params.num_threads);
 
-      for (int step = 1; step <= converge_step_number; ++step) {
+      for (std::int32_t step = 1; step <= converge_step_number; ++step) {
          CopyVector(&vector_2, vector_1, params.num_threads);
          Orthonormalize(&vector_2, subspace_vectors, params.num_threads);
          CalculateVectorVectorSum(target_vector_out, 1, *target_vector_out, krylov_eigen_vector[step], vector_2, params.num_threads);

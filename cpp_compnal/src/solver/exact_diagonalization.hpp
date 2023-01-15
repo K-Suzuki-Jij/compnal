@@ -75,6 +75,7 @@ public:
       }
       
       CRS ham = GenerateHamiltonian();
+      printf("dim=%ld\n", ham.row_dim);
       if (eigenvalues_.size() < level + 1) {
          eigenvalues_.resize(level + 1);
          eigenvectors_.resize(level + 1);
@@ -122,6 +123,13 @@ private:
       return inverse_basis;
    }
    
+   std::int32_t CalculateLocalBasis(std::int64_t global_basis, const std::int32_t site, const std::int32_t dim_onsite) const {
+      for (std::int32_t i = 0; i < site; ++i) {
+         global_basis = global_basis/dim_onsite;
+      }
+      return static_cast<std::int32_t>(global_basis%dim_onsite);
+   }
+   
    CRS GenerateHamiltonian() const {
       
       const CQNType target_sector = model_.GetTaretSector();
@@ -131,12 +139,12 @@ private:
       const std::int64_t dim_target = basis.size();
       std::int64_t num_total_elements = 0;
       
-      const int num_threads = omp_get_max_threads();
+      const std::int32_t num_threads = omp_get_max_threads();
       std::vector<ExactDiagMatrixComponents<RealType>> components(num_threads);
       
-      for (int thread_num = 0; thread_num < num_threads; ++thread_num) {
+      for (std::int32_t thread_num = 0; thread_num < num_threads; ++thread_num) {
          components[thread_num].site_constant.resize(model_.GetSystemSize());
-         for (int site = 0; site < model_.GetSystemSize(); ++site) {
+         for (std::int32_t site = 0; site < model_.GetSystemSize(); ++site) {
             components[thread_num].site_constant[site] =
             static_cast<std::int64_t>(std::pow(model_.GetDimOnsite(), site));
          }
@@ -147,7 +155,7 @@ private:
       
 #pragma omp parallel for
       for (std::int64_t row = 0; row < dim_target; ++row) {
-         const int thread_num = omp_get_thread_num();
+         const std::int32_t thread_num = omp_get_thread_num();
          GenerateMatrixComponents(&components[thread_num], basis[row], model_);
          const std::size_t size = components[thread_num].basis_affected.size();
          for (std::size_t i = 0; i < size; ++i) {
@@ -155,10 +163,11 @@ private:
             const RealType val = components[thread_num].val[i];
             if (basis_inv.count(a_basis) > 0) {
                const std::int64_t inv = basis_inv.at(a_basis);
-               if ((inv < row && std::abs(val) > components[thread_num].zero_precision) || inv == row) {
+               if ((inv < row && std::abs(val) > std::numeric_limits<RealType>::epsilon()) || inv == row) {
                   num_row_element[row + 1]++;
                }
-            } else if (basis_inv.count(a_basis) == 0 && std::abs(val) > components[thread_num].zero_precision) {
+            }
+            else if (basis_inv.count(a_basis) == 0 && std::abs(val) > std::numeric_limits<RealType>::epsilon()) {
                throw std::runtime_error("Matrix elements are not in the target space");
             }
          }
@@ -184,7 +193,7 @@ private:
       
 #pragma omp parallel for
       for (std::int64_t row = 0; row < dim_target; ++row) {
-         const int thread_num = omp_get_thread_num();
+         const std::int32_t thread_num = omp_get_thread_num();
          GenerateMatrixComponents(&components[thread_num], basis[row], model_);
          const std::size_t size = components[thread_num].basis_affected.size();
          for (std::size_t i = 0; i < size; ++i) {
@@ -192,7 +201,7 @@ private:
             const RealType val = components[thread_num].val[i];
             if (basis_inv.count(a_basis) > 0) {
                const std::int64_t inv = basis_inv.at(a_basis);
-               if ((inv < row && std::abs(val) > components[thread_num].zero_precision) || inv == row) {
+               if ((inv < row && std::abs(val) > std::numeric_limits<RealType>::epsilon()) || inv == row) {
                   ham.col[num_row_element[row]] = inv;
                   ham.val[num_row_element[row]] = val;
                   num_row_element[row]++;
@@ -222,7 +231,104 @@ private:
       return ham;
    }
    
+   void GenerateMatrixComponentsOnsite(ExactDiagMatrixComponents<RealType> *edmc,
+                                       const std::int64_t basis,
+                                       const std::int32_t site,
+                                       const CRS &matrix_onsite) const {
+      
+      const std::int32_t basis_onsite = edmc->basis_onsite[site];
+      const std::int64_t site_constant = edmc->site_constant[site];
+
+      for (std::int64_t i = matrix_onsite.row[basis_onsite]; i < matrix_onsite.row[basis_onsite + 1]; ++i) {
+         const std::int64_t a_basis = basis + (matrix_onsite.col[i] - basis_onsite)*site_constant;
+         if (edmc->inv_basis_affected.count(a_basis) == 0) {
+            edmc->inv_basis_affected[a_basis] = edmc->basis_affected.size();
+            edmc->val.push_back(matrix_onsite.val[i]);
+            edmc->basis_affected.push_back(a_basis);
+         }
+         else {
+            edmc->val[edmc->inv_basis_affected.at(a_basis)] += matrix_onsite.val[i];
+         }
+      }
+   }
+
+   void GenerateMatrixComponentsIntersite(ExactDiagMatrixComponents<RealType> *edmc, const std::int64_t basis,
+                                          const std::int32_t site_1, const CRS &matrix_onsite_1, const std::int32_t site_2,
+                                          const CRS &matrix_onsite_2, const RealType coeef,
+                                          const std::int32_t fermion_sign = 1.0) const {
+      if (std::abs(coeef) <= std::numeric_limits<RealType>::epsilon()) {
+         return;
+      }
+
+      const std::int32_t basis_onsite_1 = edmc->basis_onsite[site_1];
+      const std::int32_t basis_onsite_2 = edmc->basis_onsite[site_2];
+      const std::int64_t site_constant_1 = edmc->site_constant[site_1];
+      const std::int64_t site_constant_2 = edmc->site_constant[site_2];
+
+      for (std::int64_t i1 = matrix_onsite_1.row[basis_onsite_1]; i1 < matrix_onsite_1.row[basis_onsite_1 + 1]; ++i1) {
+         const RealType val_1 = matrix_onsite_1.val[i1];
+         const std::int64_t col_1 = matrix_onsite_1.col[i1];
+         for (std::int64_t i2 = matrix_onsite_2.row[basis_onsite_2]; i2 < matrix_onsite_2.row[basis_onsite_2 + 1];
+              ++i2) {
+            const std::int64_t a_basis = basis + (col_1 - basis_onsite_1) * site_constant_1 +
+                                         (matrix_onsite_2.col[i2] - basis_onsite_2) * site_constant_2;
+            if (edmc->inv_basis_affected.count(a_basis) == 0) {
+               edmc->inv_basis_affected[a_basis] = edmc->basis_affected.size();
+               edmc->val.push_back(fermion_sign * coeef * val_1 * matrix_onsite_2.val[i2]);
+               edmc->basis_affected.push_back(a_basis);
+            }
+            else {
+               edmc->val[edmc->inv_basis_affected.at(a_basis)] +=
+                   fermion_sign * coeef * val_1 * matrix_onsite_2.val[i2];
+            }
+         }
+      }
+   }
    
+   void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
+                                 const std::int64_t basis,
+                                 const model::quantum::Hubbard<lattice::Chain, RealType> &model) const {
+      
+      const blas::CRS<RealType> &onsite_ham = model.GenarateOnsiteOperatorHam();
+      const blas::CRS<RealType> &op_c_up = model.GetOnsiteOperatorCUp();
+      const blas::CRS<RealType> &op_c_up_d = model.GetOnsiteOperatorCUpDagger();
+      const blas::CRS<RealType> &op_c_down = model.GetOnsiteOperatorCDown();
+      const blas::CRS<RealType> &op_c_down_d = model.GetOnsiteOperatorCDownDagger();
+      const std::int32_t dim_onsite = model.GetDimOnsite();
+      const std::int32_t system_size = model.GetSystemSize();
+      
+      for (std::int32_t site = 0; site < system_size; ++site) {
+         edmc->basis_onsite[site] = CalculateLocalBasis(basis, site, dim_onsite);
+      }
+
+      // Onsite elements
+      for (std::int32_t site = 0; site < system_size; ++site) {
+         GenerateMatrixComponentsOnsite(edmc, basis, site, onsite_ham);
+      }
+
+      // Intersite elements
+      if (model.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
+         for (std::int32_t site = 0; site < system_size - 1; ++site) {
+            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_up_d  , site + 1, op_c_up  , 1.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_up_d  , site    , op_c_up  , 1.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_down_d, site + 1, op_c_down, 1.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_down_d, site    , op_c_down, 1.0);
+         }
+      }
+      else if (model.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
+         
+      }
+      else {
+         throw std::runtime_error("Unsupported BoundaryCondition");
+      }
+      
+      // Fill zero in the diagonal elements for symmetric matrix vector product calculation.
+      if (edmc->inv_basis_affected.count(basis) == 0) {
+         edmc->inv_basis_affected[basis] = edmc->basis_affected.size();
+         edmc->val.push_back(0.0);
+         edmc->basis_affected.push_back(basis);
+      }
+   }
    
    
 };

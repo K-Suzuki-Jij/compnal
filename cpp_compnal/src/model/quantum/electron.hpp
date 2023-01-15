@@ -101,10 +101,10 @@ public:
       const auto total_electron = conserved_quantum_number_.first;
       const auto total_2sz = conserved_quantum_number_.second;
       
-      const int max_total_electron = 2 * system_size;
-      const int min_total_electron = 0;
-      const int max_total_2sz = func(0, total_electron, system_size)*total_electron + func(system_size, total_electron, 2*system_size)*(2*system_size - total_electron);
-      const int min_total_2sz = -max_total_2sz;
+      const std::int32_t max_total_electron = 2 * system_size;
+      const std::int32_t min_total_electron = 0;
+      const std::int32_t max_total_2sz = func(0, total_electron, system_size)*total_electron + func(system_size, total_electron, 2*system_size)*(2*system_size - total_electron);
+      const std::int32_t min_total_2sz = -max_total_2sz;
       
       const bool c1 = (min_total_electron <= total_electron && total_electron <= max_total_electron);
       const bool c2 = (min_total_2sz <= total_2sz && total_2sz <= max_total_2sz);
@@ -120,7 +120,7 @@ public:
    //! @brief Generate bases of the target Hilbert space specified by
    //! the system size \f$ N\f$, the number of the total electrons \f$ \langle\hat{N}_{\rm e}\rangle\f$, and the total
    //! sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle \f$.
-   std::int64_t CalculateTargetDim() {
+   std::int64_t CalculateTargetDim() const {
       if (!ValidateQNumber()) {
          return 0;
       }
@@ -130,14 +130,14 @@ public:
          return 0;
       }
       const auto total_electron = conserved_quantum_number_.first;
-      const int total_2sz = conserved_quantum_number_.second;
+      const std::int32_t total_2sz = conserved_quantum_number_.second;
       const std::vector<std::vector<std::int64_t>> binom = utility::GenerateBinomialTable(system_size);
-      const int max_n_up_down = static_cast<int>(total_electron / 2);
+      const std::int32_t max_n_up_down = static_cast<std::int32_t>(total_electron / 2);
       std::int64_t dim = 0;
-      for (int n_up_down = 0; n_up_down <= max_n_up_down; ++n_up_down) {
-         const int n_up = static_cast<int>((total_electron - 2 * n_up_down + total_2sz) / 2);
-         const int n_down = static_cast<int>((total_electron - 2 * n_up_down - total_2sz) / 2);
-         const int n_vac = system_size - total_electron + n_up_down;
+      for (std::int32_t n_up_down = 0; n_up_down <= max_n_up_down; ++n_up_down) {
+         const std::int32_t n_up = static_cast<std::int32_t>((total_electron - 2 * n_up_down + total_2sz) / 2);
+         const std::int32_t n_down = static_cast<std::int32_t>((total_electron - 2 * n_up_down - total_2sz) / 2);
+         const std::int32_t n_vac = system_size - total_electron + n_up_down;
          if (0 <= n_up && 0 <= n_down && 0 <= n_vac) {
             // TODO: Detect Overflow
             dim += binom[system_size][n_up] * binom[system_size - n_up][n_down] *
@@ -170,25 +170,25 @@ public:
          site_constant[site] = static_cast<std::int64_t>(std::pow(dim_onsite_, site));
       }
 
-      const int max_n_up_down = static_cast<int>(total_electron / 2);
+      const std::int32_t max_n_up_down = static_cast<std::int32_t>(total_electron / 2);
 
-      std::vector<std::vector<int>> partition_integers;
-      for (int n_up_down = 0; n_up_down <= max_n_up_down; ++n_up_down) {
-         const int n_up = (total_electron - 2 * n_up_down + total_2sz) / 2;
-         const int n_down = (total_electron - 2 * n_up_down - total_2sz) / 2;
-         const int n_vac = system_size - total_electron + n_up_down;
+      std::vector<std::vector<std::int32_t>> partition_integers;
+      for (std::int32_t n_up_down = 0; n_up_down <= max_n_up_down; ++n_up_down) {
+         const std::int32_t n_up = (total_electron - 2 * n_up_down + total_2sz) / 2;
+         const std::int32_t n_down = (total_electron - 2 * n_up_down - total_2sz) / 2;
+         const std::int32_t n_vac = system_size - total_electron + n_up_down;
          if (0 <= n_up && 0 <= n_down && 0 <= n_vac) {
-            std::vector<int> integer_list(system_size);
-            for (int s = 0; s < n_vac; ++s) {
+            std::vector<std::int32_t> integer_list(system_size);
+            for (std::int32_t s = 0; s < n_vac; ++s) {
                integer_list[s] = 0;
             }
-            for (int s = 0; s < n_up; ++s) {
+            for (std::int32_t s = 0; s < n_up; ++s) {
                integer_list[s + n_vac] = 1;
             }
-            for (int s = 0; s < n_down; ++s) {
+            for (std::int32_t s = 0; s < n_down; ++s) {
                integer_list[s + n_vac + n_up] = 2;
             }
-            for (int s = 0; s < n_up_down; ++s) {
+            for (std::int32_t s = 0; s < n_up_down; ++s) {
                integer_list[s + n_vac + n_up + n_down] = 3;
             }
             partition_integers.push_back(integer_list);
@@ -200,13 +200,13 @@ public:
       basis.reserve(dim_target);
 
 #ifdef _OPENMP
-      const int num_threads = omp_get_max_threads();
+      const std::int32_t num_threads = omp_get_max_threads();
       std::vector<std::vector<std::int64_t>> temp_basis(num_threads);
       for (const auto &integer_list : partition_integers) {
          const std::int64_t size = utility::CalculateNumPermutation(integer_list);
 #pragma omp parallel num_threads(num_threads)
          {
-            const int thread_num = omp_get_thread_num();
+            const std::int32_t thread_num = omp_get_thread_num();
             const std::int64_t loop_begin = thread_num * size / num_threads;
             const std::int64_t loop_end = (thread_num + 1) * size / num_threads;
             std::vector<std::int32_t> n_th_integer_list = utility::GenerateNthPermutation(integer_list, loop_begin);
@@ -249,6 +249,18 @@ public:
       std::sort(basis.begin(), basis.end());
 
       return basis;
+   }
+   
+   //! @brief Get the system size.
+   //! @return The system size.
+   std::int32_t GetSystemSize() const {
+      return lattice_.GetSystemSize();
+   }
+   
+   //! @brief Get the boundary condition.
+   //! @return The boundary condition.
+   lattice::BoundaryCondition GetBoundaryCondition() const {
+      return lattice_.GetBoundaryCondition();
    }
    
    //! @brief Get dimension of the local Hilbert space, 4.
@@ -333,7 +345,7 @@ private:
    CQNType conserved_quantum_number_ = {0, 0};
    
    //! @brief The dimension of the local Hilbert space, 4.
-   const int dim_onsite_ = 4;
+   const std::int32_t dim_onsite_ = 4;
    
    //! @brief The annihilation operator for the electrons with the up spin \f$ \hat{c}_{\uparrow}\f$.
    CRS onsite_operator_c_up_;
@@ -412,10 +424,10 @@ private:
       //--------------------------------
       
       const RealType val = RealType{1.0};
-      const int dim_onsite = 4;
+      const std::int32_t dim_onsite = 4;
       CRS matrix(dim_onsite, dim_onsite);
-      for (int row = 0; row < dim_onsite; row++) {
-         for (int col = 0; col < dim_onsite; col++) {
+      for (std::int32_t row = 0; row < dim_onsite; row++) {
+         for (std::int32_t col = 0; col < dim_onsite; col++) {
             if ((col == 1 && row == 0) || (col == 3 && row == 2)) {
                matrix.col.push_back(col);
                matrix.val.push_back(val);
@@ -441,10 +453,10 @@ private:
       //--------------------------------
       
       const RealType val = RealType{1.0};
-      const int dim_onsite = 4;
+      const std::int32_t dim_onsite = 4;
       CRS matrix(dim_onsite, dim_onsite);
-      for (int row = 0; row < dim_onsite; row++) {
-         for (int col = 0; col < dim_onsite; col++) {
+      for (std::int32_t row = 0; row < dim_onsite; row++) {
+         for (std::int32_t col = 0; col < dim_onsite; col++) {
             if (col == 2 && row == 0) {
                matrix.col.push_back(col);
                matrix.val.push_back(val);

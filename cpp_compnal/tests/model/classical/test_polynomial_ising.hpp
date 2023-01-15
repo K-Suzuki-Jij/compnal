@@ -45,7 +45,7 @@ TEST(ModelPolynomialIsing, AnyLattice) {
 TEST(ModelPolynomialIsing, InfiniteRange) {
    
    lattice::InfiniteRange lattice{10};
-   std::unordered_map<int, double> interaction{{0, -1.0}, {3, +1.0}};
+   std::unordered_map<std::int32_t, double> interaction{{0, -1.0}, {3, +1.0}};
    auto model = model::make_polynomial_ising<lattice::InfiniteRange, double>(lattice, interaction);
    model.CalculateEnergy({});
    

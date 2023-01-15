@@ -25,6 +25,7 @@
 
 #include "../utility/all.hpp"
 #include "compressed_row_storage.hpp"
+#include "matrix_vector_product.hpp"
 #include "orthonormalize.hpp"
 #include <omp.h>
 
@@ -56,7 +57,7 @@ void ConjugateGradient(std::vector<RealType> *vec_out,
       throw std::runtime_error(ss.str());
    }
 
-   if (static_cast<std::int64_t>(vec_in.value_list.size()) != matrix_in.row_dim) {
+   if (static_cast<std::int64_t>(vec_in.size()) != matrix_in.row_dim) {
       std::stringstream ss;
       ss << "Error in " << __func__ << std::endl;
       ss << "Matrix vector product (Ax=b) cannot be defined." << std::endl;
@@ -87,7 +88,7 @@ void ConjugateGradient(std::vector<RealType> *vec_out,
       random_number_engine.seed(params.seed);
       vec_out->resize(dim);
       for (std::int64_t i = 0; i < dim; ++i) {
-         vec_out->value_list[i] = uniform_rand(random_number_engine);
+         (*vec_out)[i] = uniform_rand(random_number_engine);
       }
    }
    Orthonormalize(vec_out, subspace_vectors, params.num_threads);

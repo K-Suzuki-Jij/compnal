@@ -183,50 +183,48 @@ private:
       
       std::vector<std::vector<std::int64_t>> temp_col(dim_target);
       std::vector<std::vector<RealType>> temp_val(dim_target);
-      
-      std::vector<ExactDiagMatrixComponents<RealType>> components(num_threads_);
-      
-      printf("A...\n");
-      for (std::int32_t thread_num = 0; thread_num < num_threads_; ++thread_num) {
-         components[thread_num].site_constant.resize(model_.GetSystemSize());
-         for (std::int32_t site = 0; site < model_.GetSystemSize(); ++site) {
-            components[thread_num].site_constant[site] =
-            static_cast<std::int64_t>(std::pow(model_.GetDimOnsite(), site));
-         }
-         components[thread_num].basis_onsite.resize(model_.GetSystemSize());
-      }
-      printf("B...\n");
+            
       std::vector<std::int64_t> num_row_element(dim_target + 1);
       
-#pragma omp parallel for schedule(guided) num_threads(num_threads_)
-      for (std::int64_t row = 0; row < dim_target; ++row) {
-         const std::int32_t thread_num = omp_get_thread_num();
-         GenerateMatrixComponents(&components[thread_num], basis[row], model_);
-         std::vector<std::int64_t> col_list;
-         std::vector<RealType> val_list;
-         const std::size_t size = components[thread_num].basis_affected.size();
-         for (std::size_t i = 0; i < size; ++i) {
-            const std::int64_t a_basis = components[thread_num].basis_affected[i];
-            const RealType val = components[thread_num].val[i];
-            if (basis_inv.count(a_basis) > 0) {
-               const std::int64_t inv = basis_inv.at(a_basis);
-               if ((inv < row && std::abs(val) > std::numeric_limits<RealType>::epsilon()) || inv == row) {
-                  col_list.push_back(inv);
-                  val_list.push_back(val);
-                  num_row_element[row + 1]++;
+#pragma omp parallel num_threads(num_threads_)
+      {
+         ExactDiagMatrixComponents<RealType> components;
+         components.site_constant.resize(model_.GetSystemSize());
+         for (std::int32_t site = 0; site < model_.GetSystemSize(); ++site) {
+            components.site_constant[site] =
+            static_cast<std::int64_t>(std::pow(model_.GetDimOnsite(), site));
+         }
+         components.basis_onsite.resize(model_.GetSystemSize());
+         
+#pragma omp for schedule(guided)
+         for (std::int64_t row = 0; row < dim_target; ++row) {
+            GenerateMatrixComponents(&components, basis[row], model_);
+            std::vector<std::int64_t> col_list;
+            std::vector<RealType> val_list;
+            const std::size_t size = components.basis_affected.size();
+            for (std::size_t i = 0; i < size; ++i) {
+               const std::int64_t a_basis = components.basis_affected[i];
+               const RealType val = components.val[i];
+               if (basis_inv.count(a_basis) > 0) {
+                  const std::int64_t inv = basis_inv.at(a_basis);
+                  if ((inv < row && std::abs(val) > std::numeric_limits<RealType>::epsilon()) || inv == row) {
+                     col_list.push_back(inv);
+                     val_list.push_back(val);
+                     num_row_element[row + 1]++;
+                  }
+               }
+               else if (basis_inv.count(a_basis) == 0 && std::abs(val) > std::numeric_limits<RealType>::epsilon()) {
+                  throw std::runtime_error("Matrix elements are not in the target space");
                }
             }
-            else if (basis_inv.count(a_basis) == 0 && std::abs(val) > std::numeric_limits<RealType>::epsilon()) {
-               throw std::runtime_error("Matrix elements are not in the target space");
-            }
+            temp_col[row] = col_list;
+            temp_val[row] = val_list;
+            components.val.clear();
+            components.basis_affected.clear();
+            components.inv_basis_affected.clear();
          }
-         temp_col[row] = col_list;
-         temp_val[row] = val_list;
-         components[thread_num].val.clear();
-         components[thread_num].basis_affected.clear();
-         components[thread_num].inv_basis_affected.clear();
       }
-      
+   
 #pragma omp parallel for reduction(+: num_total_elements) num_threads(num_threads_)
       for (std::int64_t row = 0; row <= dim_target; ++row) {
          num_total_elements += num_row_element[row];
@@ -253,48 +251,6 @@ private:
       }
       
       
-      
-      /*
-      
-      printf("C...\n");
-#pragma omp parallel for reduction(+: num_total_elements) num_threads(num_threads_)
-      for (std::int64_t row = 0; row <= dim_target; ++row) {
-         num_total_elements += num_row_element[row];
-      }
-      
-      // Do not use openmp here
-      for (std::int64_t row = 0; row < dim_target; ++row) {
-         num_row_element[row + 1] += num_row_element[row];
-      }
-      
-      CRS ham;
-      ham.row.resize(dim_target + 1);
-      ham.col.resize(num_total_elements);
-      ham.val.resize(num_total_elements);
-      printf("D...\n");
-#pragma omp parallel for schedule(guided) num_threads(num_threads_)
-      for (std::int64_t row = 0; row < dim_target; ++row) {
-         const std::int32_t thread_num = omp_get_thread_num();
-         GenerateMatrixComponents(&components[thread_num], basis[row], model_);
-         const std::size_t size = components[thread_num].basis_affected.size();
-         for (std::size_t i = 0; i < size; ++i) {
-            const std::int64_t a_basis = components[thread_num].basis_affected[i];
-            const RealType val = components[thread_num].val[i];
-            if (basis_inv.count(a_basis) > 0) {
-               const std::int64_t inv = basis_inv.at(a_basis);
-               if ((inv < row && std::abs(val) > std::numeric_limits<RealType>::epsilon()) || inv == row) {
-                  ham.col[num_row_element[row]] = inv;
-                  ham.val[num_row_element[row]] = val;
-                  num_row_element[row]++;
-               }
-            }
-         }
-         ham.row[row + 1] = num_row_element[row];
-         components[thread_num].val.clear();
-         components[thread_num].basis_affected.clear();
-         components[thread_num].inv_basis_affected.clear();
-      }
-       */
       printf("E...\n");
       ham.row_dim = dim_target;
       ham.col_dim = dim_target;

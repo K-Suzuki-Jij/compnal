@@ -86,7 +86,7 @@ void LapackSYEV(RealType *gs_value,
    std::unique_ptr<RealType[]> work = std::make_unique<RealType[]>(3*dim);
    
    for (std::int32_t i = 0; i < dim; ++i) {
-      for (std::int32_t j = matrix_in.row[i]; j < dim; ++j) {
+      for (std::int64_t j = matrix_in.row[i]; j < dim; ++j) {
          matrix_array[i*matrix_in.row_dim + matrix_in.col[j]] = matrix_in.val[j];
          matrix_array[matrix_in.col[j]*matrix_in.row_dim + i] = matrix_in.val[j];
       }

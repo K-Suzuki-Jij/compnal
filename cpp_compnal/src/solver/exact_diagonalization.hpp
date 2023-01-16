@@ -62,26 +62,40 @@ public:
 
    ExactDiag(const ModelType &model_): model_(model_) {}
    
+   void SetNumThreads(const std::int32_t num_threads) {
+      if (num_threads <= 0) {
+         throw std::runtime_error("num_threads must be non-negative integer.");
+      }
+      num_threads_ = num_threads;
+   }
+   
    void Diagonaliza(const std::int32_t level = 0) {
       if (level < 0) {
          throw std::runtime_error("The energy level must be non-negative integer");
       }
+      
       const CQNType target_sector = model_.GetTaretSector();
       
       if (bases_.count(target_sector) == 0) {
          // Generate basis
+         printf("Gen basis...\n");
          bases_[target_sector] = model_.GenerateBasis();
          inverse_bases_[target_sector] = GenerateInverseBasis(bases_.at(target_sector));
       }
       
+      printf("Gen ham...\n");
       CRS ham = GenerateHamiltonian();
-      printf("dim=%ld\n", ham.row_dim);
+      //ham.Print();
+      //std::exit(1);
+      printf("dim=%lld\n", ham.row_dim);
       if (eigenvalues_.size() < level + 1) {
          eigenvalues_.resize(level + 1);
          eigenvectors_.resize(level + 1);
       }
       
       if (diag_method == blas::DiagAlgorithm::LANCZOS) {
+         printf("Diag ham...\n");
+         diag_params.flag_symmetric_crs = true;
          blas::EigendecompositionLanczos(&eigenvalues_[0], &eigenvectors_[0], ham, diag_params, {});
       }
       else if (diag_method == blas::DiagAlgorithm::LOBPCG) {
@@ -94,6 +108,8 @@ public:
          throw std::runtime_error(ss.str());
       }
       
+      printf("II ham...\n");
+      ii_params.cg.flag_symmetric_crs = true;
       blas::InverseIteration(&ham, &eigenvectors_[0], eigenvalues_[0], {}, ii_params);
       
    }
@@ -108,6 +124,8 @@ private:
    
    std::unordered_map<CQNType, std::vector<std::int64_t>, CQNHash> bases_;
    std::unordered_map<CQNType, std::unordered_map<std::int64_t, std::int64_t>, CQNHash> inverse_bases_;
+   
+   std::int32_t num_threads_ = 1;
    
    //! @brief Diagonalization method.
    blas::DiagAlgorithm diag_method = blas::DiagAlgorithm::LANCZOS;
@@ -139,10 +157,10 @@ private:
       const std::int64_t dim_target = basis.size();
       std::int64_t num_total_elements = 0;
       
-      const std::int32_t num_threads = omp_get_max_threads();
-      std::vector<ExactDiagMatrixComponents<RealType>> components(num_threads);
+      std::vector<ExactDiagMatrixComponents<RealType>> components(num_threads_);
       
-      for (std::int32_t thread_num = 0; thread_num < num_threads; ++thread_num) {
+      printf("A...\n");
+      for (std::int32_t thread_num = 0; thread_num < num_threads_; ++thread_num) {
          components[thread_num].site_constant.resize(model_.GetSystemSize());
          for (std::int32_t site = 0; site < model_.GetSystemSize(); ++site) {
             components[thread_num].site_constant[site] =
@@ -150,10 +168,10 @@ private:
          }
          components[thread_num].basis_onsite.resize(model_.GetSystemSize());
       }
-      
+      printf("B...\n");
       std::vector<std::int64_t> num_row_element(dim_target + 1);
       
-#pragma omp parallel for
+#pragma omp parallel for schedule(guided) num_threads(num_threads_)
       for (std::int64_t row = 0; row < dim_target; ++row) {
          const std::int32_t thread_num = omp_get_thread_num();
          GenerateMatrixComponents(&components[thread_num], basis[row], model_);
@@ -175,8 +193,8 @@ private:
          components[thread_num].basis_affected.clear();
          components[thread_num].inv_basis_affected.clear();
       }
-      
-#pragma omp parallel for reduction(+: num_total_elements)
+      printf("C...\n");
+#pragma omp parallel for reduction(+: num_total_elements) num_threads(num_threads_)
       for (std::int64_t row = 0; row <= dim_target; ++row) {
          num_total_elements += num_row_element[row];
       }
@@ -190,8 +208,8 @@ private:
       ham.row.resize(dim_target + 1);
       ham.col.resize(num_total_elements);
       ham.val.resize(num_total_elements);
-      
-#pragma omp parallel for
+      printf("D...\n");
+#pragma omp parallel for schedule(guided) num_threads(num_threads_)
       for (std::int64_t row = 0; row < dim_target; ++row) {
          const std::int32_t thread_num = omp_get_thread_num();
          GenerateMatrixComponents(&components[thread_num], basis[row], model_);
@@ -213,7 +231,7 @@ private:
          components[thread_num].basis_affected.clear();
          components[thread_num].inv_basis_affected.clear();
       }
-      
+      printf("E...\n");
       ham.row_dim = dim_target;
       ham.col_dim = dim_target;
       
@@ -226,6 +244,7 @@ private:
          ss << "Unknown error detected in " << __FUNCTION__ << " at " << __LINE__ << std::endl;
          throw std::runtime_error(ss.str());
       }
+      printf("F...\n");
       ham.SortCol();
          
       return ham;
@@ -252,9 +271,13 @@ private:
       }
    }
 
-   void GenerateMatrixComponentsIntersite(ExactDiagMatrixComponents<RealType> *edmc, const std::int64_t basis,
-                                          const std::int32_t site_1, const CRS &matrix_onsite_1, const std::int32_t site_2,
-                                          const CRS &matrix_onsite_2, const RealType coeef,
+   void GenerateMatrixComponentsIntersite(ExactDiagMatrixComponents<RealType> *edmc,
+                                          const std::int64_t basis,
+                                          const std::int32_t site_1,
+                                          const CRS &matrix_onsite_1,
+                                          const std::int32_t site_2,
+                                          const CRS &matrix_onsite_2,
+                                          const RealType coeef,
                                           const std::int32_t fermion_sign = 1.0) const {
       if (std::abs(coeef) <= std::numeric_limits<RealType>::epsilon()) {
          return;
@@ -274,7 +297,7 @@ private:
                                          (matrix_onsite_2.col[i2] - basis_onsite_2) * site_constant_2;
             if (edmc->inv_basis_affected.count(a_basis) == 0) {
                edmc->inv_basis_affected[a_basis] = edmc->basis_affected.size();
-               edmc->val.push_back(fermion_sign * coeef * val_1 * matrix_onsite_2.val[i2]);
+               edmc->val.push_back(fermion_sign*coeef*val_1*matrix_onsite_2.val[i2]);
                edmc->basis_affected.push_back(a_basis);
             }
             else {
@@ -309,14 +332,20 @@ private:
       // Intersite elements
       if (model.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
          for (std::int32_t site = 0; site < system_size - 1; ++site) {
-            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_up_d  , site + 1, op_c_up  , 1.0);
-            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_up_d  , site    , op_c_up  , 1.0);
-            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_down_d, site + 1, op_c_down, 1.0);
-            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_down_d, site    , op_c_down, 1.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_up_d  , site + 1, op_c_up  , 10.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_up_d  , site    , op_c_up  , 10.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_down_d, site + 1, op_c_down, 10.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_down_d, site    , op_c_down, 10.0);
          }
+         
       }
       else if (model.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
-         
+         for (std::int32_t site = 0; site < system_size - 1; ++site) {
+            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_up_d  , site + 1, op_c_up  , 2.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_up_d  , site    , op_c_up  , 2.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_down_d, site + 1, op_c_down, 2.0);
+            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_down_d, site    , op_c_down, 2.0);
+         }
       }
       else {
          throw std::runtime_error("Unsupported BoundaryCondition");

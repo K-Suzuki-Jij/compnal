@@ -53,7 +53,7 @@ public:
    }
    
    void SetNumThreads(const std::int32_t num_threads) {
-      if (num_threads < 0) {
+      if (num_threads <= 0) {
          throw std::runtime_error("num_threads must be non-negative integer.");
       }
       num_threads_ = num_threads;

@@ -36,13 +36,7 @@ void Orthonormalize(std::vector<RealType> *target_vector,
                     const std::vector<std::vector<RealType>> &vectors,
                     const std::int32_t num_threads = 1,
                     const bool flag_normalize = true) {
-   
-   if (vectors.size() == 0) {
-      return;
-   }
-   
-   const std::int64_t dim = static_cast<std::int64_t>(target_vector->size());
-   
+         
    for (std::size_t i = 0; i < vectors.size(); ++i) {
       if (target_vector->size() != vectors[i].size()) {
          std::stringstream ss;
@@ -55,7 +49,7 @@ void Orthonormalize(std::vector<RealType> *target_vector,
       const RealType inner_product = CalculateInnerProduct(*target_vector, vectors[i], num_threads);
       
 #pragma omp parallel for num_threads(num_threads)
-      for (std::int64_t j = 0; j < dim; ++j) {
+      for (std::size_t j = 0; j < target_vector->size(); ++j) {
          (*target_vector)[j] -= inner_product*vectors[i][j];
       }
    }

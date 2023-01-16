@@ -92,6 +92,35 @@ public:
       return conserved_quantum_number_;
    }
    
+   //! @brief Calculate the number of electrons from the input onsite basis.
+   //! @param basis_onsite The onsite basis.
+   //! @return The number of electrons.
+   std::int32_t CalculateNumElectron(const std::int32_t basis_onsite) const {
+      //--------------------------------
+      // # <->  [Cherge  ] -- (N,  2*sz)
+      // 0 <->  [        ] -- (0,  0   )
+      // 1 <->  [up      ] -- (1,  1   )
+      // 2 <->  [down    ] -- (1, -1   )
+      // 3 <->  [up&down ] -- (2,  0   )
+      //--------------------------------
+
+      if (basis_onsite == 0) {
+         return 0;
+      }
+      else if (basis_onsite == 1 || basis_onsite == 2) {
+         return 1;
+      }
+      else if (basis_onsite == 3) {
+         return 2;
+      }
+      else {
+         std::stringstream ss;
+         ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+         ss << "Invalid onsite basis" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+   }
+   
    //! @brief Check if there is a subspace specified by the input quantum numbers.
    //! @return ture if there exists corresponding subspace, otherwise false.
    bool ValidateQNumber() const {

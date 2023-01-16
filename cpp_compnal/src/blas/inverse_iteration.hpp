@@ -73,7 +73,7 @@ void InverseIteration(CRS<RealType> *matrix_in,
    for (std::int32_t step = 0; step < params.max_step; ++step) {
       if (params.cg.flag_symmetric_crs) {
          std::vector<std::vector<RealType>> vectors_work_pthreads(params.num_threads, std::vector<RealType>(matrix_in->row_dim));
-         CalculateSymmetricMatrixVectorProduct(&vectors_work, &vectors_work_pthreads, 1, *matrix_in, *eigenvector);
+         CalculateSymmetricMatrixVectorProduct(&vectors_work, &vectors_work_pthreads, 1, *matrix_in, *eigenvector, params.num_threads);
       }
       else {
          CalculateMatrixVectorProduct(&vectors_work, 1, *matrix_in, *eigenvector);

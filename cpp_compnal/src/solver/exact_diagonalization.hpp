@@ -27,6 +27,8 @@
 
 #include <vector>
 #include <omp.h>
+#include <iostream>
+#include <chrono>
 
 namespace compnal {
 namespace solver {
@@ -48,6 +50,21 @@ struct ExactDiagMatrixComponents {
 
    //! @brief Inverse basis.
    std::unordered_map<std::int64_t, std::int64_t> inv_basis_affected;
+   
+};
+
+template<typename RealType>
+struct ExactDiagLog {
+  
+   std::string execute_time;
+   RealType time_gen_basis;
+   RealType time_gen_ham;
+   RealType time_diag;
+   RealType time_ii;
+   RealType time_cg;
+   std::int32_t diag_step;
+   std::int32_t ii_step;
+   std::int32_t cg_step;
    
 };
 
@@ -96,7 +113,12 @@ public:
       if (diag_method == blas::DiagAlgorithm::LANCZOS) {
          printf("Diag ham...\n");
          diag_params.flag_symmetric_crs = true;
+         diag_params.num_threads = num_threads_;
+         auto start = std::chrono::system_clock::now();
          blas::EigendecompositionLanczos(&eigenvalues_[0], &eigenvectors_[0], ham, diag_params, {});
+         std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
+         std::cout << "Elapsed Time: " << elapsed_seconds.count() << " sec" << std::endl;
+         std::exit(1);
       }
       else if (diag_method == blas::DiagAlgorithm::LOBPCG) {
          //blas::EigendecompositionLOBPCG(&eigenvalues_[0], &eigenvectors_[0], ham, diag_params);
@@ -110,6 +132,8 @@ public:
       
       printf("II ham...\n");
       ii_params.cg.flag_symmetric_crs = true;
+      ii_params.num_threads = num_threads_;
+      ii_params.cg.num_threads = num_threads_;
       blas::InverseIteration(&ham, &eigenvectors_[0], eigenvalues_[0], {}, ii_params);
       
    }
@@ -149,7 +173,7 @@ private:
    }
    
    CRS GenerateHamiltonian() const {
-      
+      auto start = std::chrono::system_clock::now();
       const CQNType target_sector = model_.GetTaretSector();
       const auto &basis = bases_.at(target_sector);
       const auto &basis_inv = inverse_bases_.at(target_sector);
@@ -247,6 +271,9 @@ private:
       printf("F...\n");
       ham.SortCol();
          
+      
+      std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
+      std::cout << "Elapsed Time: " << elapsed_seconds.count() << " sec" << std::endl;
       return ham;
    }
    
@@ -260,13 +287,15 @@ private:
 
       for (std::int64_t i = matrix_onsite.row[basis_onsite]; i < matrix_onsite.row[basis_onsite + 1]; ++i) {
          const std::int64_t a_basis = basis + (matrix_onsite.col[i] - basis_onsite)*site_constant;
-         if (edmc->inv_basis_affected.count(a_basis) == 0) {
-            edmc->inv_basis_affected[a_basis] = edmc->basis_affected.size();
-            edmc->val.push_back(matrix_onsite.val[i]);
-            edmc->basis_affected.push_back(a_basis);
-         }
-         else {
-            edmc->val[edmc->inv_basis_affected.at(a_basis)] += matrix_onsite.val[i];
+         if (a_basis <= basis) {
+            if (edmc->inv_basis_affected.count(a_basis) == 0) {
+               edmc->inv_basis_affected[a_basis] = edmc->basis_affected.size();
+               edmc->val.push_back(matrix_onsite.val[i]);
+               edmc->basis_affected.push_back(a_basis);
+            }
+            else {
+               edmc->val[edmc->inv_basis_affected.at(a_basis)] += matrix_onsite.val[i];
+            }
          }
       }
    }
@@ -295,14 +324,16 @@ private:
               ++i2) {
             const std::int64_t a_basis = basis + (col_1 - basis_onsite_1) * site_constant_1 +
                                          (matrix_onsite_2.col[i2] - basis_onsite_2) * site_constant_2;
-            if (edmc->inv_basis_affected.count(a_basis) == 0) {
-               edmc->inv_basis_affected[a_basis] = edmc->basis_affected.size();
-               edmc->val.push_back(fermion_sign*coeef*val_1*matrix_onsite_2.val[i2]);
-               edmc->basis_affected.push_back(a_basis);
-            }
-            else {
-               edmc->val[edmc->inv_basis_affected.at(a_basis)] +=
-                   fermion_sign * coeef * val_1 * matrix_onsite_2.val[i2];
+            if (a_basis <= basis) {
+               if (edmc->inv_basis_affected.count(a_basis) == 0) {
+                  edmc->inv_basis_affected[a_basis] = edmc->basis_affected.size();
+                  edmc->val.push_back(fermion_sign*coeef*val_1*matrix_onsite_2.val[i2]);
+                  edmc->basis_affected.push_back(a_basis);
+               }
+               else {
+                  edmc->val[edmc->inv_basis_affected.at(a_basis)] +=
+                      fermion_sign * coeef * val_1 * matrix_onsite_2.val[i2];
+               }
             }
          }
       }
@@ -319,6 +350,7 @@ private:
       const blas::CRS<RealType> &op_c_down_d = model.GetOnsiteOperatorCDownDagger();
       const std::int32_t dim_onsite = model.GetDimOnsite();
       const std::int32_t system_size = model.GetSystemSize();
+      std::int32_t fermion_sign = 1;
       
       for (std::int32_t site = 0; site < system_size; ++site) {
          edmc->basis_onsite[site] = CalculateLocalBasis(basis, site, dim_onsite);
@@ -332,19 +364,30 @@ private:
       // Intersite elements
       if (model.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
          for (std::int32_t site = 0; site < system_size - 1; ++site) {
-            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_up_d  , site + 1, op_c_up  , 10.0);
-            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_up_d  , site    , op_c_up  , 10.0);
-            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_down_d, site + 1, op_c_down, 10.0);
-            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_down_d, site    , op_c_down, 10.0);
+            if (model.CalculateNumElectron(edmc->basis_onsite[site])%2 == 1) {
+               fermion_sign = 1;
+            }
+            else {
+               fermion_sign = -1;
+            }
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up_d  , site + 1, op_c_up    , fermion_sign*model.GetHoppingEnergy());
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up    , site + 1, op_c_up_d  , fermion_sign*model.GetHoppingEnergy());
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down_d, site + 1, op_c_down  , fermion_sign*model.GetHoppingEnergy());
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down  , site + 1, op_c_down_d, fermion_sign*model.GetHoppingEnergy());
          }
-         
       }
       else if (model.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
          for (std::int32_t site = 0; site < system_size - 1; ++site) {
-            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_up_d  , site + 1, op_c_up  , 2.0);
-            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_up_d  , site    , op_c_up  , 2.0);
-            GenerateMatrixComponentsIntersite(edmc, basis, site    , op_c_down_d, site + 1, op_c_down, 2.0);
-            GenerateMatrixComponentsIntersite(edmc, basis, site + 1, op_c_down_d, site    , op_c_down, 2.0);
+            if (model.CalculateNumElectron(edmc->basis_onsite[site])%2 == 1) {
+               fermion_sign = 1;
+            }
+            else {
+               fermion_sign = -1;
+            }
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up_d  , site + 1, op_c_up    , fermion_sign*model.GetHoppingEnergy());
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up    , site + 1, op_c_up_d  , fermion_sign*model.GetHoppingEnergy());
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down_d, site + 1, op_c_down  , fermion_sign*model.GetHoppingEnergy());
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down  , site + 1, op_c_down_d, fermion_sign*model.GetHoppingEnergy());
          }
       }
       else {

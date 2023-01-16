@@ -31,10 +31,10 @@ namespace compnal {
 namespace test {
 
 TEST(SolverExactDiagonalization, Hubbard) {
-   lattice::Chain chain{10};
+   lattice::Chain chain{14};
    model::quantum::Hubbard<lattice::Chain, double> hubbard{chain};
    hubbard.SetTotalSz(0);
-   hubbard.SetTotalElectron(10);
+   hubbard.SetTotalElectron(14);
    solver::ExactDiag ed{hubbard};
    ed.SetNumThreads(8);
    

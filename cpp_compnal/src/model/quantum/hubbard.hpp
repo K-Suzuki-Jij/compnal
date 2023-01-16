@@ -36,8 +36,8 @@ class Hubbard: public Electron<LatticeType, RealType> {
 public:
    Hubbard(const LatticeType &lattice): Electron<LatticeType, RealType>(lattice) {}
       
-   void SetHoppingEnergy(const RealType hoppin_genergy) {
-      hoppin_genergy_ = hoppin_genergy;
+   void SetHoppingEnergy(const RealType hopping_energy) {
+      hopping_energy_ = hopping_energy;
    }
    
    void SetOnsiteCoulomb(const RealType onsite_coulomb) {
@@ -52,6 +52,22 @@ public:
       magnetic_field_ = magnetic_field;
    }
    
+   RealType GetHoppingEnergy() const {
+      return hopping_energy_;
+   }
+   
+   RealType GetOnsiteCoulomb() const {
+      return onsite_coulomb_;
+   }
+   
+   RealType GetChemicalPotential() const {
+      return chemical_potential_;
+   }
+   
+   RealType GetMagnetiField() const {
+      return magnetic_field_;
+   }
+   
    blas::CRS<RealType> GenarateOnsiteOperatorHam() const {
       return
       magnetic_field_*this->GetOnsiteOperatorSz() +
@@ -61,7 +77,7 @@ public:
    
 private:
    //! @brief Hopping energy \f$ t \f$.
-   RealType hoppin_genergy_ = 1.0;
+   RealType hopping_energy_ = 1.0;
    
    //! @brief The onsite density interactions \f$ U \f$.
    RealType onsite_coulomb_ = 1.0;

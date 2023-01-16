@@ -113,6 +113,8 @@ void CalculateSymmetricMatrixVectorProduct(std::vector<T1> *vector_out,
       std::stringstream ss;
       ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
       ss << "Working vector (vectors_work) must be arrays of the number of parallel threads";
+      ss << "The size of working vector is " << vectors_work->size();
+      ss << "The number of parallel threads is num_threads";
       throw std::runtime_error(ss.str());
    }
    

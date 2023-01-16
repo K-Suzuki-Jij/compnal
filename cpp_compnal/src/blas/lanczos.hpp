@@ -154,6 +154,7 @@ void EigendecompositionLanczos(RealType *target_value_out,
             *target_value_out = krylov_eigen_value[step + 1];
             converge_step_number = step + 1;
             residual_error_final = residual_error;
+            printf("val=%.15lf\n", *target_value_out);
             break;
          }
       }

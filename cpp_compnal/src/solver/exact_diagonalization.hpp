@@ -181,6 +181,9 @@ private:
       const std::int64_t dim_target = basis.size();
       std::int64_t num_total_elements = 0;
       
+      std::vector<std::vector<std::int64_t>> temp_col(dim_target);
+      std::vector<std::vector<RealType>> temp_val(dim_target);
+      
       std::vector<ExactDiagMatrixComponents<RealType>> components(num_threads_);
       
       printf("A...\n");
@@ -199,6 +202,8 @@ private:
       for (std::int64_t row = 0; row < dim_target; ++row) {
          const std::int32_t thread_num = omp_get_thread_num();
          GenerateMatrixComponents(&components[thread_num], basis[row], model_);
+         std::vector<std::int64_t> col_list;
+         std::vector<RealType> val_list;
          const std::size_t size = components[thread_num].basis_affected.size();
          for (std::size_t i = 0; i < size; ++i) {
             const std::int64_t a_basis = components[thread_num].basis_affected[i];
@@ -206,6 +211,8 @@ private:
             if (basis_inv.count(a_basis) > 0) {
                const std::int64_t inv = basis_inv.at(a_basis);
                if ((inv < row && std::abs(val) > std::numeric_limits<RealType>::epsilon()) || inv == row) {
+                  col_list.push_back(inv);
+                  val_list.push_back(val);
                   num_row_element[row + 1]++;
                }
             }
@@ -213,10 +220,42 @@ private:
                throw std::runtime_error("Matrix elements are not in the target space");
             }
          }
+         temp_col[row] = col_list;
+         temp_val[row] = val_list;
          components[thread_num].val.clear();
          components[thread_num].basis_affected.clear();
          components[thread_num].inv_basis_affected.clear();
       }
+      
+#pragma omp parallel for reduction(+: num_total_elements) num_threads(num_threads_)
+      for (std::int64_t row = 0; row <= dim_target; ++row) {
+         num_total_elements += num_row_element[row];
+      }
+      
+      // Do not use openmp here
+      for (std::int64_t row = 0; row < dim_target; ++row) {
+         num_row_element[row + 1] += num_row_element[row];
+      }
+      
+      CRS ham;
+      ham.row.resize(dim_target + 1);
+      ham.col.resize(num_total_elements);
+      ham.val.resize(num_total_elements);
+      
+#pragma omp parallel for num_threads(num_threads_)
+      for (std::int64_t row = 0; row < dim_target; ++row) {
+         for (std::size_t i = 0; i < temp_col[row].size(); ++i) {
+            ham.col[num_row_element[row]] = temp_col[row][i];
+            ham.val[num_row_element[row]] = temp_val[row][i];
+            num_row_element[row]++;
+         }
+         ham.row[row + 1] = num_row_element[row];
+      }
+      
+      
+      
+      /*
+      
       printf("C...\n");
 #pragma omp parallel for reduction(+: num_total_elements) num_threads(num_threads_)
       for (std::int64_t row = 0; row <= dim_target; ++row) {
@@ -255,6 +294,7 @@ private:
          components[thread_num].basis_affected.clear();
          components[thread_num].inv_basis_affected.clear();
       }
+       */
       printf("E...\n");
       ham.row_dim = dim_target;
       ham.col_dim = dim_target;

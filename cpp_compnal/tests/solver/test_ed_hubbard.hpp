@@ -36,7 +36,7 @@ TEST(SolverExactDiagonalization, Hubbard) {
    hubbard.SetTotalSz(0);
    hubbard.SetTotalElectron(14);
    solver::ExactDiag ed{hubbard};
-   ed.SetNumThreads(4);
+   ed.SetNumThreads(8);
    
    ed.Diagonaliza();
 }

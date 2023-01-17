@@ -29,7 +29,6 @@ namespace compnal {
 namespace blas {
 
 //! @brief Calculate matrix vector product. \f$ \boldsymbol{v}_{\rm out} = c\hat{M}\cdot\boldsymbol{v} \f$.
-//!
 //! @tparam T1 The value type of the coefficient \f$ c\f$.
 //! @tparam T2 The value type of the matirx \f$ \hat{M}\f$.
 //! @tparam T3 The value type of the vector \f$ \boldsymbol{v}\f$.

@@ -36,7 +36,8 @@ struct IIParams {
    std::int32_t num_threads = 1;
    RealType diag_add = std::pow(10, -11);
    RealType acc = std::pow(10, -7);
-   CGParams<RealType> cg;
+   LinearEqParams<RealType> linear_eq_params;
+   LinearEqAlgorithm linear_eq_method = LinearEqAlgorithm::CONJUGATE_GRADIENT;
 };
 
 template<typename RealType>
@@ -53,12 +54,16 @@ void InverseIteration(CRS<RealType> *matrix_in,
       ss << "row=" << matrix_in->row_dim << ", col=" << matrix_in->col_dim << std::endl;
       throw std::runtime_error(ss.str());
    }
+   
+   if (params.max_step <= 0) {
+      return;
+   }
 
    std::vector<RealType> improved_eigenvector;
    std::vector<RealType> vectors_work(matrix_in->row_dim);
    std::vector<std::vector<RealType>> vectors_work_pthreads;
 
-   if (params.cg.flag_use_initial_vec) {
+   if (params.linear_eq_params.flag_use_initial_vec) {
       if (static_cast<std::int64_t>(eigenvector->size()) != matrix_in->row_dim) {
          std::stringstream ss;
          ss << "Error in " << __func__ << std::endl;
@@ -71,7 +76,7 @@ void InverseIteration(CRS<RealType> *matrix_in,
    matrix_in->AddDiagonalElements(params.diag_add - eigenvalue);
 
    for (std::int32_t step = 0; step < params.max_step; ++step) {
-      if (params.cg.flag_symmetric_crs) {
+      if (params.linear_eq_params.flag_symmetric_crs) {
          std::vector<std::vector<RealType>> vectors_work_pthreads(params.num_threads, std::vector<RealType>(matrix_in->row_dim));
          CalculateSymmetricMatrixVectorProduct(&vectors_work, &vectors_work_pthreads, 1, *matrix_in, *eigenvector, params.num_threads);
       }
@@ -79,13 +84,20 @@ void InverseIteration(CRS<RealType> *matrix_in,
          CalculateMatrixVectorProduct(&vectors_work, 1, *matrix_in, *eigenvector);
       }
       const RealType residual_error = CalculateL1Distance(params.diag_add, *eigenvector, 1, vectors_work, params.num_threads);
-
+      printf("ii_error=%.15lf\n", residual_error);
       if (residual_error < params.acc) {
          matrix_in->AddDiagonalElements(-(params.diag_add - eigenvalue));
          return;
       }
-
-      ConjugateGradient(&improved_eigenvector, *matrix_in, *eigenvector, subspace_vectors, params.cg);
+      if (params.linear_eq_method == LinearEqAlgorithm::CONJUGATE_GRADIENT) {
+         ConjugateGradient(&improved_eigenvector, *matrix_in, *eigenvector, subspace_vectors, params.linear_eq_params);
+      }
+      else if (params.linear_eq_method == LinearEqAlgorithm::MINIMUM_RESIDUAL) {
+         //MinimumResidual(&improved_eigenvector, *matrix_in, *eigenvector, subspace_vectors, params.linear_eq_params);
+      }
+      else {
+         throw std::runtime_error("Unknwon linear equation solver detected.");
+      }
       Normalize(&improved_eigenvector);
       CopyVector(eigenvector, improved_eigenvector);
    }

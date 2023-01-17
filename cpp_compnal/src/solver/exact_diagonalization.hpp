@@ -86,6 +86,56 @@ public:
       num_threads_ = num_threads;
    }
    
+   void SetDiagonalizationMaxStep(const std::int32_t diag_max_step) {
+      if (diag_max_step < 0) {
+         throw std::runtime_error("diag_max_step must be larger than 1");
+      }
+      diag_max_step_ = diag_max_step;
+   }
+   
+   void SetDiagonalizationAccuracy(const RealType diag_accuracy) {
+      if (diag_accuracy < std::numeric_limits<RealType>::epsilon()) {
+         throw std::runtime_error("Accuracy is too small");
+      }
+      diag_accuracy_ = diag_accuracy;
+   }
+   
+   void SetLanczosStoreVector(const bool lanczos_store_vec) {
+      lanczos_store_vec_ = lanczos_store_vec;
+   }
+   
+   void SetInverseIterationMaxStep(const std::int32_t ii_max_step) {
+      if (ii_max_step < 0) {
+         throw std::runtime_error("The max step of the inverse iteration must be larger than 0");
+      }
+      ii_max_step_ = ii_max_step;
+   }
+   
+   void SetInverseIterationShiftDiagElement(const RealType ii_diag_add) {
+      ii_diag_add_ = ii_diag_add;
+   }
+   
+   void SetInverseIterationAccuracy(const RealType ii_accuracy) {
+      if (ii_accuracy < std::numeric_limits<RealType>::epsilon()) {
+         throw std::runtime_error("ii_accuracy is too small");
+      }
+      ii_accuracy_ = ii_accuracy;
+   }
+   
+   void SetConjugateGradientMaxStep(const std::int32_t linear_eq_max_step) {
+      if (linear_eq_max_step < 0) {
+         throw std::runtime_error("linear_eq_max_step must be larger than 0");
+      }
+      linear_eq_max_step_ = linear_eq_max_step;
+   }
+   
+   void SetConjugateGradientAccuracy(const RealType linear_eq_accuracy) {
+      if (linear_eq_accuracy < std::numeric_limits<RealType>::epsilon()) {
+         throw std::runtime_error("linear_eq_accuracy must be is too small");
+      }
+      linear_eq_accuracy_ = linear_eq_accuracy;
+   }
+   
    void Diagonaliza(const std::int32_t level = 0) {
       if (level < 0) {
          throw std::runtime_error("The energy level must be non-negative integer");
@@ -95,33 +145,25 @@ public:
       
       if (bases_.count(target_sector) == 0) {
          // Generate basis
-         printf("Gen basis...\n");
          bases_[target_sector] = model_.GenerateBasis();
          inverse_bases_[target_sector] = GenerateInverseBasis(bases_.at(target_sector));
       }
       
-      printf("Gen ham...\n");
       CRS ham = GenerateHamiltonian();
-      //ham.Print();
-      //std::exit(1);
-      printf("dim=%lld\n", ham.row_dim);
+
       if (eigenvalues_.size() < level + 1) {
          eigenvalues_.resize(level + 1);
          eigenvectors_.resize(level + 1);
       }
       
-      if (diag_method == blas::DiagAlgorithm::LANCZOS) {
-         printf("Diag ham...\n");
-         diag_params.flag_symmetric_crs = true;
-         diag_params.num_threads = num_threads_;
-         auto start = std::chrono::system_clock::now();
-         blas::EigendecompositionLanczos(&eigenvalues_[0], &eigenvectors_[0], ham, diag_params, {});
-         std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
-         std::cout << "Elapsed Time: " << elapsed_seconds.count() << " sec" << std::endl;
-         std::exit(1);
+      if (diag_method_ == blas::DiagAlgorithm::LANCZOS) {
+         blas::EigendecompositionLanczos(&eigenvalues_[0], &eigenvectors_[0], ham, GetDiagParams(), {});
       }
-      else if (diag_method == blas::DiagAlgorithm::LOBPCG) {
+      else if (diag_method_ == blas::DiagAlgorithm::LOBPCG) {
          //blas::EigendecompositionLOBPCG(&eigenvalues_[0], &eigenvectors_[0], ham, diag_params);
+      }
+      else if (diag_method_ == blas::DiagAlgorithm::DAVIDSON) {
+         //blas::EigendecompositionDavidson(&eigenvalues_[0], &eigenvectors_[0], ham, diag_params);
       }
       else {
          std::stringstream ss;
@@ -130,12 +172,7 @@ public:
          throw std::runtime_error(ss.str());
       }
       
-      printf("II ham...\n");
-      ii_params.cg.flag_symmetric_crs = true;
-      ii_params.num_threads = num_threads_;
-      ii_params.cg.num_threads = num_threads_;
-      blas::InverseIteration(&ham, &eigenvectors_[0], eigenvalues_[0], {}, ii_params);
-      
+      blas::InverseIteration(&ham, &eigenvectors_[0], eigenvalues_[0], {}, GetIIParams());
    }
    
    
@@ -150,12 +187,50 @@ private:
    std::unordered_map<CQNType, std::unordered_map<std::int64_t, std::int64_t>, CQNHash> inverse_bases_;
    
    std::int32_t num_threads_ = 1;
+   std::uint64_t seed_ = std::random_device()();
    
-   //! @brief Diagonalization method.
-   blas::DiagAlgorithm diag_method = blas::DiagAlgorithm::LANCZOS;
-   blas::DiagParams<RealType> diag_params = blas::DiagParams<RealType>();
-   blas::IIParams<RealType> ii_params = blas::IIParams<RealType>();
-
+   blas::DiagAlgorithm diag_method_ = blas::DiagAlgorithm::LANCZOS;
+   blas::LinearEqAlgorithm linear_eq_method_ = blas::LinearEqAlgorithm::CONJUGATE_GRADIENT;
+   
+   // Diagonalization
+   std::int32_t diag_max_step_ = 1000;
+   RealType diag_accuracy_ = std::pow(10, -14);
+   bool lanczos_store_vec_ = false;
+   
+   //Inverse iteration
+   std::int32_t ii_max_step_ = 3;
+   RealType ii_diag_add_ = std::pow(10, -11);
+   RealType ii_accuracy_ = std::pow(10, -7);
+   
+   //Conjugate Gradient
+   std::int32_t linear_eq_max_step_ = 1000;
+   RealType linear_eq_accuracy_ = std::pow(10, -7);
+   
+   blas::DiagParams<RealType> GetDiagParams() const {
+      blas::DiagParams<RealType> diag_params;
+      diag_params.flag_symmetric_crs = true;
+      diag_params.num_threads = num_threads_;
+      diag_params.max_step = diag_max_step_;
+      diag_params.acc = diag_accuracy_;
+      diag_params.flag_store_vec = lanczos_store_vec_;
+      return diag_params;
+   }
+   
+   blas::IIParams<RealType> GetIIParams() const {
+      blas::IIParams<RealType> ii_params;
+      ii_params.num_threads = num_threads_;
+      ii_params.max_step = ii_max_step_;
+      ii_params.diag_add = ii_diag_add_;
+      ii_params.acc = ii_accuracy_;
+      ii_params.linear_eq_params.num_threads = num_threads_;
+      ii_params.linear_eq_params.flag_symmetric_crs = true;
+      ii_params.linear_eq_params.flag_use_initial_vec = true;
+      ii_params.linear_eq_method = linear_eq_method_;
+      ii_params.linear_eq_params.max_step = linear_eq_max_step_;
+      ii_params.linear_eq_params.acc = linear_eq_accuracy_;
+      return ii_params;
+   }
+   
    std::unordered_map<std::int64_t, std::int64_t> GenerateInverseBasis(const std::vector<std::int64_t> &basis) const {
       const std::int64_t dim = static_cast<std::int64_t>(basis.size());
       std::unordered_map<std::int64_t, std::int64_t> inverse_basis;
@@ -250,8 +325,6 @@ private:
          ham.row[row + 1] = num_row_element[row];
       }
       
-      
-      printf("E...\n");
       ham.row_dim = dim_target;
       ham.col_dim = dim_target;
       
@@ -264,9 +337,8 @@ private:
          ss << "Unknown error detected in " << __FUNCTION__ << " at " << __LINE__ << std::endl;
          throw std::runtime_error(ss.str());
       }
-      printf("F...\n");
+
       ham.SortCol();
-         
       
       std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
       std::cout << "Elapsed Time: " << elapsed_seconds.count() << " sec" << std::endl;

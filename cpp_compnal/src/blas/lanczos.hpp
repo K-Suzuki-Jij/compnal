@@ -31,7 +31,7 @@
 namespace compnal {
 namespace blas {
 
-template <typename RealType>
+template<typename RealType>
 struct DiagParams {
    std::int32_t min_step = 0;
    std::int32_t max_step = 1000;
@@ -69,6 +69,10 @@ void EigendecompositionLanczos(RealType *target_value_out,
    if (matrix_in.row_dim <= 1000) {
       const std::int32_t dim_subspace = static_cast<std::int32_t>(subspace_vectors.size());
       LapackSYEV<RealType>(target_value_out, target_vector_out, dim_subspace, matrix_in);
+      return;
+   }
+   
+   if (params.max_step <= 0) {
       return;
    }
 

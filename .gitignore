@@ -64,3 +64,4 @@ _skbuild/*
 _cmake_test_compile
 
 .coverage
+.pytest_cache

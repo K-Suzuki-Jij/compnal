@@ -41,6 +41,7 @@ struct DiagParams {
    bool flag_use_initial_vec = false;
    bool flag_store_vec = false;
    bool flag_symmetric_crs = false;
+   bool flag_display_info = false;
 };
 
 
@@ -48,10 +49,12 @@ template<typename RealType>
 void EigendecompositionLanczos(RealType *target_value_out,
                                std::vector<RealType> *target_vector_out,
                                const CRS<RealType> &matrix_in,
-                               const DiagParams<RealType> params = DiagParams<RealType>(),
-                               const std::vector<std::vector<RealType>> &subspace_vectors = {}
+                               const std::vector<std::vector<RealType>> &subspace_vectors = {},
+                               const DiagParams<RealType> params = DiagParams<RealType>()
                                ) {
-
+   const auto start = std::chrono::system_clock::now();
+   std::ios::fmtflags flagsSaved = std::cout.flags();
+   
    if (matrix_in.row_dim != matrix_in.col_dim) {
       std::stringstream ss;
       ss << "Error in " << __func__ << std::endl;
@@ -152,13 +155,16 @@ void EigendecompositionLanczos(RealType *target_value_out,
 
       if (step >= params.min_step) {
          LapackSTEV<RealType>(&krylov_eigen_value[step + 1], &krylov_eigen_vector, diagonal_value, off_diagonal_value);
+         
          const RealType residual_error = std::abs(krylov_eigen_value[step + 1] - krylov_eigen_value[step]);
-         printf("residual_error=%.15lf\n", residual_error);
+         if (params.flag_display_info) {
+            std::cout << "\rLanczos Step[" << step + 1 << "]=" << std::scientific << std::setprecision(1);
+            std::cout << residual_error << std::flush;
+         }
          if (residual_error < params.acc) {
             *target_value_out = krylov_eigen_value[step + 1];
             converge_step_number = step + 1;
             residual_error_final = residual_error;
-            printf("val=%.15lf\n", *target_value_out);
             break;
          }
       }
@@ -235,8 +241,23 @@ void EigendecompositionLanczos(RealType *target_value_out,
             vector_1[i] -= diagonal_value[step]*vector_2[i] + off_diagonal_value[step - 1]*vector_0[i];
             vector_0[i] = vector_2[i];
          }
+         if (params.flag_display_info) {
+            std::cout << "\rLanczos Vec Step:" << step << "/";
+            std::cout << converge_step_number << std::string(5, ' ') << std::flush;
+         }
       }
       Normalize(target_vector_out);
+   }
+   
+   if (params.flag_display_info) {
+      const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
+      std::cout << std::defaultfloat << std::fixed << std::setprecision(3);
+      std::cout << "\rDiagonalize by Lanczos:";
+      std::cout << elapsed_seconds.count() << "[sec]" << std::flush;
+      std::cout << std::scientific << std::setprecision(1);
+      std::cout << " (" << residual_error_final << ")" << std::flush;
+      std::cout << std::endl;
+      std::cout.flags(flagsSaved);
    }
 
 }

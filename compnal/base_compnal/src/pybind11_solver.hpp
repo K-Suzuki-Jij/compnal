@@ -84,6 +84,36 @@ void pybind11SolverClassicalMonteCarlo(py::module &m, const std::string &post_na
    
 }
 
+template<class ModelType>
+void pybind11SolverExactDiag(py::module &m, const std::string &post_name = "") {
+   
+   using ED = solver::ExactDiag<ModelType>;
+   std::string name = std::string("ExactDiag") + post_name;
+
+   auto py_class = py::class_<ED>(m, name.c_str(), py::module_local());
+   
+   //Constructors
+   py_class.def(py::init<const ModelType&>(), "model"_a);
+   
+   //Public Member Functions
+   py_class.def("set_num_threads", &ED::SetNumThreads, "num_threads"_a );
+   py_class.def("set_diagonalize_max_step", &ED::SetDiagonalizationMaxStep , "diagonalize_max_step"_a );
+   py_class.def("set_diagonalize_accuracy", &ED::SetDiagonalizationAccuracy, "diagonalize_accuracy"_a );
+   py_class.def("set_lanczos_store_vector", &ED::SetLanczosStoreVector     , "lanczos_store_vector"_a );
+   py_class.def("set_inverse_iteration_max_step", &ED::SetInverseIterationMaxStep, "inverse_iteration_max_step"_a );
+   py_class.def("set_inverse_iteration_shift_diag_element", &ED::SetInverseIterationShiftDiagElement, "inverse_iteration_shift_diag_element"_a );
+   py_class.def("set_inverse_iteration_accuracy", &ED::SetInverseIterationAccuracy, "inverse_iteration_accuracy"_a );
+   py_class.def("set_conjugate_gradient_max_step", &ED::SetConjugateGradientMaxStep, "conjugate_gradient_max_step"_a );
+   py_class.def("set_conjugate_gradient_accuracy", &ED::SetConjugateGradientAccuracy, "set_conjugate_gradient_accuracy"_a );
+   py_class.def("get_eigenvalue", &ED::GetEigenvalue, "level"_a);
+   py_class.def("get_eigenvalues", &ED::GetEigenvalues);
+   py_class.def("get_eigenvector", &ED::GetEigenvector, "level"_a);
+   py_class.def("get_eigenvectors", &ED::GetEigenvectors);
+   py_class.def("calculate_ground_state", &ED::CalculateGroundState);
+   py_class.def("calculate_target_state", &ED::CalculateTargetState);
+
+}
+
 
 
 

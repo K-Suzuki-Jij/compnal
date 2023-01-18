@@ -38,7 +38,13 @@ TEST(SolverExactDiagonalization, Hubbard) {
    solver::ExactDiag ed{hubbard};
    ed.SetNumThreads(8);
    
-   ed.Diagonaliza();
+   ed.CalculateGroundState();
+   ed.CalculateTargetState(2);
+   
+   std::cout << ed.GetEigenvalue(0) << std::endl;
+   std::cout << ed.GetEigenvalue(1) << std::endl;
+   std::cout << ed.GetEigenvalue(2) << std::endl;
+   
 }
 
 

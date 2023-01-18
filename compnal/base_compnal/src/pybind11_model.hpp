@@ -81,6 +81,34 @@ void pybind11ModelPolynomialIsing(py::module &m, const std::string &post_name = 
    }, "lattice"_a, "interaction"_a);
 }
 
+template<class LatticeType, typename RealType>
+void pybind11ModelHubbard(py::module &m, const std::string &post_name = "") {
+   
+   using Hub = model::quantum::Hubbard<LatticeType, RealType>;
+   std::string name = std::string("Hubbard") + post_name;
+
+   auto py_class = py::class_<Hub>(m, name.c_str(), py::module_local());
+   
+   //Constructors
+   py_class.def(py::init<const LatticeType&>(), "lattice"_a);
+   
+   //Public Member Functions
+   py_class.def("set_total_electron", &Hub::SetTotalElectron, "total_electron"_a);
+   py_class.def("set_total_sz"      , &Hub::SetTotalSz      , "total_sz"_a      );
+   
+   py_class.def("set_hopping_energy"    , &Hub::SetHoppingEnergy    , "hopping_energy"_a    );
+   py_class.def("set_onsite_coulomb"    , &Hub::SetOnsiteCoulomb    , "onsite_coulomb"_a    );
+   py_class.def("set_chemical_potential", &Hub::SetChemicalPotential, "chemical_potential"_a);
+   py_class.def("set_magnetic_field"    , &Hub::SetMagneticField    , "magnetic_field"_a    );
+   
+   py_class.def("get_hopping_energy"    , &Hub::GetHoppingEnergy    );
+   py_class.def("get_onsite_coulomb"    , &Hub::GetOnsiteCoulomb    );
+   py_class.def("get_chemical_potential", &Hub::GetChemicalPotential);
+   py_class.def("get_magnetic_field"    , &Hub::GetMagneticField    );
+
+   
+}
+
 
 
 

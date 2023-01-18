@@ -64,7 +64,7 @@ public:
       return chemical_potential_;
    }
    
-   RealType GetMagnetiField() const {
+   RealType GetMagneticField() const {
       return magnetic_field_;
    }
    

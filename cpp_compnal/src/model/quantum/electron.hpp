@@ -228,7 +228,6 @@ public:
       std::vector<std::int64_t> basis;
       basis.reserve(dim_target);
 
-#ifdef _OPENMP
       const std::int32_t num_threads = omp_get_max_threads();
       std::vector<std::vector<std::int64_t>> temp_basis(num_threads);
       for (const auto &integer_list : partition_integers) {
@@ -253,19 +252,7 @@ public:
          basis.insert(basis.end(), it.begin(), it.end());
          std::vector<std::int64_t>().swap(it);
       }
-#else
-      for (std::size_t i = 0; i < partition_integers.size(); ++i) {
-         auto &integer_list = partition_integers[i];
-         std::sort(integer_list.begin(), integer_list.end());
-         do {
-            std::int64_t basis_global = 0;
-            for (std::size_t j = 0; j < integer_list.size(); ++j) {
-               basis_global += integer_list[j] * site_constant[j];
-            }
-            basis.push_back(basis_global);
-         } while (std::next_permutation(integer_list.begin(), integer_list.end()));
-      }
-#endif
+
       basis.shrink_to_fit();
 
       if (static_cast<std::int64_t>(basis.size()) != dim_target) {

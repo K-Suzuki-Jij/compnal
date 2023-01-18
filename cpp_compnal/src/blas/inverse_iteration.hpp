@@ -38,6 +38,7 @@ struct IIParams {
    RealType acc = std::pow(10, -7);
    LinearEqParams<RealType> linear_eq_params;
    LinearEqAlgorithm linear_eq_method = LinearEqAlgorithm::CONJUGATE_GRADIENT;
+   bool flag_display_info = false;
 };
 
 template<typename RealType>
@@ -46,6 +47,9 @@ void InverseIteration(CRS<RealType> *matrix_in,
                       const RealType eigenvalue,
                       const std::vector<std::vector<RealType>> &subspace_vectors = {},
                       const IIParams<RealType> &params = IIParams<RealType>()) {
+   
+   const auto start = std::chrono::system_clock::now();
+   std::ios::fmtflags flagsSaved = std::cout.flags();
    
    if (matrix_in->row_dim != matrix_in->col_dim) {
       std::stringstream ss;
@@ -84,9 +88,24 @@ void InverseIteration(CRS<RealType> *matrix_in,
          CalculateMatrixVectorProduct(&vectors_work, 1, *matrix_in, *eigenvector);
       }
       const RealType residual_error = CalculateL1Distance(params.diag_add, *eigenvector, 1, vectors_work, params.num_threads);
-      printf("ii_error=%.15lf\n", residual_error);
+      
+      if (params.flag_display_info) {
+         std::cout << "\rInverse Iteration Step[" << step + 1 << "]=" << std::scientific << std::setprecision(1);
+         std::cout << residual_error << std::flush;
+      }
+      
       if (residual_error < params.acc) {
          matrix_in->AddDiagonalElements(-(params.diag_add - eigenvalue));
+         if (params.flag_display_info) {
+            const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
+            std::cout << std::defaultfloat << std::fixed << std::setprecision(3);
+            std::cout << "\rInverse Iteration:";
+            std::cout << elapsed_seconds.count() << "[sec]" << std::flush;
+            std::cout << std::scientific << std::setprecision(1);
+            std::cout << " (" << residual_error << ")" << std::flush;
+            std::cout << std::endl;
+            std::cout.flags(flagsSaved);
+         }
          return;
       }
       if (params.linear_eq_method == LinearEqAlgorithm::CONJUGATE_GRADIENT) {
@@ -105,6 +124,7 @@ void InverseIteration(CRS<RealType> *matrix_in,
    std::stringstream ss;
    ss << "Error in " << __func__ << std::endl;
    ss << "Did not converge" << std::endl;
+   std::cout.flags(flagsSaved);
    throw std::runtime_error(ss.str());
 }
 

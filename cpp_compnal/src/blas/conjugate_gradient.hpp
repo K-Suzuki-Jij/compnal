@@ -40,6 +40,7 @@ struct LinearEqParams {
    RealType acc = std::pow(10, -7);
    bool flag_use_initial_vec = false;
    bool flag_symmetric_crs = false;
+   bool flag_display_info = false;
 };
 
 template<typename RealType>
@@ -48,6 +49,8 @@ void ConjugateGradient(std::vector<RealType> *vec_out,
                        const std::vector<RealType> &vec_in,
                        const std::vector<std::vector<RealType>> &subspace_vectors = {},
                        const LinearEqParams<RealType> &params = LinearEqParams<RealType>()) {
+   const auto start = std::chrono::system_clock::now();
+   std::ios::fmtflags flagsSaved = std::cout.flags();
    
    if (matrix_in.row_dim != matrix_in.col_dim) {
       std::stringstream ss;
@@ -136,8 +139,22 @@ void ConjugateGradient(std::vector<RealType> *vec_out,
       Orthonormalize(&rrr, subspace_vectors, params.num_threads, false);
 
       const RealType residual_error = CalculateInnerProduct(rrr, rrr, params.num_threads);
+      
+      if (params.flag_display_info) {
+         std::cout << "\rCG Step[" << step << "]=" << std::scientific << std::setprecision(1);
+         std::cout << residual_error << std::string(5, ' ') << std::flush;
+      }
 
       if (residual_error < params.acc) {
+         if (params.flag_display_info) {
+            const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
+            std::cout << std::defaultfloat << std::fixed << std::setprecision(3);
+            std::cout << "\rConjugate Gradient:" << elapsed_seconds.count() << "[sec]";
+            std::cout << std::scientific << std::setprecision(1);
+            std::cout << " (" << residual_error << ")" << std::flush;
+            std::cout << std::endl;
+            std::cout.flags(flagsSaved);
+         }
          return;
       }
 
@@ -154,6 +171,7 @@ void ConjugateGradient(std::vector<RealType> *vec_out,
    std::stringstream ss;
    ss << "Error in " << __func__ << std::endl;
    ss << "Does not converge" << std::endl;
+   std::cout.flags(flagsSaved);
    throw std::runtime_error(ss.str());
 }
 

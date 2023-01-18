@@ -24,6 +24,7 @@ PYBIND11_MODULE(base_compnal, m) {
    namespace py = pybind11;
    
    using RealType = double;
+   py::add_ostream_redirect(m, "ostream_redirect");
       
    py::module_ m_lattice = m.def_submodule("base_lattice");
    compnal::wrapper::pybind11BoundaryCondition(m_lattice);
@@ -46,6 +47,8 @@ PYBIND11_MODULE(base_compnal, m) {
    compnal::wrapper::pybind11ModelPolynomialIsing<compnal::lattice::InfiniteRange, RealType>(m_model, "InfiniteRange");
    compnal::wrapper::pybind11ModelPolynomialIsing<compnal::lattice::AnyLattice, RealType>(m_model, "AnyLattice");
    
+   compnal::wrapper::pybind11ModelHubbard<compnal::lattice::Chain, RealType>(m_model, "Chain");
+   
    py::module_ m_solver = m.def_submodule("base_solver");
    compnal::wrapper::pybind11SolverCMCUpdater(m_solver);
    
@@ -60,5 +63,8 @@ PYBIND11_MODULE(base_compnal, m) {
    compnal::wrapper::pybind11SolverClassicalMonteCarlo<compnal::model::Ising<compnal::lattice::Cubic, RealType>>(m_solver, "IsingCubic");
    compnal::wrapper::pybind11SolverClassicalMonteCarlo<compnal::model::Ising<compnal::lattice::InfiniteRange, RealType>>(m_solver, "IsingInfiniteRange");
    compnal::wrapper::pybind11SolverClassicalMonteCarlo<compnal::model::Ising<compnal::lattice::AnyLattice, RealType>>(m_solver, "IsingAnyLattice");
+   
+   compnal::wrapper::pybind11SolverExactDiag<compnal::model::quantum::Hubbard<compnal::lattice::Chain, RealType>>(m_solver, "HubbardChain");
+
 
 };

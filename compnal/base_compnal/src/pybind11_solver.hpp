@@ -109,8 +109,14 @@ void pybind11SolverExactDiag(py::module &m, const std::string &post_name = "") {
    py_class.def("get_eigenvalues", &ED::GetEigenvalues);
    py_class.def("get_eigenvector", &ED::GetEigenvector, "level"_a);
    py_class.def("get_eigenvectors", &ED::GetEigenvectors);
-   py_class.def("calculate_ground_state", &ED::CalculateGroundState);
-   py_class.def("calculate_target_state", &ED::CalculateTargetState);
+   py_class.def("calculate_ground_state",
+                &ED::CalculateGroundState,
+                py::call_guard<py::scoped_ostream_redirect,
+                py::scoped_estream_redirect>());
+   py_class.def("calculate_target_state",
+                &ED::CalculateTargetState,
+                py::call_guard<py::scoped_ostream_redirect,
+                py::scoped_estream_redirect>());
 
 }
 

@@ -39,9 +39,11 @@ void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
    const blas::CRS<RealType> &op_c_up_d = model.GetOnsiteOperatorCUpDagger();
    const blas::CRS<RealType> &op_c_down = model.GetOnsiteOperatorCDown();
    const blas::CRS<RealType> &op_c_down_d = model.GetOnsiteOperatorCDownDagger();
+   const blas::CRS<RealType> &op_n = model.GetOnsiteOperatorNC();
    const std::int32_t dim_onsite = model.GetDimOnsite();
    const std::int32_t system_size = model.GetSystemSize();
-   const RealType hop = model.GetHoppingEnergy();
+   const std::vector<RealType> &hop_list = model.GetHoppingEnergy();
+   const std::vector<RealType> &intersite_coulomb_list = model.GetIntersiteCoulomb();
    std::int32_t fermion_sign = 1;
    
    for (std::int32_t site = 0; site < system_size; ++site) {
@@ -55,35 +57,59 @@ void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
 
    // Intersite elements
    if (model.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
-      for (std::int32_t site = 0; site < system_size - 1; ++site) {
-         if (model.CalculateNumElectron(edmc->basis_onsite[site])%2 == 1) {
-            fermion_sign = 1;
+      // Hopping
+      for (std::int32_t dist = 1; dist <= hop_list.size(); ++dist) {
+         for (std::int32_t site = 0; site < system_size; ++site) {
+            std::int32_t num_electron = 0;
+            for (std::int32_t i = site; i < site + dist; ++i) {
+               num_electron += model.CalculateNumElectron(edmc->basis_onsite[site]);
+            }
+            if (num_electron%2 == 1) {
+               fermion_sign = 1;
+            }
+            else {
+               fermion_sign = -1;
+            }
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up_d  , (site + dist)%system_size, op_c_up    , fermion_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up    , (site + dist)%system_size, op_c_up_d  , fermion_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down_d, (site + dist)%system_size, op_c_down  , fermion_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down  , (site + dist)%system_size, op_c_down_d, fermion_sign*hop_list[dist - 1]);
          }
-         else {
-            fermion_sign = -1;
-         }
-         GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up_d  , site + 1, op_c_up    , fermion_sign*hop);
-         GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up    , site + 1, op_c_up_d  , fermion_sign*hop);
-         GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down_d, site + 1, op_c_down  , fermion_sign*hop);
-         GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down  , site + 1, op_c_down_d, fermion_sign*hop);
       }
-      GenerateMatrixComponentsIntersite(edmc, basis, 0, op_c_up_d  , system_size - 1, op_c_up    , fermion_sign*hop);
-      GenerateMatrixComponentsIntersite(edmc, basis, 0, op_c_up    , system_size - 1, op_c_up_d  , fermion_sign*hop);
-      GenerateMatrixComponentsIntersite(edmc, basis, 0, op_c_down_d, system_size - 1, op_c_down  , fermion_sign*hop);
-      GenerateMatrixComponentsIntersite(edmc, basis, 0, op_c_down  , system_size - 1, op_c_down_d, fermion_sign*hop);
+      
+      // Intersite Coulomb
+      for (std::int32_t dist = 1; dist <= intersite_coulomb_list.size(); ++dist) {
+         for (std::int32_t site = 0; site < system_size; ++site) {
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_n, (site + dist)%system_size, op_n, fermion_sign*intersite_coulomb_list[dist - 1]);
+         }
+      }
    }
    else if (model.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
-      for (std::int32_t site = 0; site < system_size - 1; ++site) {
-         if (model.CalculateNumElectron(edmc->basis_onsite[site])%2 == 1) {
-            fermion_sign = 1;
+      // Hopping
+      for (std::int32_t dist = 1; dist <= hop_list.size(); ++dist) {
+         for (std::int32_t site = 0; site < system_size - dist; ++site) {
+            std::int32_t num_electron = 0;
+            for (std::int32_t i = site; i < site + dist; ++i) {
+               num_electron += model.CalculateNumElectron(edmc->basis_onsite[site]);
+            }
+            if (num_electron%2 == 1) {
+               fermion_sign = 1;
+            }
+            else {
+               fermion_sign = -1;
+            }
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up_d  , (site + dist), op_c_up    , fermion_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up    , (site + dist), op_c_up_d  , fermion_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down_d, (site + dist), op_c_down  , fermion_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down  , (site + dist), op_c_down_d, fermion_sign*hop_list[dist - 1]);
          }
-         else {
-            fermion_sign = -1;
+      }
+      
+      // Intersite Coulomb
+      for (std::int32_t dist = 1; dist <= intersite_coulomb_list.size(); ++dist) {
+         for (std::int32_t site = 0; site < system_size - dist; ++site) {
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_n, (site + dist), op_n, fermion_sign*intersite_coulomb_list[dist - 1]);
          }
-         GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up_d  , site + 1, op_c_up    , fermion_sign*hop);
-         GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up    , site + 1, op_c_up_d  , fermion_sign*hop);
-         GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down_d, site + 1, op_c_down  , fermion_sign*hop);
-         GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down  , site + 1, op_c_down_d, fermion_sign*hop);
       }
    }
    else {

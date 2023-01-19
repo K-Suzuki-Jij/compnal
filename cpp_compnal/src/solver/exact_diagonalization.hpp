@@ -186,9 +186,6 @@ public:
       }
    }
    
-   
-   
-   
 private:
    const ModelType model_;
    std::vector<RealType> eigenvalues_;
@@ -249,8 +246,9 @@ private:
    std::unordered_map<std::int64_t, std::int64_t> GenerateInverseBasis(const std::vector<std::int64_t> &basis) const {
       const std::int64_t dim = static_cast<std::int64_t>(basis.size());
       std::unordered_map<std::int64_t, std::int64_t> inverse_basis;
+      inverse_basis.reserve(dim + 1);
       for (std::int64_t i = 0; i < dim; ++i) {
-         inverse_basis[basis[i]] = i;
+         inverse_basis.emplace(basis[i], i);
       }
       return inverse_basis;
    }

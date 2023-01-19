@@ -24,7 +24,6 @@ PYBIND11_MODULE(base_compnal, m) {
    namespace py = pybind11;
    
    using RealType = double;
-   py::add_ostream_redirect(m, "ostream_redirect");
       
    py::module_ m_lattice = m.def_submodule("base_lattice");
    compnal::wrapper::pybind11BoundaryCondition(m_lattice);

@@ -36,12 +36,16 @@ class Hubbard: public Electron<LatticeType, RealType> {
 public:
    Hubbard(const LatticeType &lattice): Electron<LatticeType, RealType>(lattice) {}
       
-   void SetHoppingEnergy(const RealType hopping_energy) {
+   void SetHoppingEnergy(const std::vector<RealType> &hopping_energy) {
       hopping_energy_ = hopping_energy;
    }
    
    void SetOnsiteCoulomb(const RealType onsite_coulomb) {
       onsite_coulomb_ = onsite_coulomb;
+   }
+   
+   void SetIntersiteCoulomb(const std::vector<RealType> &intersite_coulomb) {
+      intersite_coulomb_ = intersite_coulomb;
    }
    
    void SetChemicalPotential(const RealType chemical_potential) {
@@ -52,12 +56,16 @@ public:
       magnetic_field_ = magnetic_field;
    }
    
-   RealType GetHoppingEnergy() const {
+   std::vector<RealType> GetHoppingEnergy() const {
       return hopping_energy_;
    }
    
    RealType GetOnsiteCoulomb() const {
       return onsite_coulomb_;
+   }
+   
+   std::vector<RealType> GetIntersiteCoulomb() const {
+      return intersite_coulomb_;
    }
    
    RealType GetChemicalPotential() const {
@@ -77,19 +85,17 @@ public:
    
 private:
    //! @brief Hopping energy \f$ t \f$.
-   RealType hopping_energy_ = 1.0;
+   std::vector<RealType> hopping_energy_ = {1.0};
    
    //! @brief The onsite density interactions \f$ U \f$.
    RealType onsite_coulomb_ = 1.0;
+   
+   std::vector<RealType> intersite_coulomb_ = {};
       
    //! @brief The chemical potential \f$ mu \f$.
    RealType chemical_potential_ = 0.0;
    
    RealType magnetic_field_ = 0.0;
-   
-
-   
-   
    
 };
 

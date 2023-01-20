@@ -34,17 +34,15 @@ TEST(SolverExactDiagonalization, Hubbard) {
    lattice::Chain chain{14};
    model::quantum::Hubbard<lattice::Chain, double> hubbard{chain};
    hubbard.SetTotalSz(0);
-   hubbard.SetTotalElectron(14);
+   hubbard.SetTotalElectron(10);
    solver::ExactDiag ed{hubbard};
    ed.SetNumThreads(8);
    
    ed.CalculateGroundState();
-   ed.CalculateTargetState(2);
-   
-   std::cout << ed.GetEigenvalue(0) << std::endl;
-   std::cout << ed.GetEigenvalue(1) << std::endl;
-   std::cout << ed.GetEigenvalue(2) << std::endl;
-   
+
+   std::cout << ed.CalculateExpectationValue(hubbard.GetOnsiteOperatorNC(), 0) << std::endl;
+   std::cout << ed.CalculateCorrelationFunction(hubbard.GetOnsiteOperatorNC(), 0,
+                                                hubbard.GetOnsiteOperatorNC(), 1) << std::endl;
 }
 
 

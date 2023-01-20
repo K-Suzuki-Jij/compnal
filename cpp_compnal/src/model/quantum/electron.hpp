@@ -87,6 +87,14 @@ public:
       }
       conserved_quantum_number_.second = 2*total_sz;
    }
+
+   //! @brief Print the onsite bases.
+   void PrintBasisOnsite() const {
+      std::cout << "row " << 0 << ": |vac>" << std::endl;
+      std::cout << "row " << 1 << ": |↑  >" << std::endl;
+      std::cout << "row " << 2 << ": |↓  >" << std::endl;
+      std::cout << "row " << 3 << ": |↑↓ >" << std::endl;
+   }
    
    CQNType GetTaretSector() const {
       return conserved_quantum_number_;
@@ -103,7 +111,7 @@ public:
       // 2 <->  [down    ] -- (1, -1   )
       // 3 <->  [up&down ] -- (2,  0   )
       //--------------------------------
-
+      
       if (basis_onsite == 0) {
          return 0;
       }
@@ -124,13 +132,17 @@ public:
    //! @brief Check if there is a subspace specified by the input quantum numbers.
    //! @return ture if there exists corresponding subspace, otherwise false.
    bool ValidateQNumber() const {
+      return ValidateQNumber(conserved_quantum_number_);
+   }
+   
+   bool ValidateQNumber(const CQNType conserved_quantum_number) const {
       
-      auto func = [](const auto a, const auto x, const auto b) { return (x >= a) * (1 - (x >= b)); };
+      auto func = [](const auto a, const auto x, const auto b) { return (x >= a)*(1 - (x >= b)); };
       const auto system_size = lattice_.GetSystemSize();
-      const auto total_electron = conserved_quantum_number_.first;
-      const auto total_2sz = conserved_quantum_number_.second;
+      const auto total_electron = conserved_quantum_number.first;
+      const auto total_2sz = conserved_quantum_number.second;
       
-      const std::int32_t max_total_electron = 2 * system_size;
+      const std::int32_t max_total_electron = 2*system_size;
       const std::int32_t min_total_electron = 0;
       const std::int32_t max_total_2sz = func(0, total_electron, system_size)*total_electron + func(system_size, total_electron, 2*system_size)*(2*system_size - total_electron);
       const std::int32_t min_total_2sz = -max_total_2sz;
@@ -146,10 +158,14 @@ public:
       }
    }
    
+   std::int64_t CalculateTargetDim() const {
+      return CalculateTargetDim(conserved_quantum_number_);
+   }
+   
    //! @brief Generate bases of the target Hilbert space specified by
    //! the system size \f$ N\f$, the number of the total electrons \f$ \langle\hat{N}_{\rm e}\rangle\f$, and the total
    //! sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle \f$.
-   std::int64_t CalculateTargetDim() const {
+   std::int64_t CalculateTargetDim(const CQNType conserved_quantum_number) const {
       if (!ValidateQNumber()) {
          return 0;
       }
@@ -158,8 +174,8 @@ public:
       if (system_size <= 0) {
          return 0;
       }
-      const auto total_electron = conserved_quantum_number_.first;
-      const std::int32_t total_2sz = conserved_quantum_number_.second;
+      const auto total_electron = conserved_quantum_number.first;
+      const std::int32_t total_2sz = conserved_quantum_number.second;
       const std::vector<std::vector<std::int64_t>> binom = utility::GenerateBinomialTable(system_size);
       const std::int32_t max_n_up_down = static_cast<std::int32_t>(total_electron / 2);
       std::int64_t dim = 0;
@@ -169,19 +185,24 @@ public:
          const std::int32_t n_vac = system_size - total_electron + n_up_down;
          if (0 <= n_up && 0 <= n_down && 0 <= n_vac) {
             // TODO: Detect Overflow
-            dim += binom[system_size][n_up] * binom[system_size - n_up][n_down] *
-                   binom[system_size - n_up - n_down][n_up_down];
+            dim += binom[system_size][n_up]*binom[system_size - n_up][n_down]*
+            binom[system_size - n_up - n_down][n_up_down];
          }
       }
       return dim;
+   }
+   
+   std::vector<std::int64_t> GenerateBasis(const std::int32_t num_threads = 1) const {
+      return GenerateBasis(conserved_quantum_number_, num_threads);
    }
    
    //! @brief Generate bases of the target Hilbert space specified by
    //! the system size \f$ N\f$, the number of the total electrons \f$ \langle\hat{N}_{\rm e}\rangle\f$, and the total
    //! sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle \f$.
    //! @return Corresponding basis.
-   std::vector<std::int64_t> GenerateBasis() const {
-
+   std::vector<std::int64_t> GenerateBasis(const CQNType conserved_quantum_number,
+                                           const std::int32_t num_threads = 1) const {
+      
       if (!ValidateQNumber()) {
          std::stringstream ss;
          ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
@@ -191,16 +212,16 @@ public:
       
       const auto system_size = lattice_.GetSystemSize();
       
-      const auto total_electron = conserved_quantum_number_.first;
-      const auto total_2sz = conserved_quantum_number_.second;
-
+      const auto total_electron = conserved_quantum_number.first;
+      const auto total_2sz = conserved_quantum_number.second;
+      
       std::vector<std::int64_t> site_constant(system_size);
       for (std::int32_t site = 0; site < system_size; ++site) {
          site_constant[site] = static_cast<std::int64_t>(std::pow(dim_onsite_, site));
       }
-
+      
       const std::int32_t max_n_up_down = static_cast<std::int32_t>(total_electron / 2);
-
+      
       std::vector<std::vector<std::int32_t>> partition_integers;
       for (std::int32_t n_up_down = 0; n_up_down <= max_n_up_down; ++n_up_down) {
          const std::int32_t n_up = (total_electron - 2 * n_up_down + total_2sz) / 2;
@@ -223,12 +244,11 @@ public:
             partition_integers.push_back(integer_list);
          }
       }
-
-      const std::int64_t dim_target = CalculateTargetDim();
+      
+      const std::int64_t dim_target = CalculateTargetDim(conserved_quantum_number);
       std::vector<std::int64_t> basis;
       basis.reserve(dim_target);
-
-      const std::int32_t num_threads = omp_get_max_threads();
+      
       std::vector<std::vector<std::int64_t>> temp_basis(num_threads);
       for (const auto &integer_list : partition_integers) {
          const std::int64_t size = utility::CalculateNumPermutation(integer_list);
@@ -252,19 +272,82 @@ public:
          basis.insert(basis.end(), it.begin(), it.end());
          std::vector<std::int64_t>().swap(it);
       }
-
+      
       basis.shrink_to_fit();
-
+      
       if (static_cast<std::int64_t>(basis.size()) != dim_target) {
          std::stringstream ss;
          ss << "Unknown error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
          ss << "basis.size()=" << basis.size() << ", but dim_target=" << dim_target << std::endl;
          throw std::runtime_error(ss.str());
       }
-
+      
       std::sort(basis.begin(), basis.end());
-
+      
       return basis;
+   }
+   
+   //! @brief Calculate sectors generated by an onsite operator.
+   //! @tparam IntegerType Value type int row and col.
+   //! @param row The row in the matrix representation of an onsite operator.
+   //! @param col The column in the matrix representation of an onsite operator.
+   //! @return Sectors generated by an onsite operator.
+   template<typename IntegerType>
+   CQNType CalculateQNumber(const IntegerType row, const IntegerType col) const {
+      static_assert(std::is_integral<IntegerType>::value, "Template parameter IntegerType must be integer type");
+      if (row < 0 || col < 0 || dim_onsite_ <= row || dim_onsite_ <= col) {
+         std::stringstream ss;
+         ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+         ss << "Invalid parameters" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      const std::int32_t total_electron = conserved_quantum_number_.first;
+      const std::int32_t total_2sz = conserved_quantum_number_.second;
+      if (row == col && 0 <= row && row < 4 && 0 <= col && col < 4) {
+         return {+0 + total_electron, +0 + total_2sz};
+      }
+      else if (row == 0 && col == 1) {
+         return {-1 + total_electron, -1 + total_2sz};
+      }
+      else if (row == 0 && col == 2) {
+         return {-1 + total_electron, +1 + total_2sz};
+      }
+      else if (row == 0 && col == 3) {
+         return {-2 + total_electron, +0 + total_2sz};
+      }
+      else if (row == 1 && col == 0) {
+         return {+1 + total_electron, +1 + total_2sz};
+      }
+      else if (row == 1 && col == 2) {
+         return {+0 + total_electron, +2 + total_2sz};
+      }
+      else if (row == 1 && col == 3) {
+         return {-1 + total_electron, +1 + total_2sz};
+      }
+      else if (row == 2 && col == 0) {
+         return {+1 + total_electron, -1 + total_2sz};
+      }
+      else if (row == 2 && col == 1) {
+         return {+0 + total_electron, -2 + total_2sz};
+      }
+      else if (row == 2 && col == 3) {
+         return {-1 + total_electron, -1 + total_2sz};
+      }
+      else if (row == 3 && col == 0) {
+         return {+2 + total_electron, +0 + total_2sz};
+      }
+      else if (row == 3 && col == 1) {
+         return {+1 + total_electron, -1 + total_2sz};
+      }
+      else if (row == 3 && col == 2) {
+         return {+1 + total_electron, +1 + total_2sz};
+      }
+      else {
+         std::stringstream ss;
+         ss << "Error in " << __func__ << std::endl;
+         ss << "The dimenstion of the matrix must be 4";
+         throw std::runtime_error(ss.str());
+      }
    }
    
    //! @brief Get the system size.

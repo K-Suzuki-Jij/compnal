@@ -23,6 +23,7 @@
 #ifndef COMPNAL_SOLVER_ED_UTILITY_ALL_HPP_
 #define COMPNAL_SOLVER_ED_UTILITY_ALL_HPP_
 
+#include "./ed_matrix_comp.hpp"
 #include "./mat_comp_hubbard_chain.hpp"
 
 #endif /* COMPNAL_SOLVER_ED_UTILITY_ALL_HPP_ */

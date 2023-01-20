@@ -27,6 +27,7 @@
 #include "orthonormalize.hpp"
 #include "lapack_wrapper.hpp"
 #include <omp.h>
+#include <chrono>
 
 namespace compnal {
 namespace blas {
@@ -256,7 +257,7 @@ void EigendecompositionLanczos(RealType *target_value_out,
       std::cout << elapsed_seconds.count() << "[sec]" << std::flush;
       std::cout << std::scientific << std::setprecision(1);
       std::cout << " (" << residual_error_final << ")" << std::flush;
-      std::cout << std::endl;
+      std::cout << std::string(30, ' ') << std::flush;
       std::cout.flags(flagsSaved);
    }
 

@@ -104,7 +104,7 @@ void pybind11SolverExactDiag(py::module &m, const std::string &post_name = "") {
    py_class.def("set_inverse_iteration_shift_diag_element", &ED::SetInverseIterationShiftDiagElement, "inverse_iteration_shift_diag_element"_a );
    py_class.def("set_inverse_iteration_accuracy", &ED::SetInverseIterationAccuracy, "inverse_iteration_accuracy"_a );
    py_class.def("set_conjugate_gradient_max_step", &ED::SetConjugateGradientMaxStep, "conjugate_gradient_max_step"_a );
-   py_class.def("set_conjugate_gradient_accuracy", &ED::SetConjugateGradientAccuracy, "set_conjugate_gradient_accuracy"_a );
+   py_class.def("set_conjugate_gradient_accuracy", &ED::SetConjugateGradientAccuracy, "conjugate_gradient_accuracy"_a );
    py_class.def("get_eigenvalue", &ED::GetEigenvalue, "level"_a);
    py_class.def("get_eigenvalues", &ED::GetEigenvalues);
    py_class.def("get_eigenvector", &ED::GetEigenvector, "level"_a);
@@ -115,6 +115,16 @@ void pybind11SolverExactDiag(py::module &m, const std::string &post_name = "") {
                 py::scoped_estream_redirect>());
    py_class.def("calculate_target_state",
                 &ED::CalculateTargetState,
+                py::call_guard<py::scoped_ostream_redirect,
+                py::scoped_estream_redirect>());
+   py_class.def("calculate_expectation_value", 
+                &ED::CalculateExpectationValue, 
+                "m"_a, "site"_a, "level"_a = 0,
+                py::call_guard<py::scoped_ostream_redirect,
+                py::scoped_estream_redirect>());
+   py_class.def("calculate_correlation_function", 
+                &ED::CalculateCorrelationFunction, 
+                "m_1"_a, "site_1"_a, "m_2"_a, "site_2"_a, "level"_a = 0,
                 py::call_guard<py::scoped_ostream_redirect,
                 py::scoped_estream_redirect>());
 

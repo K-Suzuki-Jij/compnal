@@ -36,7 +36,7 @@ namespace solver {
 
 template<typename RealType>
 struct ExactDiagLog {
-  
+   
    std::string execute_time;
    RealType time_gen_basis;
    RealType time_gen_ham;
@@ -57,7 +57,7 @@ class ExactDiag {
    using CRS = blas::CRS<RealType>;
    
 public:
-
+   
    ExactDiag(const ModelType &model_): model_(model_) {}
    
    void SetNumThreads(const std::int32_t num_threads) {
@@ -128,7 +128,7 @@ public:
    const std::vector<RealType> &GetEigenvalues() const {
       return eigenvalues_;
    }
-      
+   
    const std::vector<std::vector<RealType>> &GetEigenvectors() const {
       return eigenvectors_;
    }
@@ -149,20 +149,21 @@ public:
       
       if (bases_.count(target_sector) == 0) {
          const auto start = std::chrono::system_clock::now();
-         bases_[target_sector] = model_.GenerateBasis();
+         bases_[target_sector] = model_.GenerateBasis(num_threads_);
          inverse_bases_[target_sector] = GenerateInverseBasis(bases_.at(target_sector));
          if (flag_display_info_) {
             const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
             std::cout << "\rGenerate Basis: " << elapsed_seconds.count() << " [sec]" << std::endl;
+            std::cout << std::flush;
          }
       }
-   
+      
       CRS ham = GenerateHamiltonian();
       for (std::int32_t i = 0; i <= level; ++i) {
          if (eigenvalues_.size() > i) {
             continue;
          }
-
+         
          RealType temp_eigenvalue = 0;
          std::vector<RealType> temp_eigenvector(ham.row_dim);
          if (diag_method_ == blas::DiagAlgorithm::LANCZOS) {
@@ -184,6 +185,173 @@ public:
          eigenvalues_.push_back(temp_eigenvalue);
          eigenvectors_.push_back(temp_eigenvector);
       }
+   }
+   
+   RealType CalculateExpectationValue(const CRS &m, const std::int32_t site, const std::int32_t level = 0) const {
+      if (eigenvectors_.size() <= level) {
+         std::stringstream ss;
+         ss << "Error in " << __func__ << std::endl;
+         ss << "An eigenvector of the energy level: " << level << " has not been calculated" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      if (m.row_dim != model_.GetDimOnsite()) {
+         std::stringstream ss;
+         ss << "Error in " << __func__ << std::endl;
+         ss << "The dimension of local matrix is not equal to the onsite dimension of the model" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      if (site < 0 || site >= model_.GetSystemSize()) {
+         std::stringstream ss;
+         ss << "Error in " << __func__ << std::endl;
+         ss << "The input site " << site << " is invalid" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      if (m.tag == blas::CRSTag::FERMION) {
+         std::stringstream ss;
+         ss << "Error in " << __func__ << std::endl;
+         ss << "The expectation value of Ferimon operators cannot be calculated " << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      const CQNType target_sector = model_.GetTaretSector();
+      const auto &basis = bases_.at(target_sector);
+      const auto &basis_inv = inverse_bases_.at(target_sector);
+      const auto &eigenvector = eigenvectors_.at(level);
+      
+      const std::int64_t dim = static_cast<std::int64_t>(eigenvector.size());
+      const std::int32_t dim_onsite = static_cast<std::int32_t>(m.row_dim);
+      const std::int64_t site_constant = static_cast<std::int64_t>(std::pow(dim_onsite, site));
+      
+      RealType val = 0.0;
+      
+#pragma omp parallel for schedule(guided) reduction(+ : val) num_threads(num_threads_)
+      for (std::int64_t i = 0; i < dim; ++i) {
+         const std::int64_t global_basis = basis[i];
+         const std::int32_t local_basis = ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite);
+         RealType temp_val = 0.0;
+         for (std::int64_t j = m.row[local_basis]; j < m.row[local_basis + 1]; ++j) {
+            const std::int64_t a_basis = global_basis - (local_basis - m.col[j])*site_constant;
+            if (basis_inv.count(a_basis) != 0) {
+               temp_val += eigenvector[basis_inv.at(a_basis)]*m.val[j];
+            }
+         }
+         val += eigenvector[i]*temp_val;
+      }
+      return val;
+   }
+   
+   RealType CalculateCorrelationFunction(const CRS &m_1, const std::int32_t site_1,
+                                         const CRS &m_2, const std::int32_t site_2,
+                                         const std::int32_t level = 0) {
+      
+      if (eigenvectors_.size() <= level) {
+         std::stringstream ss;
+         ss << "Error in " << __func__ << std::endl;
+         ss << "An eigenvector of the energy level: " << level << " has not been calculated" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      if (m_1.row_dim != m_2.row_dim || m_1.row_dim != m_1.col_dim || m_2.row_dim != m_2.col_dim) {
+         std::stringstream ss;
+         ss << "Error in " << __func__ << std::endl;
+         ss << "Invalid input of the local operators" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      if (m_1.row_dim != model_.GetDimOnsite()) {
+         std::stringstream ss;
+         ss << "Error in " << __func__ << std::endl;
+         ss << "The dimension of local matrix is not equal to the onsite dimension of the model" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      if (site_1 < 0 || site_1 >= model_.GetSystemSize() || site_2 < 0 || site_2 >= model_.GetSystemSize()) {
+         std::stringstream ss;
+         ss << "Error in " << __func__ << std::endl;
+         ss << "The input site " << site_1 << " or " << site_2 << " is invalid" << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      const CRS m1_dagger = blas::GenerateTransposedMatrix(m_1);
+      const auto target_sector_set = GenerateTargetSector(m1_dagger, m_2);
+      const auto &basis_inv = inverse_bases_.at(model_.GetTaretSector());
+      const std::int32_t dim_onsite = model_.GetDimOnsite();
+      const std::int64_t site_constant_m1 = static_cast<std::int64_t>(std::pow(dim_onsite, site_1));
+      const std::int64_t site_constant_m2 = static_cast<std::int64_t>(std::pow(dim_onsite, site_2));
+      const auto &eigenvector = eigenvectors_.at(level);
+      std::vector<RealType> vector_work_m1;
+      std::vector<RealType> vector_work_m2;
+      RealType val = 0.0;
+      
+      for (const auto &sector : target_sector_set) {
+         if (bases_.count(sector) == 0) {
+            const auto start = std::chrono::system_clock::now();
+            bases_[sector] = model_.GenerateBasis(sector, num_threads_);
+            inverse_bases_[sector] = GenerateInverseBasis(bases_.at(sector));
+            if (flag_display_info_) {
+               const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
+               std::cout << "\rGenerate Basis: " << elapsed_seconds.count() << " [sec]" << std::endl;
+               std::cout << std::flush;
+            }
+         }
+                  
+         const auto &basis = bases_.at(sector);
+         const std::int64_t dim_target = static_cast<std::int64_t>(basis.size());
+         vector_work_m1.resize(dim_target);
+         vector_work_m2.resize(dim_target);
+         
+#pragma omp parallel for num_threads(num_threads_)
+         for (std::int64_t i = 0; i < dim_target; ++i) {
+            const std::int64_t global_basis = basis[i];
+            const std::int32_t local_basis_m1 = ed_utility::CalculateLocalBasis(global_basis, site_1, dim_onsite);
+            const std::int32_t local_basis_m2 = ed_utility::CalculateLocalBasis(global_basis, site_2, dim_onsite);
+            RealType temp_val_m1 = 0.0;
+            RealType temp_val_m2 = 0.0;
+            
+            std::int32_t fermion_sign_m1 = 1;
+            if (m_1.tag == blas::CRSTag::FERMION) {
+               std::int32_t num_electron = 0;
+               for (std::int32_t site = 0; site < site_1; site++) {
+                  num_electron += model_.CalculateNumElectron(ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite));
+               }
+               if (num_electron % 2 == 1) {
+                  fermion_sign_m1 = -1;
+               }
+            }
+            
+            for (std::int64_t j = m1_dagger.row[local_basis_m1]; j < m1_dagger.row[local_basis_m1 + 1]; ++j) {
+               const std::int64_t a_basis = global_basis - (local_basis_m1 - m1_dagger.col[j]) * site_constant_m1;
+               if (basis_inv.count(a_basis) != 0) {
+                  temp_val_m1 += eigenvector[basis_inv.at(a_basis)] * m1_dagger.val[j];
+               }
+            }
+            vector_work_m1[i] = temp_val_m1 * fermion_sign_m1;
+            
+            std::int32_t fermion_sign_m2 = 1;
+            if (m_2.tag == blas::CRSTag::FERMION) {
+               std::int32_t num_electron = 0;
+               for (std::int32_t site = 0; site < site_2; site++) {
+                  num_electron += model_.CalculateNumElectron(ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite));
+               }
+               if (num_electron % 2 == 1) {
+                  fermion_sign_m2 = -1;
+               }
+            }
+            
+            for (std::int64_t j = m_2.row[local_basis_m2]; j < m_2.row[local_basis_m2 + 1]; ++j) {
+               const std::int64_t a_basis = global_basis - (local_basis_m2 - m_2.col[j]) * site_constant_m2;
+               if (basis_inv.count(a_basis) != 0) {
+                  temp_val_m2 += eigenvector[basis_inv.at(a_basis)] * m_2.val[j];
+               }
+            }
+            vector_work_m2[i] = temp_val_m2 * fermion_sign_m2;
+         }
+         val += blas::CalculateInnerProduct(vector_work_m1, vector_work_m2, num_threads_);
+      }
+      return val;
    }
    
 private:
@@ -265,7 +433,7 @@ private:
       
       std::vector<std::vector<std::int64_t>> temp_col(dim_target);
       std::vector<std::vector<RealType>> temp_val(dim_target);
-            
+      
       std::vector<std::int64_t> num_row_element(dim_target + 1);
       
 #pragma omp parallel num_threads(num_threads_)
@@ -306,7 +474,7 @@ private:
             components.inv_basis_affected.clear();
          }
       }
-   
+      
 #pragma omp parallel for reduction(+: num_total_elements) num_threads(num_threads_)
       for (std::int64_t row = 0; row <= dim_target; ++row) {
          num_total_elements += num_row_element[row];
@@ -322,7 +490,7 @@ private:
       ham.col.resize(num_total_elements);
       ham.val.resize(num_total_elements);
       
-#pragma omp parallel for num_threads(num_threads_)
+#pragma omp parallel for schedule(guided) num_threads(num_threads_)
       for (std::int64_t row = 0; row < dim_target; ++row) {
          for (std::size_t i = 0; i < temp_col[row].size(); ++i) {
             ham.col[num_row_element[row]] = temp_col[row][i];
@@ -344,15 +512,47 @@ private:
          ss << "Unknown error detected in " << __FUNCTION__ << " at " << __LINE__ << std::endl;
          throw std::runtime_error(ss.str());
       }
-
+      
       ham.SortCol(num_threads_);
       if (flag_display_info_) {
          const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
          std::cout << "\rConstruct Hamiltonian: " << elapsed_seconds.count() << " [sec]" << std::endl;
+         std::cout << std::flush;
       }
       
       return ham;
    }
+   
+   std::unordered_set<CQNType, CQNHash> GenerateTargetSector(const CRS &m_1) const {
+      std::unordered_set<CQNType, CQNHash> target_q_set;
+      for (std::int64_t i = 0; i < m_1.row_dim; ++i) {
+         for (std::int64_t j = m_1.row[i]; j < m_1.row[i + 1]; ++j) {
+            if (std::abs(m_1.val[j]) > std::numeric_limits<RealType>::epsilon()) {
+               target_q_set.emplace(model_.CalculateQNumber(i, m_1.col[j]));
+            }
+         }
+      }
+      return target_q_set;
+   }
+   
+   //! @brief Calculate the quantum numbers of excited states that appear when calculating the correlation functions.
+   //! @param m_1 The matrix of an onsite operator.
+   //! @param m_2 The matrix of an onsite operator.
+   //! @return The list of quantum numbers.
+   std::vector<CQNType> GenerateTargetSector(const CRS &m_1, const CRS &m_2) const {
+      std::unordered_set<CQNType, CQNHash> q_set_m1 = GenerateTargetSector(m_1);
+      std::unordered_set<CQNType, CQNHash> q_set_m2 = GenerateTargetSector(m_2);
+      
+      std::vector<CQNType> target_q_set;
+      for (const auto &q_m1 : q_set_m1) {
+         if (q_set_m2.count(q_m1) > 0 && model_.ValidateQNumber(q_m1)) {
+            target_q_set.push_back(q_m1);
+         }
+      }
+      
+      return target_q_set;
+   }
+
    
 };
 

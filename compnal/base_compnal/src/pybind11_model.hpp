@@ -98,6 +98,7 @@ void pybind11ModelHubbard(py::module &m, const std::string &post_name = "") {
    
    py_class.def("set_hopping_energy"    , &Hub::SetHoppingEnergy    , "hopping_energy"_a    );
    py_class.def("set_onsite_coulomb"    , &Hub::SetOnsiteCoulomb    , "onsite_coulomb"_a    );
+   py_class.def("set_intersite_coulomb" , &Hub::SetIntersiteCoulomb , "intersite_coulomb"_a );
    py_class.def("set_chemical_potential", &Hub::SetChemicalPotential, "chemical_potential"_a);
    py_class.def("set_magnetic_field"    , &Hub::SetMagneticField    , "magnetic_field"_a    );
    
@@ -106,6 +107,21 @@ void pybind11ModelHubbard(py::module &m, const std::string &post_name = "") {
    py_class.def("get_chemical_potential", &Hub::GetChemicalPotential);
    py_class.def("get_magnetic_field"    , &Hub::GetMagneticField    );
 
+   py_class.def("GetOnsiteOperatorCUp", &Hub::GetOnsiteOperatorCUp);
+   py_class.def("GetOnsiteOperatorCDown", &Hub::GetOnsiteOperatorCDown);
+
+   py_class.def("GetOnsiteOperatorCUpDagger", &Hub::GetOnsiteOperatorCUpDagger);
+   py_class.def("GetOnsiteOperatorCDownDagger", &Hub::GetOnsiteOperatorCDownDagger);
+
+   py_class.def("GetOnsiteOperatorNCUp", &Hub::GetOnsiteOperatorNCUp);
+   py_class.def("GetOnsiteOperatorNCDown", &Hub::GetOnsiteOperatorNCDown);
+
+   py_class.def("get_onsite_operator_NC", &Hub::GetOnsiteOperatorNC);
+   py_class.def("get_onsite_operator_Sx", &Hub::GetOnsiteOperatorSx);
+   py_class.def("get_onsite_operator_iSy", &Hub::GetOnsiteOperatoriSy);
+   py_class.def("get_onsite_operator_Sz", &Hub::GetOnsiteOperatorSz);
+   py_class.def("get_onsite_operator_Sp", &Hub::GetOnsiteOperatorSp);
+   py_class.def("get_onsite_operator_Sm", &Hub::GetOnsiteOperatorSm);
    
 }
 

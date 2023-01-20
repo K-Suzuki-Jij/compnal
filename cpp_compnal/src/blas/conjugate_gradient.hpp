@@ -28,6 +28,7 @@
 #include "matrix_vector_product.hpp"
 #include "orthonormalize.hpp"
 #include <omp.h>
+#include <chrono>
 
 namespace compnal {
 namespace blas {
@@ -152,7 +153,7 @@ void ConjugateGradient(std::vector<RealType> *vec_out,
             std::cout << "\rConjugate Gradient:" << elapsed_seconds.count() << "[sec]";
             std::cout << std::scientific << std::setprecision(1);
             std::cout << " (" << residual_error << ")" << std::flush;
-            std::cout << std::endl;
+            std::cout << std::string(30, ' ') << std::flush << std::endl;
             std::cout.flags(flagsSaved);
          }
          return;

@@ -26,6 +26,7 @@
 #include "compressed_row_storage.hpp"
 #include "conjugate_gradient.hpp"
 #include <omp.h>
+#include <chrono>
 
 namespace compnal {
 namespace blas {
@@ -103,7 +104,7 @@ void InverseIteration(CRS<RealType> *matrix_in,
             std::cout << elapsed_seconds.count() << "[sec]" << std::flush;
             std::cout << std::scientific << std::setprecision(1);
             std::cout << " (" << residual_error << ")" << std::flush;
-            std::cout << std::endl;
+            std::cout << std::string(30, ' ') << std::flush << std::endl;
             std::cout.flags(flagsSaved);
          }
          return;
@@ -113,6 +114,7 @@ void InverseIteration(CRS<RealType> *matrix_in,
       }
       else if (params.linear_eq_method == LinearEqAlgorithm::MINIMUM_RESIDUAL) {
          //MinimumResidual(&improved_eigenvector, *matrix_in, *eigenvector, subspace_vectors, params.linear_eq_params);
+         throw std::runtime_error("MINIMUM_RESIDUAL is under construction.");
       }
       else {
          throw std::runtime_error("Unknwon linear equation solver detected.");

@@ -158,14 +158,14 @@ public:
          }
       }
       
-      CRS ham = GenerateHamiltonian();
+      auto ham = GenerateHamiltonian();
       for (std::int32_t i = 0; i <= level; ++i) {
          if (eigenvalues_.size() > i) {
             continue;
          }
          
          RealType temp_eigenvalue = 0;
-         std::vector<RealType> temp_eigenvector(ham.row_dim);
+         std::vector<RealType> temp_eigenvector(bases_.at(target_sector).size());
          if (diag_method_ == blas::DiagAlgorithm::LANCZOS) {
             blas::EigendecompositionLanczos(&temp_eigenvalue, &temp_eigenvector, ham, eigenvectors_, GetDiagParams());
          }
@@ -317,7 +317,7 @@ public:
                for (std::int32_t site = 0; site < site_1; site++) {
                   num_electron += model_.CalculateNumElectron(ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite));
                }
-               if (num_electron % 2 == 1) {
+               if (num_electron%2 == 1) {
                   fermion_sign_m1 = -1;
                }
             }
@@ -336,7 +336,7 @@ public:
                for (std::int32_t site = 0; site < site_2; site++) {
                   num_electron += model_.CalculateNumElectron(ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite));
                }
-               if (num_electron % 2 == 1) {
+               if (num_electron%2 == 1) {
                   fermion_sign_m2 = -1;
                }
             }
@@ -344,10 +344,10 @@ public:
             for (std::int64_t j = m_2.row[local_basis_m2]; j < m_2.row[local_basis_m2 + 1]; ++j) {
                const std::int64_t a_basis = global_basis - (local_basis_m2 - m_2.col[j]) * site_constant_m2;
                if (basis_inv.count(a_basis) != 0) {
-                  temp_val_m2 += eigenvector[basis_inv.at(a_basis)] * m_2.val[j];
+                  temp_val_m2 += eigenvector[basis_inv.at(a_basis)]*m_2.val[j];
                }
             }
-            vector_work_m2[i] = temp_val_m2 * fermion_sign_m2;
+            vector_work_m2[i] = temp_val_m2*fermion_sign_m2;
          }
          val += blas::CalculateInnerProduct(vector_work_m1, vector_work_m2, num_threads_);
       }
@@ -421,7 +421,7 @@ private:
       return inverse_basis;
    }
    
-   CRS GenerateHamiltonian() const {
+   blas::DASPM<RealType> GenerateHamiltonian() const {
       const auto start = std::chrono::system_clock::now();
       
       const CQNType target_sector = model_.GetTaretSector();
@@ -429,12 +429,14 @@ private:
       const auto &basis_inv = inverse_bases_.at(target_sector);
       
       const std::int64_t dim_target = basis.size();
-      std::int64_t num_total_elements = 0;
+      //std::int64_t num_total_elements = 0;
       
       std::vector<std::vector<std::int64_t>> temp_col(dim_target);
       std::vector<std::vector<RealType>> temp_val(dim_target);
       
-      std::vector<std::int64_t> num_row_element(dim_target + 1);
+      blas::DASPM<RealType> ham(dim_target);
+      
+      //std::vector<std::int64_t> num_row_element(dim_target + 1);
       
 #pragma omp parallel num_threads(num_threads_)
       {
@@ -449,8 +451,9 @@ private:
 #pragma omp for schedule(guided)
          for (std::int64_t row = 0; row < dim_target; ++row) {
             ed_utility::GenerateMatrixComponents(&components, basis[row], model_);
-            std::vector<std::int64_t> col_list;
-            std::vector<RealType> val_list;
+            std::vector<std::pair<std::int64_t, RealType>> temp_col_val_list;
+            //std::vector<std::int64_t> col_list;
+            //std::vector<RealType> val_list;
             const std::size_t size = components.basis_affected.size();
             for (std::size_t i = 0; i < size; ++i) {
                const std::int64_t a_basis = components.basis_affected[i];
@@ -458,23 +461,29 @@ private:
                if (basis_inv.count(a_basis) > 0) {
                   const std::int64_t inv = basis_inv.at(a_basis);
                   if ((inv < row && std::abs(val) > std::numeric_limits<RealType>::epsilon()) || inv == row) {
-                     col_list.push_back(inv);
-                     val_list.push_back(val);
-                     num_row_element[row + 1]++;
+                     temp_col_val_list.push_back({inv, val});
+                     //col_list.push_back(inv);
+                     //val_list.push_back(val);
+                     //num_row_element[row + 1]++;
                   }
                }
                else if (basis_inv.count(a_basis) == 0 && std::abs(val) > std::numeric_limits<RealType>::epsilon()) {
                   throw std::runtime_error("Matrix elements are not in the target space");
                }
             }
-            temp_col[row] = col_list;
-            temp_val[row] = val_list;
+            std::sort(temp_col_val_list.begin(), temp_col_val_list.end(), [](const auto &a, const auto &b) {
+               return a.first < b.first;
+            });
+            ham[row] = temp_col_val_list;
+            //temp_col[row] = col_list;
+            //temp_val[row] = val_list;
             components.val.clear();
             components.basis_affected.clear();
             components.inv_basis_affected.clear();
          }
       }
       
+      /*
 #pragma omp parallel for reduction(+: num_total_elements) num_threads(num_threads_)
       for (std::int64_t row = 0; row <= dim_target; ++row) {
          num_total_elements += num_row_element[row];
@@ -514,6 +523,7 @@ private:
       }
       
       ham.SortCol(num_threads_);
+       */
       if (flag_display_info_) {
          const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
          std::cout << "\rConstruct Hamiltonian: " << elapsed_seconds.count() << " [sec]" << std::endl;

@@ -30,6 +30,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <omp.h>
 
 namespace compnal {
 namespace blas {
@@ -203,16 +204,16 @@ struct CRS {
    }
    
    //! @brief Clear the elements and free memory.
-    void Free() {
-       this->row_dim = 0;
-       this->col_dim = 0;
-       std::vector<std::int64_t>().swap(this->row);
-       std::vector<std::int64_t>().swap(this->col);
-       std::vector<ElementType>().swap(this->val);
-       this->row.push_back(0);
-       this->tag = CRSTag::NONE;
-       this->name = "";
-    }
+   void Free() {
+      this->row_dim = 0;
+      this->col_dim = 0;
+      std::vector<std::int64_t>().swap(this->row);
+      std::vector<std::int64_t>().swap(this->col);
+      std::vector<ElementType>().swap(this->val);
+      this->row.push_back(0);
+      this->tag = CRSTag::NONE;
+      this->name = "";
+   }
    
    //! @brief Check if the matrix is symmetric or not within the threshold.
    //! @param threshold The threshold. Defaults to 10^-15.
@@ -282,7 +283,7 @@ struct CRS {
          throw std::runtime_error(ss.str());
       }
       
-   #pragma omp parallel for schedule(guided) num_threads(num_threads)
+#pragma omp parallel for schedule(guided) num_threads(num_threads)
       for (std::int64_t i = 0; i < this->row_dim; ++i) {
          for (std::int64_t j = this->row[i]; j < this->row[i + 1]; ++j) {
             if (i == this->col[j]) {
@@ -849,6 +850,169 @@ auto CalculateMatrixMatrixSum(const T1 coeff_1, const CRS<T2> &matrix_1, const T
    }
    return matrix_out;
 }
+
+
+//! @brief Calculate matrix vector product. \f$ \boldsymbol{v}_{\rm out} = c\hat{M}\cdot\boldsymbol{v} \f$.
+//! @tparam T1 The value type of the coefficient \f$ c\f$.
+//! @tparam T2 The value type of the matirx \f$ \hat{M}\f$.
+//! @tparam T3 The value type of the vector \f$ \boldsymbol{v}\f$.
+//! @tparam T4 The value type of output vector.
+//! @param coeff The coefficient \f$ c\f$.
+//! @param matrix_in The matrix \f$ \hat{M} \f$.
+//! @param vector_in The vector \f$ \boldsymbol{v} \f$.
+//! @param vector_out The result of matrix vector product \f$ \boldsymbol{v}_{\rm out} = c\hat{M}\cdot\boldsymbol{v}\f$.
+template<typename T1, typename T2, typename T3, typename T4>
+void CalculateMatrixVectorProduct(std::vector<T1> *vector_out,
+                                  const T2 coeff,
+                                  const CRS<T3> &matrix_in,
+                                  const std::vector<T4> &vector_in,
+                                  const std::int32_t num_threads = 1) {
+   if (matrix_in.col_dim != vector_in.size()) {
+      std::stringstream ss;
+      ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+      ss << "The column of the input matrix is " << matrix_in.col_dim << std::endl;
+      ss << "The dimension of the input vector is " << vector_in.size() << std::endl;
+      ss << "Both must be equal" << std::endl;
+      throw std::runtime_error(ss.str());
+   }
+   vector_out->resize(matrix_in.row_dim);
+   using T3T4 = decltype(std::declval<T3>()*std::declval<T4>());
+   
+#pragma omp parallel for schedule(guided) num_threads(num_threads)
+   for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
+      T3T4 temp = 0;
+      for (std::int64_t j = matrix_in.row[i]; j < matrix_in.row[i + 1]; ++j) {
+         temp += matrix_in.val[j]*vector_in[matrix_in.col[j]];
+      }
+      (*vector_out)[i] = temp*coeff;
+   }
+   
+}
+
+//! @brief Calculate matrix vector product.
+//! \f$ \boldsymbol{v}_{\rm out} = c\hat{M}\cdot\boldsymbol{v}\f$.
+//! Note that the matrix \f$ \hat{M}\f$ must be symmetric and their elements are
+//! stored only in lower triangle elements. In addition, the diagonal elements
+//! must also stored even if they are zero.
+//! @tparam T1 The value type of the coefficient \f$ c\f$.
+//! @tparam T2 The value type of the matirx \f$ \hat{M}\f$.
+//! @tparam T3 The value type of the vector \f$ \boldsymbol{v}\f$.
+//! @tparam T4 The value type of output vector.
+//! \f$ \boldsymbol{v}_{\rm out} = c\hat{M}\cdot\boldsymbol{v}\f$.
+//! @param coeff The coefficient \f$ c\f$.
+//! @param matrix_in The matrix \f$ \hat{M} \f$.
+//! @param vector_in The vector \f$ \boldsymbol{v} \f$.
+//! @param vector_out The pointer of result for matrix vector product
+//! @param vectors_work The pointer of a temporary two-dimensional array used
+//! for calculations. Their elements must be zero. Note that this working array
+//! is used only when openmp is active.
+template<typename T1, typename T2, typename T3, typename T4>
+void CalculateSymmetricMatrixVectorProduct(std::vector<T1> *vector_out,
+                                           std::vector<std::vector<T1>> *vectors_work,
+                                           const T2 coeff,
+                                           const CRS<T3> &matrix_in,
+                                           const std::vector<T4> &vector_in,
+                                           const std::int32_t num_threads = 1) {
+   
+   if (matrix_in.row_dim != matrix_in.col_dim) {
+      std::stringstream ss;
+      ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+      ss << "The input matrix is not symmetric" << std::endl;
+      throw std::runtime_error(ss.str());
+   }
+   
+   if (matrix_in.col_dim != vector_in.size()) {
+      std::stringstream ss;
+      ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+      ss << "The column of the input matrix is " << matrix_in.col_dim << std::endl;
+      ss << "The dimension of the input vector is " << vector_in.size() << std::endl;
+      ss << "Both must be equal" << std::endl;
+      throw std::runtime_error(ss.str());
+   }
+   
+   vector_out->resize(matrix_in.row_dim);
+   
+   if (static_cast<std::int32_t>(vectors_work->size()) != num_threads) {
+      std::stringstream ss;
+      ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+      ss << "Working vector (vectors_work) must be arrays of the number of parallel threads";
+      ss << "The size of working vector is " << vectors_work->size();
+      ss << "The number of parallel threads is num_threads";
+      throw std::runtime_error(ss.str());
+   }
+   
+#pragma omp parallel num_threads(num_threads)
+   {
+      const std::int32_t thread_num = omp_get_thread_num();
+#pragma omp for schedule(guided)
+      for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
+         const T4 temp_vec_in = vector_in[i];
+         T1 temp_val = matrix_in.val[matrix_in.row[i + 1] - 1]*temp_vec_in;
+         for (std::int64_t j = matrix_in.row[i]; j < matrix_in.row[i + 1] - 1; ++j) {
+            temp_val += matrix_in.val[j]*vector_in[matrix_in.col[j]];
+            (*vectors_work)[thread_num][matrix_in.col[j]] += matrix_in.val[j]*temp_vec_in;
+         }
+         (*vectors_work)[thread_num][i] += temp_val;
+      }
+   }
+   
+#pragma omp parallel for schedule(guided) num_threads(num_threads)
+   for (std::int64_t i = 0; i < matrix_in.row_dim; ++i) {
+      T1 temp_val = 0.0;
+      for (std::int32_t thread_num = 0; thread_num < num_threads; ++thread_num) {
+         temp_val += (*vectors_work)[thread_num][i];
+         (*vectors_work)[thread_num][i] = 0;
+      }
+      (*vector_out)[i] = temp_val*coeff;
+   }
+   
+}
+
+
+template<typename T1, typename T2>
+void AddSymmetricDiagonalElements(CRS<T1> *matrix_in,
+                                  const T2 diag_add,
+                                  const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
+   
+   if (matrix_in->row_dim != matrix_in->col_dim) {
+      std::stringstream ss;
+      ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+      ss << "The matrix is not a square matrix." << std::endl;
+      throw std::runtime_error(ss.str());
+   }
+   
+#pragma omp parallel for schedule(guided) num_threads(num_threads)
+   for (std::int64_t i = 0; i < matrix_in->row_dim; ++i) {
+      if (matrix_in->col[matrix_in->row[i + 1] - 1] != matrix_in->row_dim) {
+         throw std::runtime_error("Could not add diagonal elements");
+      }
+      matrix_in->val[matrix_in->row[i + 1] - 1] += diag_add;
+   }
+}
+
+template<typename T1, typename T2>
+void AddDiagonalElements(CRS<T1> *matrix,
+                         const T2 diag_add,
+                         const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
+   
+   if (matrix->row_dim != matrix->col_dim) {
+      std::stringstream ss;
+      ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+      ss << "The matrix is not a square matrix." << std::endl;
+      throw std::runtime_error(ss.str());
+   }
+   
+#pragma omp parallel for schedule(guided) num_threads(num_threads)
+   for (std::int64_t i = 0; i < matrix->row_dim; ++i) {
+      for (std::int64_t j = matrix->row[i]; j < matrix->row[i + 1]; ++j) {
+         if (i == matrix->col[j]) {
+            matrix->val[j] += diag_add;
+            break;
+         }
+      }
+   }
+}
+
 
 } // namespace blas
 } // namespace compnal

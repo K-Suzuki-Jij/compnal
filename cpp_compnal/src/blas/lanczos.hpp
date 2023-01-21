@@ -26,6 +26,8 @@
 #include "../utility/all.hpp"
 #include "orthonormalize.hpp"
 #include "lapack_wrapper.hpp"
+#include "compressed_row_storage.hpp"
+#include "double_array_sparse_matrix.hpp"
 #include <omp.h>
 #include <chrono>
 
@@ -46,16 +48,17 @@ struct DiagParams {
 };
 
 
-template<typename RealType>
+template<typename RealType, class SPMType>
 void EigendecompositionLanczos(RealType *target_value_out,
                                std::vector<RealType> *target_vector_out,
-                               const CRS<RealType> &matrix_in,
+                               const SPMType &matrix_in,
                                const std::vector<std::vector<RealType>> &subspace_vectors = {},
                                const DiagParams<RealType> params = DiagParams<RealType>()
                                ) {
+   
    const auto start = std::chrono::system_clock::now();
    std::ios::fmtflags flagsSaved = std::cout.flags();
-   
+   /*
    if (matrix_in.row_dim != matrix_in.col_dim) {
       std::stringstream ss;
       ss << "Error in " << __func__ << std::endl;
@@ -75,13 +78,15 @@ void EigendecompositionLanczos(RealType *target_value_out,
       LapackSYEV<RealType>(target_value_out, target_vector_out, dim_subspace, matrix_in);
       return;
    }
+    */
    
    if (params.max_step <= 0) {
       return;
    }
 
    std::int32_t converge_step_number = 0;
-   const std::int64_t dim = matrix_in.row_dim;
+   //const std::int64_t dim = matrix_in.row_dim;
+   const std::int64_t dim = matrix_in.size();
    RealType residual_error_final = 0.0;
    std::vector<RealType> vector_0(dim);
    std::vector<RealType> vector_1(dim);
@@ -260,6 +265,7 @@ void EigendecompositionLanczos(RealType *target_value_out,
       std::cout << std::string(30, ' ') << std::flush;
       std::cout.flags(flagsSaved);
    }
+    
 
 }
 

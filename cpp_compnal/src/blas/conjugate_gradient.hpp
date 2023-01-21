@@ -25,7 +25,6 @@
 
 #include "../utility/all.hpp"
 #include "compressed_row_storage.hpp"
-#include "matrix_vector_product.hpp"
 #include "orthonormalize.hpp"
 #include <omp.h>
 #include <chrono>
@@ -44,15 +43,15 @@ struct LinearEqParams {
    bool flag_display_info = false;
 };
 
-template<typename RealType>
+template<typename RealType, class SPMType>
 void ConjugateGradient(std::vector<RealType> *vec_out,
-                       const CRS<RealType> &matrix_in,
+                       const SPMType &matrix_in,
                        const std::vector<RealType> &vec_in,
                        const std::vector<std::vector<RealType>> &subspace_vectors = {},
                        const LinearEqParams<RealType> &params = LinearEqParams<RealType>()) {
    const auto start = std::chrono::system_clock::now();
    std::ios::fmtflags flagsSaved = std::cout.flags();
-   
+   /*
    if (matrix_in.row_dim != matrix_in.col_dim) {
       std::stringstream ss;
       ss << "Error in " << __func__ << std::endl;
@@ -67,12 +66,13 @@ void ConjugateGradient(std::vector<RealType> *vec_out,
       ss << "Matrix vector product (Ax=b) cannot be defined." << std::endl;
       throw std::runtime_error(ss.str());
    }
-   
+   */
    if (params.max_step <= 0) {
       return;
    }
 
-   const std::int64_t dim = matrix_in.row_dim;
+   //const std::int64_t dim = matrix_in.row_dim;
+   const std::int64_t dim = matrix_in.size();
    std::vector<RealType> rrr(dim);
    std::vector<RealType> ppp(dim);
    std::vector<RealType> yyy(dim);

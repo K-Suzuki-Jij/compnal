@@ -42,8 +42,9 @@ struct IIParams {
    bool flag_display_info = false;
 };
 
-template<typename RealType>
-void InverseIteration(CRS<RealType> *matrix_in,
+
+template<typename RealType, class SPMType>
+void InverseIteration(SPMType *matrix_in,
                       std::vector<RealType> *eigenvector,
                       const RealType eigenvalue,
                       const std::vector<std::vector<RealType>> &subspace_vectors = {},
@@ -51,7 +52,7 @@ void InverseIteration(CRS<RealType> *matrix_in,
    
    const auto start = std::chrono::system_clock::now();
    std::ios::fmtflags flagsSaved = std::cout.flags();
-   
+   /*
    if (matrix_in->row_dim != matrix_in->col_dim) {
       std::stringstream ss;
       ss << "Error in " << __func__ << std::endl;
@@ -59,30 +60,38 @@ void InverseIteration(CRS<RealType> *matrix_in,
       ss << "row=" << matrix_in->row_dim << ", col=" << matrix_in->col_dim << std::endl;
       throw std::runtime_error(ss.str());
    }
-   
+   */
    if (params.max_step <= 0) {
       return;
    }
 
    std::vector<RealType> improved_eigenvector;
-   std::vector<RealType> vectors_work(matrix_in->row_dim);
+   //std::vector<RealType> vectors_work(matrix_in->row_dim);
+   std::vector<RealType> vectors_work(matrix_in->size());
    std::vector<std::vector<RealType>> vectors_work_pthreads;
 
    if (params.linear_eq_params.flag_use_initial_vec) {
+      /*
       if (static_cast<std::int64_t>(eigenvector->size()) != matrix_in->row_dim) {
          std::stringstream ss;
          ss << "Error in " << __func__ << std::endl;
          ss << "The dimension of the initial vector is not equal to that of the input matrix." << std::endl;
          throw std::runtime_error(ss.str());
       }
+       */
       improved_eigenvector = *eigenvector;
    }
 
-   matrix_in->AddDiagonalElements(params.diag_add - eigenvalue);
-
+   if (params.linear_eq_params.flag_symmetric_crs) {
+      AddSymmetricDiagonalElements(matrix_in, params.diag_add - eigenvalue);
+   }
+   else {
+      AddDiagonalElements(matrix_in, params.diag_add - eigenvalue);
+   }
+   
    for (std::int32_t step = 0; step < params.max_step; ++step) {
       if (params.linear_eq_params.flag_symmetric_crs) {
-         std::vector<std::vector<RealType>> vectors_work_pthreads(params.num_threads, std::vector<RealType>(matrix_in->row_dim));
+         std::vector<std::vector<RealType>> vectors_work_pthreads(params.num_threads, std::vector<RealType>(vectors_work.size()));
          CalculateSymmetricMatrixVectorProduct(&vectors_work, &vectors_work_pthreads, 1, *matrix_in, *eigenvector, params.num_threads);
       }
       else {
@@ -96,7 +105,12 @@ void InverseIteration(CRS<RealType> *matrix_in,
       }
       
       if (residual_error < params.acc) {
-         matrix_in->AddDiagonalElements(-(params.diag_add - eigenvalue));
+         if (params.linear_eq_params.flag_symmetric_crs) {
+            AddSymmetricDiagonalElements(matrix_in, -(params.diag_add - eigenvalue));
+         }
+         else {
+            AddDiagonalElements(matrix_in, -(params.diag_add - eigenvalue));
+         }
          if (params.flag_display_info) {
             const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
             std::cout << std::defaultfloat << std::fixed << std::setprecision(3);

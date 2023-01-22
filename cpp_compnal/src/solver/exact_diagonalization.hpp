@@ -149,7 +149,7 @@ public:
       
       if (bases_.count(target_sector) == 0) {
          const auto start = std::chrono::system_clock::now();
-         bases_[target_sector] = model_.GenerateBasis(num_threads_);
+         bases_[target_sector] = model_.GenerateBasis(target_sector, num_threads_);
          inverse_bases_[target_sector] = GenerateInverseBasis(bases_.at(target_sector));
          if (flag_display_info_) {
             const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
@@ -187,7 +187,9 @@ public:
       }
    }
    
-   RealType CalculateExpectationValue(const CRS &m, const std::int32_t site, const std::int32_t level = 0) const {
+   RealType CalculateExpectationValue(const CRS &m,
+                                      const typename ModelType::COOIndexType site_index,
+                                      const std::int32_t level = 0) const {
       if (eigenvectors_.size() <= level) {
          std::stringstream ss;
          ss << "Error in " << __func__ << std::endl;
@@ -202,10 +204,10 @@ public:
          throw std::runtime_error(ss.str());
       }
       
-      if (site < 0 || site >= model_.GetSystemSize()) {
+      if (!model_.GetLattice().ValidateCOOIndex(site_index)) {
          std::stringstream ss;
          ss << "Error in " << __func__ << std::endl;
-         ss << "The input site " << site << " is invalid" << std::endl;
+         ss << "The input site is invalid" << std::endl;
          throw std::runtime_error(ss.str());
       }
       
@@ -223,14 +225,15 @@ public:
       
       const std::int64_t dim = static_cast<std::int64_t>(eigenvector.size());
       const std::int32_t dim_onsite = static_cast<std::int32_t>(m.row_dim);
-      const std::int64_t site_constant = static_cast<std::int64_t>(std::pow(dim_onsite, site));
+      const std::int32_t one_dim_site_index = model_.GetLattice().CalculateOneDimSiteIndex(site_index);
+      const std::int64_t site_constant = static_cast<std::int64_t>(std::pow(dim_onsite, one_dim_site_index));
       
       RealType val = 0.0;
       
 #pragma omp parallel for schedule(guided) reduction(+ : val) num_threads(num_threads_)
       for (std::int64_t i = 0; i < dim; ++i) {
          const std::int64_t global_basis = basis[i];
-         const std::int32_t local_basis = ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite);
+         const std::int32_t local_basis = ed_utility::CalculateLocalBasis(global_basis, one_dim_site_index, dim_onsite);
          RealType temp_val = 0.0;
          for (std::int64_t j = m.row[local_basis]; j < m.row[local_basis + 1]; ++j) {
             const std::int64_t a_basis = global_basis - (local_basis - m.col[j])*site_constant;
@@ -243,8 +246,10 @@ public:
       return val;
    }
    
-   RealType CalculateCorrelationFunction(const CRS &m_1, const std::int32_t site_1,
-                                         const CRS &m_2, const std::int32_t site_2,
+   RealType CalculateCorrelationFunction(const CRS &m_1,
+                                         const typename ModelType::COOIndexType site_index_1,
+                                         const CRS &m_2,
+                                         const typename ModelType::COOIndexType site_index_2,
                                          const std::int32_t level = 0) {
       
       if (eigenvectors_.size() <= level) {
@@ -268,10 +273,10 @@ public:
          throw std::runtime_error(ss.str());
       }
       
-      if (site_1 < 0 || site_1 >= model_.GetSystemSize() || site_2 < 0 || site_2 >= model_.GetSystemSize()) {
+      if (!model_.GetLattice().ValidateCOOIndex(site_index_1) || !model_.GetLattice().ValidateCOOIndex(site_index_2)) {
          std::stringstream ss;
          ss << "Error in " << __func__ << std::endl;
-         ss << "The input site " << site_1 << " or " << site_2 << " is invalid" << std::endl;
+         ss << "The input site is invalid" << std::endl;
          throw std::runtime_error(ss.str());
       }
       
@@ -279,8 +284,10 @@ public:
       const auto target_sector_set = GenerateTargetSector(m1_dagger, m_2);
       const auto &basis_inv = inverse_bases_.at(model_.GetTaretSector());
       const std::int32_t dim_onsite = model_.GetDimOnsite();
-      const std::int64_t site_constant_m1 = static_cast<std::int64_t>(std::pow(dim_onsite, site_1));
-      const std::int64_t site_constant_m2 = static_cast<std::int64_t>(std::pow(dim_onsite, site_2));
+      const std::int32_t one_dim_site_index_1 = model_.GetLattice().CalculateOneDimSiteIndex(site_index_1);
+      const std::int32_t one_dim_site_index_2 = model_.GetLattice().CalculateOneDimSiteIndex(site_index_2);
+      const std::int64_t site_constant_m1 = static_cast<std::int64_t>(std::pow(dim_onsite, one_dim_site_index_1));
+      const std::int64_t site_constant_m2 = static_cast<std::int64_t>(std::pow(dim_onsite, one_dim_site_index_2));
       const auto &eigenvector = eigenvectors_.at(level);
       std::vector<RealType> vector_work_m1;
       std::vector<RealType> vector_work_m2;
@@ -306,15 +313,19 @@ public:
 #pragma omp parallel for num_threads(num_threads_)
          for (std::int64_t i = 0; i < dim_target; ++i) {
             const std::int64_t global_basis = basis[i];
-            const std::int32_t local_basis_m1 = ed_utility::CalculateLocalBasis(global_basis, site_1, dim_onsite);
-            const std::int32_t local_basis_m2 = ed_utility::CalculateLocalBasis(global_basis, site_2, dim_onsite);
+            const std::int32_t local_basis_m1 = ed_utility::CalculateLocalBasis(global_basis,
+                                                                                one_dim_site_index_1,
+                                                                                dim_onsite);
+            const std::int32_t local_basis_m2 = ed_utility::CalculateLocalBasis(global_basis,
+                                                                                one_dim_site_index_2,
+                                                                                dim_onsite);
             RealType temp_val_m1 = 0.0;
             RealType temp_val_m2 = 0.0;
             
             std::int32_t fermion_sign_m1 = 1;
             if (m_1.tag == blas::CRSTag::FERMION) {
                std::int32_t num_electron = 0;
-               for (std::int32_t site = 0; site < site_1; site++) {
+               for (std::int32_t site = 0; site < one_dim_site_index_1; site++) {
                   num_electron += model_.CalculateNumElectron(ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite));
                }
                if (num_electron%2 == 1) {
@@ -333,7 +344,7 @@ public:
             std::int32_t fermion_sign_m2 = 1;
             if (m_2.tag == blas::CRSTag::FERMION) {
                std::int32_t num_electron = 0;
-               for (std::int32_t site = 0; site < site_2; site++) {
+               for (std::int32_t site = 0; site < one_dim_site_index_2; site++) {
                   num_electron += model_.CalculateNumElectron(ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite));
                }
                if (num_electron%2 == 1) {

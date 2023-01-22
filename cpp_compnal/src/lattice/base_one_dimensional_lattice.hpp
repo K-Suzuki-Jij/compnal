@@ -34,6 +34,7 @@ namespace lattice {
 class BaseOneDimensionalLattice {
    
 public:
+   using COOIndexType = std::int32_t;
    
    //! @brief Constructor of BaseOneDimensionalLattice class.
    //! @param system_size System size.
@@ -65,6 +66,19 @@ public:
    //! @return Boundary condition.
    BoundaryCondition GetBoundaryCondition() const {
       return bc_;
+   }
+   
+   bool ValidateCOOIndex(const COOIndexType site_index) const {
+      if (site_index  >= system_size_ || site_index < 0) {
+         return false;
+      }
+      else {
+         return true;
+      }
+   }
+   
+   std::int32_t CalculateOneDimSiteIndex(const COOIndexType site_index) const {
+      return site_index;
    }
    
 private:

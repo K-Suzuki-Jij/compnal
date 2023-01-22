@@ -104,17 +104,18 @@ void pybind11ModelHubbard(py::module &m, const std::string &post_name = "") {
    
    py_class.def("get_hopping_energy"    , &Hub::GetHoppingEnergy    );
    py_class.def("get_onsite_coulomb"    , &Hub::GetOnsiteCoulomb    );
+   py_class.def("get_intersite_coulomb" , &Hub::GetIntersiteCoulomb );
    py_class.def("get_chemical_potential", &Hub::GetChemicalPotential);
    py_class.def("get_magnetic_field"    , &Hub::GetMagneticField    );
 
-   py_class.def("GetOnsiteOperatorCUp", &Hub::GetOnsiteOperatorCUp);
-   py_class.def("GetOnsiteOperatorCDown", &Hub::GetOnsiteOperatorCDown);
+   py_class.def("get_onsite_operator_CUp", &Hub::GetOnsiteOperatorCUp);
+   py_class.def("get_onsite_operator_CDown", &Hub::GetOnsiteOperatorCDown);
 
-   py_class.def("GetOnsiteOperatorCUpDagger", &Hub::GetOnsiteOperatorCUpDagger);
-   py_class.def("GetOnsiteOperatorCDownDagger", &Hub::GetOnsiteOperatorCDownDagger);
+   py_class.def("get_onsite_operator_CUpDagger", &Hub::GetOnsiteOperatorCUpDagger);
+   py_class.def("get_onsite_operator_CDownDagger", &Hub::GetOnsiteOperatorCDownDagger);
 
-   py_class.def("GetOnsiteOperatorNCUp", &Hub::GetOnsiteOperatorNCUp);
-   py_class.def("GetOnsiteOperatorNCDown", &Hub::GetOnsiteOperatorNCDown);
+   py_class.def("get_onsite_operator_NCUp", &Hub::GetOnsiteOperatorNCUp);
+   py_class.def("get_onsite_operator_NCDown", &Hub::GetOnsiteOperatorNCDown);
 
    py_class.def("get_onsite_operator_NC", &Hub::GetOnsiteOperatorNC);
    py_class.def("get_onsite_operator_Sx", &Hub::GetOnsiteOperatorSx);
@@ -125,7 +126,38 @@ void pybind11ModelHubbard(py::module &m, const std::string &post_name = "") {
    
 }
 
+template<class LatticeType, typename RealType>
+void pybind11ModelHeisenberg(py::module &m, const std::string &post_name = "") {
+   
+   using Hei = model::quantum::Heisenberg<LatticeType, RealType>;
+   std::string name = std::string("Heisenberg") + post_name;
 
+   auto py_class = py::class_<Hei>(m, name.c_str(), py::module_local());
+   
+   //Constructors
+   py_class.def(py::init<const LatticeType&>(), "lattice"_a);
+   
+   //Public Member Functions
+   py_class.def("set_total_sz", &Hei::SetTotalSz, "total_sz"_a);
+   
+   py_class.def("set_hopping_energy"    , &Hei::SetSpinSpinZ    , "spin_spin_z"_a   );
+   py_class.def("set_onsite_coulomb"    , &Hei::SetSpinSpinXY   , "spin_spin_xy"_a  );
+   py_class.def("set_intersite_coulomb" , &Hei::SetMagneticField, "magnetic_field"_a);
+   py_class.def("set_chemical_potential", &Hei::SetAnisotropy   , "anisotropy"_a    );
+   
+   py_class.def("get_hopping_energy"    , &Hei::GetSpinSpinZ    );
+   py_class.def("get_onsite_coulomb"    , &Hei::GetSpinSpinXY   );
+   py_class.def("get_intersite_coulomb" , &Hei::GetMagneticField);
+   py_class.def("get_chemical_potential", &Hei::GetAnisotropy   );
+
+   py_class.def("get_magnitude_spin", &Hei::GetMagnitudeSpin);
+   py_class.def("get_onsite_operator_Sx" , &Hei::GetOnsiteOperatorSx );
+   py_class.def("get_onsite_operator_iSy", &Hei::GetOnsiteOperatoriSy);
+   py_class.def("get_onsite_operator_Sz" , &Hei::GetOnsiteOperatorSz );
+   py_class.def("get_onsite_operator_Sp" , &Hei::GetOnsiteOperatorSp );
+   py_class.def("get_onsite_operator_Sm" , &Hei::GetOnsiteOperatorSm );
+
+}
 
 
 } // namespace wrapper

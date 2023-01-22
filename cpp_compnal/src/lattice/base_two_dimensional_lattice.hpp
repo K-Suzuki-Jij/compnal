@@ -32,8 +32,10 @@ namespace lattice {
 
 //! @brief Base class to represent the two-dimensional lattice.
 class BaseTwoDimensionalLattice {
-  
+   
 public:
+   using COOIndexType = std::pair<std::int32_t, std::int32_t>;
+   
    //! @brief Constructor of BaseTwoDimensionalLattice class.
    //! @param x_size The size of the x-direction.
    //! @param y_size The size of the y-direction.
@@ -62,7 +64,7 @@ public:
       }
       bc_ = boundary_condition;
    }
-      
+   
    //! @brief Get size of the x-direction.
    //! @return Size of the x-direction.
    std::int32_t GetXSize() const {
@@ -85,6 +87,22 @@ public:
    //! @return Boundary condition.
    BoundaryCondition GetBoundaryCondition() const {
       return bc_;
+   }
+   
+   bool ValidateCOOIndex(const COOIndexType site_index) const {
+      if (site_index.first  >= x_size_ ||
+          site_index.first  <  0       ||
+          site_index.second >= y_size_ ||
+          site_index.second <  0       ) {
+         return false;
+      }
+      else {
+         return true;
+      }
+   }
+   
+   std::int32_t CalculateOneDimSiteIndex(const COOIndexType site_index) const {
+      return site_index.second*x_size_ + site_index.first;
    }
    
    

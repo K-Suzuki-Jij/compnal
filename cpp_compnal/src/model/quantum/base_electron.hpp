@@ -13,20 +13,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  electron.hpp
+//  base_electron.hpp
 //  compnal
 //
 //  Created by kohei on 2022/12/31.
 //  
 //
 
-#ifndef COMPNAL_MODEL_QUANTUM_ELECTRON_HPP_
-#define COMPNAL_MODEL_QUANTUM_ELECTRON_HPP_
+#ifndef COMPNAL_MODEL_QUANTUM_BASE_ELECTRON_HPP_
+#define COMPNAL_MODEL_QUANTUM_BASE_ELECTRON_HPP_
 
 #include "../../lattice/all.hpp"
 #include "../../blas/all.hpp"
 #include "../../utility/hash.hpp"
 
+#include <omp.h>
 #include <vector>
 
 namespace compnal {
@@ -34,7 +35,7 @@ namespace model {
 namespace quantum {
 
 template<class LatticeType, typename RealType>
-class Electron {
+class BaseElectron {
    static_assert(std::is_floating_point<RealType>::value, "Template parameter RealType must be floating point type");
    
    //! @brief Alias of compressed row strage (CRS) with RealType.
@@ -49,15 +50,15 @@ public:
    
    using CQNHash = utility::PairHash;
    
-   //! @brief Constructor for Electron class.
+   //! @brief Constructor for BaseElectron class.
    //! @param lattice The lattice type.
-   Electron(const LatticeType &lattice): lattice_(lattice) {
+   BaseElectron(const LatticeType &lattice): lattice_(lattice) {
       SetOnsiteOperator();
    }
    
-   //! @brief Constructor for Electron class.
+   //! @brief Constructor for BaseElectron class.
    //! @param lattice The lattice type.
-   Electron(const LatticeType &lattice,
+   BaseElectron(const LatticeType &lattice,
             const std::int32_t total_electron,
             const double total_sz): lattice_(lattice) {
       SetTotalElectron(total_electron);
@@ -203,7 +204,7 @@ public:
    std::vector<std::int64_t> GenerateBasis(const CQNType conserved_quantum_number,
                                            const std::int32_t num_threads = 1) const {
       
-      if (!ValidateQNumber()) {
+      if (!ValidateQNumber(conserved_quantum_number)) {
          std::stringstream ss;
          ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
          ss << "Invalid parameters (system_size or total_electron or total_sz)" << std::endl;
@@ -220,12 +221,12 @@ public:
          site_constant[site] = static_cast<std::int64_t>(std::pow(dim_onsite_, site));
       }
       
-      const std::int32_t max_n_up_down = static_cast<std::int32_t>(total_electron / 2);
+      const std::int32_t max_n_up_down = static_cast<std::int32_t>(total_electron/2);
       
       std::vector<std::vector<std::int32_t>> partition_integers;
       for (std::int32_t n_up_down = 0; n_up_down <= max_n_up_down; ++n_up_down) {
-         const std::int32_t n_up = (total_electron - 2 * n_up_down + total_2sz) / 2;
-         const std::int32_t n_down = (total_electron - 2 * n_up_down - total_2sz) / 2;
+         const std::int32_t n_up = (total_electron - 2 * n_up_down + total_2sz)/2;
+         const std::int32_t n_down = (total_electron - 2 * n_up_down - total_2sz)/2;
          const std::int32_t n_vac = system_size - total_electron + n_up_down;
          if (0 <= n_up && 0 <= n_down && 0 <= n_vac) {
             std::vector<std::int32_t> integer_list(system_size);
@@ -360,6 +361,12 @@ public:
    //! @return The boundary condition.
    lattice::BoundaryCondition GetBoundaryCondition() const {
       return lattice_.GetBoundaryCondition();
+   }
+   
+   //! @brief Get the lattice.
+   //! @return The lattice.
+   const LatticeType &GetLattice() const {
+      return lattice_;
    }
    
    //! @brief Get dimension of the local Hilbert space, 4.
@@ -637,4 +644,4 @@ private:
 } // namespace compnal
 
 
-#endif /* COMPNAL_MODEL_QUANTUM_ELECTRON_HPP_ */
+#endif /* COMPNAL_MODEL_QUANTUM_BASE_ELECTRON_HPP_ */

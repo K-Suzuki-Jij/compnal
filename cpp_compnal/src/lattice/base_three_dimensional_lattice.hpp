@@ -34,6 +34,7 @@ namespace lattice {
 class BaseThreeDimensionalLattice {
   
 public:
+   using COOIndexType = std::tuple<std::int32_t, std::int32_t, std::int32_t>;
    
    //! @brief Constructor of BaseThreeDimensionalLattice.
    //! @param x_size The size of the x-direction.
@@ -100,6 +101,24 @@ public:
    //! @return Boundary condition.
    BoundaryCondition GetBoundaryCondition() const {
       return bc_;
+   }
+   
+   bool ValidateCOOIndex(const COOIndexType site_index) const {
+      if (std::get<0>(site_index)  >= x_size_ ||
+          std::get<0>(site_index)  <  0       ||
+          std::get<1>(site_index) >= y_size_  ||
+          std::get<1>(site_index) <  0        ||
+          std::get<2>(site_index) >= z_size_  ||
+          std::get<2>(site_index) <  0       ) {
+         return false;
+      }
+      else {
+         return true;
+      }
+   }
+   
+   std::int32_t CalculateOneDimSiteIndex(const COOIndexType site_index) const {
+      return std::get<2>(site_index)*x_size_*y_size_ + std::get<1>(site_index)*x_size_ + std::get<0>(site_index);
    }
    
    

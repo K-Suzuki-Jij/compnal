@@ -23,35 +23,35 @@
 #ifndef COMPNAL_TEST_QUANTUM_ELECTRON_HPP_
 #define COMPNAL_TEST_QUANTUM_ELECTRON_HPP_
 
-#include "../../../src/model/quantum/electron.hpp"
+#include "../../../src/model/quantum/base_electron.hpp"
 
 namespace compnal {
 namespace test {
 
-TEST(ModelQuantum, Electron) {
+TEST(ModelQuantum, BaseElectron) {
    lattice::Chain chain{10};
-   model::quantum::Electron<lattice::Chain, double>(chain, 10, 0);
+   model::quantum::BaseElectron<lattice::Chain, double>(chain, 10, 0);
    
 
 }
 
 TEST(ModelQuantum, ElectronValidateQNumber) {
-   EXPECT_TRUE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, 4, 0   }.ValidateQNumber()));
-   EXPECT_TRUE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, 3, +0.5}.ValidateQNumber()));
-   EXPECT_TRUE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, 3, -0.5}.ValidateQNumber()));
-   EXPECT_TRUE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, 2, 0   }.ValidateQNumber()));
-   EXPECT_TRUE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, 2, +1  }.ValidateQNumber()));
-   EXPECT_TRUE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, 2, -1  }.ValidateQNumber()));
-   EXPECT_TRUE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, 1, +0.5}.ValidateQNumber()));
-   EXPECT_TRUE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, 1, -0.5}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, 4, 0   }.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, 3, +0.5}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, 3, -0.5}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, 2, 0   }.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, 2, +1  }.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, 2, -1  }.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, 1, +0.5}.ValidateQNumber()));
+   EXPECT_TRUE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, 1, -0.5}.ValidateQNumber()));
 
-   EXPECT_FALSE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, +4, +1  }.ValidateQNumber()));
-   EXPECT_FALSE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, +3, +0  }.ValidateQNumber()));
-   EXPECT_FALSE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, +3, -1.5}.ValidateQNumber()));
-   EXPECT_FALSE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, +2, +0.5}.ValidateQNumber()));
-   EXPECT_FALSE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, +2, -0.5}.ValidateQNumber()));
-   EXPECT_FALSE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, +1, +1  }.ValidateQNumber()));
-   EXPECT_FALSE((model::quantum::Electron<lattice::Chain, double>{lattice::Chain{2}, +1, -1  }.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, +4, +1  }.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, +3, +0  }.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, +3, -1.5}.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, +2, +0.5}.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, +2, -0.5}.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, +1, +1  }.ValidateQNumber()));
+   EXPECT_FALSE((model::quantum::BaseElectron<lattice::Chain, double>{lattice::Chain{2}, +1, -1  }.ValidateQNumber()));
 }
 
 

@@ -23,7 +23,7 @@
 #ifndef COMPNAL_MODEL_HUBBARD_HPP_
 #define COMPNAL_MODEL_HUBBARD_HPP_
 
-#include "./electron.hpp"
+#include "./base_electron.hpp"
 #include "../../blas/compressed_row_storage.hpp"
 
 namespace compnal {
@@ -31,10 +31,12 @@ namespace model {
 namespace quantum {
 
 template<class LatticeType, typename RealType>
-class Hubbard: public Electron<LatticeType, RealType> {
+class Hubbard: public BaseElectron<LatticeType, RealType> {
    
 public:
-   Hubbard(const LatticeType &lattice): Electron<LatticeType, RealType>(lattice) {}
+   using COOIndexType = typename LatticeType::COOIndexType;
+   
+   Hubbard(const LatticeType &lattice): BaseElectron<LatticeType, RealType>(lattice) {}
       
    void SetHoppingEnergy(const std::vector<RealType> &hopping_energy) {
       hopping_energy_ = hopping_energy;

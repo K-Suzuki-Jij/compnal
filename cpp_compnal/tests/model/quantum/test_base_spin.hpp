@@ -13,18 +13,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  all.hpp
+//  test_base_spin.hpp
 //  compnal
 //
-//  Created by kohei on 2023/01/18.
+//  Created by kohei on 2023/01/22.
 //  
 //
 
-#ifndef COMPNAL_SOLVER_ED_UTILITY_ALL_HPP_
-#define COMPNAL_SOLVER_ED_UTILITY_ALL_HPP_
+#ifndef COMPNAL_TEST_QUANTUM_BASE_SPIN_HPP_
+#define COMPNAL_TEST_QUANTUM_BASE_SPIN_HPP_
 
-#include "./ed_matrix_comp.hpp"
-#include "./mat_comp_hubbard.hpp"
-#include "./mat_comp_heisenberg.hpp"
+#include "../../../src/model/quantum/base_spin.hpp"
 
-#endif /* COMPNAL_SOLVER_ED_UTILITY_ALL_HPP_ */
+namespace compnal {
+namespace test {
+
+TEST(ModelQuantum, BaseSpin) {
+   lattice::Chain chain{10};
+   model::quantum::BaseSpin<lattice::Chain, double>(chain, 10, 0);
+   
+
+}
+
+} // namespace test
+} // namespace compnal
+
+
+#endif /* COMPNAL_TEST_QUANTUM_BASE_SPIN_HPP_ */

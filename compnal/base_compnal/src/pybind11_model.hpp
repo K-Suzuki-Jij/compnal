@@ -139,6 +139,7 @@ void pybind11ModelHeisenberg(py::module &m, const std::string &post_name = "") {
    
    //Public Member Functions
    py_class.def("set_total_sz", &Hei::SetTotalSz, "total_sz"_a);
+   py_class.def("set_magnitude_spin", &Hei::SetMagnitudeSpin, "magnitude_spin"_a);
    
    py_class.def("set_spin_spin_z"    , &Hei::SetSpinSpinZ    , "spin_spin_z"_a   );
    py_class.def("set_spin_spin_xy"    , &Hei::SetSpinSpinXY   , "spin_spin_xy"_a  );

@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <cstdint>
 #include <utility>
+#include <tuple>
 
 namespace compnal {
 namespace lattice {

@@ -58,7 +58,7 @@ void EigendecompositionLanczos(RealType *target_value_out,
    
    const auto start = std::chrono::system_clock::now();
    std::ios::fmtflags flagsSaved = std::cout.flags();
-   /*
+   
    if (matrix_in.row_dim != matrix_in.col_dim) {
       std::stringstream ss;
       ss << "Error in " << __func__ << std::endl;
@@ -75,18 +75,16 @@ void EigendecompositionLanczos(RealType *target_value_out,
 
    if (matrix_in.row_dim <= 1000) {
       const std::int32_t dim_subspace = static_cast<std::int32_t>(subspace_vectors.size());
-      LapackSYEV<RealType>(target_value_out, target_vector_out, dim_subspace, matrix_in);
+      LapackSYEV(target_value_out, target_vector_out, dim_subspace, matrix_in);
       return;
    }
-    */
    
    if (params.max_step <= 0) {
       return;
    }
 
    std::int32_t converge_step_number = 0;
-   //const std::int64_t dim = matrix_in.row_dim;
-   const std::int64_t dim = matrix_in.size();
+   const std::int64_t dim = matrix_in.row_dim;
    RealType residual_error_final = 0.0;
    std::vector<RealType> vector_0(dim);
    std::vector<RealType> vector_1(dim);

@@ -429,15 +429,12 @@ private:
       const auto &basis_inv = inverse_bases_.at(target_sector);
       
       const std::int64_t dim_target = basis.size();
-      //std::int64_t num_total_elements = 0;
       
       std::vector<std::vector<std::int64_t>> temp_col(dim_target);
       std::vector<std::vector<RealType>> temp_val(dim_target);
       
       blas::DASPM<RealType> ham(dim_target);
-      
-      //std::vector<std::int64_t> num_row_element(dim_target + 1);
-      
+            
 #pragma omp parallel num_threads(num_threads_)
       {
          ed_utility::ExactDiagMatrixComponents<RealType> components;
@@ -452,8 +449,6 @@ private:
          for (std::int64_t row = 0; row < dim_target; ++row) {
             ed_utility::GenerateMatrixComponents(&components, basis[row], model_);
             std::vector<std::pair<std::int64_t, RealType>> temp_col_val_list;
-            //std::vector<std::int64_t> col_list;
-            //std::vector<RealType> val_list;
             const std::size_t size = components.basis_affected.size();
             for (std::size_t i = 0; i < size; ++i) {
                const std::int64_t a_basis = components.basis_affected[i];
@@ -462,9 +457,6 @@ private:
                   const std::int64_t inv = basis_inv.at(a_basis);
                   if ((inv < row && std::abs(val) > std::numeric_limits<RealType>::epsilon()) || inv == row) {
                      temp_col_val_list.push_back({inv, val});
-                     //col_list.push_back(inv);
-                     //val_list.push_back(val);
-                     //num_row_element[row + 1]++;
                   }
                }
                else if (basis_inv.count(a_basis) == 0 && std::abs(val) > std::numeric_limits<RealType>::epsilon()) {
@@ -474,56 +466,13 @@ private:
             std::sort(temp_col_val_list.begin(), temp_col_val_list.end(), [](const auto &a, const auto &b) {
                return a.first < b.first;
             });
-            ham[row] = temp_col_val_list;
-            //temp_col[row] = col_list;
-            //temp_val[row] = val_list;
+            ham.col_val[row] = temp_col_val_list;
             components.val.clear();
             components.basis_affected.clear();
             components.inv_basis_affected.clear();
          }
       }
       
-      /*
-#pragma omp parallel for reduction(+: num_total_elements) num_threads(num_threads_)
-      for (std::int64_t row = 0; row <= dim_target; ++row) {
-         num_total_elements += num_row_element[row];
-      }
-      
-      // Do not use openmp here
-      for (std::int64_t row = 0; row < dim_target; ++row) {
-         num_row_element[row + 1] += num_row_element[row];
-      }
-      
-      CRS ham;
-      ham.row.resize(dim_target + 1);
-      ham.col.resize(num_total_elements);
-      ham.val.resize(num_total_elements);
-      
-#pragma omp parallel for schedule(guided) num_threads(num_threads_)
-      for (std::int64_t row = 0; row < dim_target; ++row) {
-         for (std::size_t i = 0; i < temp_col[row].size(); ++i) {
-            ham.col[num_row_element[row]] = temp_col[row][i];
-            ham.val[num_row_element[row]] = temp_val[row][i];
-            num_row_element[row]++;
-         }
-         ham.row[row + 1] = num_row_element[row];
-      }
-      
-      ham.row_dim = dim_target;
-      ham.col_dim = dim_target;
-      
-      const bool flag_check_1 = (ham.row[dim_target] != num_total_elements);
-      const bool flag_check_2 = (static_cast<std::int64_t>(ham.col.size()) != num_total_elements);
-      const bool flag_check_3 = (static_cast<std::int64_t>(ham.val.size()) != num_total_elements);
-      
-      if (flag_check_1 || flag_check_2 || flag_check_3) {
-         std::stringstream ss;
-         ss << "Unknown error detected in " << __FUNCTION__ << " at " << __LINE__ << std::endl;
-         throw std::runtime_error(ss.str());
-      }
-      
-      ham.SortCol(num_threads_);
-       */
       if (flag_display_info_) {
          const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
          std::cout << "\rConstruct Hamiltonian: " << elapsed_seconds.count() << " [sec]" << std::endl;

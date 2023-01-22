@@ -52,7 +52,7 @@ void InverseIteration(SPMType *matrix_in,
    
    const auto start = std::chrono::system_clock::now();
    std::ios::fmtflags flagsSaved = std::cout.flags();
-   /*
+   
    if (matrix_in->row_dim != matrix_in->col_dim) {
       std::stringstream ss;
       ss << "Error in " << __func__ << std::endl;
@@ -60,25 +60,22 @@ void InverseIteration(SPMType *matrix_in,
       ss << "row=" << matrix_in->row_dim << ", col=" << matrix_in->col_dim << std::endl;
       throw std::runtime_error(ss.str());
    }
-   */
+   
    if (params.max_step <= 0) {
       return;
    }
 
    std::vector<RealType> improved_eigenvector;
-   //std::vector<RealType> vectors_work(matrix_in->row_dim);
-   std::vector<RealType> vectors_work(matrix_in->size());
+   std::vector<RealType> vectors_work(matrix_in->row_dim);
    std::vector<std::vector<RealType>> vectors_work_pthreads;
 
    if (params.linear_eq_params.flag_use_initial_vec) {
-      /*
       if (static_cast<std::int64_t>(eigenvector->size()) != matrix_in->row_dim) {
          std::stringstream ss;
          ss << "Error in " << __func__ << std::endl;
          ss << "The dimension of the initial vector is not equal to that of the input matrix." << std::endl;
          throw std::runtime_error(ss.str());
       }
-       */
       improved_eigenvector = *eigenvector;
    }
 

@@ -270,28 +270,15 @@ struct CRS {
       return true;
    }
    
-   //! @brief Add a value to the diagonal elements.
-   //! @tparam T Value type.
-   //! @param diag_add The value to be added to the diagonal elements.
-   template<typename T>
-   void AddDiagonalElements(const T diag_add, const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
-      
-      if (this->row_dim != this->col_dim) {
-         std::stringstream ss;
-         ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
-         ss << "The matrix is not a square matrix." << std::endl;
-         throw std::runtime_error(ss.str());
-      }
-      
-#pragma omp parallel for schedule(guided) num_threads(num_threads)
-      for (std::int64_t i = 0; i < this->row_dim; ++i) {
+   std::unique_ptr<ElementType[]> ToArray() const {
+      std::unique_ptr<ElementType[]> matrix_array = std::make_unique<ElementType[]>(this->row_dim*this->col_dim);
+      for (std::int64_t i = 0; i < row_dim; ++i) {
          for (std::int64_t j = this->row[i]; j < this->row[i + 1]; ++j) {
-            if (i == this->col[j]) {
-               this->val[j] += diag_add;
-               break;
-            }
+            matrix_array[i*this->col_dim + this->col[j]] = this->val[j];
+            matrix_array[this->col[j]*this->col_dim + i] = this->val[j];
          }
       }
+      return matrix_array;
    }
    
    //! @brief Print the matrix.
@@ -991,11 +978,11 @@ void AddSymmetricDiagonalElements(CRS<T1> *matrix_in,
 }
 
 template<typename T1, typename T2>
-void AddDiagonalElements(CRS<T1> *matrix,
+void AddDiagonalElements(CRS<T1> *matrix_in,
                          const T2 diag_add,
                          const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
-   if (matrix->row_dim != matrix->col_dim) {
+   if (matrix_in->row_dim != matrix_in->col_dim) {
       std::stringstream ss;
       ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
       ss << "The matrix is not a square matrix." << std::endl;
@@ -1003,10 +990,10 @@ void AddDiagonalElements(CRS<T1> *matrix,
    }
    
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
-   for (std::int64_t i = 0; i < matrix->row_dim; ++i) {
-      for (std::int64_t j = matrix->row[i]; j < matrix->row[i + 1]; ++j) {
-         if (i == matrix->col[j]) {
-            matrix->val[j] += diag_add;
+   for (std::int64_t i = 0; i < matrix_in->row_dim; ++i) {
+      for (std::int64_t j = matrix_in->row[i]; j < matrix_in->row[i + 1]; ++j) {
+         if (i == matrix_in->col[j]) {
+            matrix_in->val[j] += diag_add;
             break;
          }
       }

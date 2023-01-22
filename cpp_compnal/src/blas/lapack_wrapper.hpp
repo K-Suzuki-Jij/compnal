@@ -58,11 +58,11 @@ void dspgv_(const std::int32_t &ITYPE, const char &JOBZ, const char &UPLO, const
             double *Z, const std::int32_t &LDZ, double *WORK, std::int32_t &INFO);
 };
 
-template<typename RealType>
+template<typename RealType, class SPMType>
 void LapackSYEV(RealType *gs_value,
                 std::vector<RealType> *gs_vector,
                 const std::int32_t target_level,
-                const CRS<RealType> &matrix_in
+                const SPMType &matrix_in
                 ) {
    
    if (matrix_in.row_dim != matrix_in.col_dim || matrix_in.row_dim < 1 || matrix_in.col_dim < 1) {
@@ -81,17 +81,10 @@ void LapackSYEV(RealType *gs_value,
    
    const std::int32_t dim = static_cast<std::int32_t>(matrix_in.row_dim);
    std::int32_t info;
-   std::unique_ptr<RealType[]> matrix_array = std::make_unique<RealType[]>(dim*dim);
+   std::unique_ptr<RealType[]> matrix_array = matrix_in.ToArray();
    std::unique_ptr<RealType[]> val_array = std::make_unique<RealType[]>(dim);
    std::unique_ptr<RealType[]> work = std::make_unique<RealType[]>(3*dim);
-   
-   for (std::int32_t i = 0; i < dim; ++i) {
-      for (std::int64_t j = matrix_in.row[i]; j < dim; ++j) {
-         matrix_array[i*matrix_in.row_dim + matrix_in.col[j]] = matrix_in.val[j];
-         matrix_array[matrix_in.col[j]*matrix_in.row_dim + i] = matrix_in.val[j];
-      }
-   }
-   
+      
    if constexpr (std::is_same<RealType, double>::value) {
       dsyev_('V', 'L', dim, matrix_array.get(), dim, val_array.get(), work.get(), 3*dim, info);
    }

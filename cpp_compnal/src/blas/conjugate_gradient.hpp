@@ -51,7 +51,7 @@ void ConjugateGradient(std::vector<RealType> *vec_out,
                        const LinearEqParams<RealType> &params = LinearEqParams<RealType>()) {
    const auto start = std::chrono::system_clock::now();
    std::ios::fmtflags flagsSaved = std::cout.flags();
-   /*
+   
    if (matrix_in.row_dim != matrix_in.col_dim) {
       std::stringstream ss;
       ss << "Error in " << __func__ << std::endl;
@@ -66,13 +66,12 @@ void ConjugateGradient(std::vector<RealType> *vec_out,
       ss << "Matrix vector product (Ax=b) cannot be defined." << std::endl;
       throw std::runtime_error(ss.str());
    }
-   */
+   
    if (params.max_step <= 0) {
       return;
    }
 
-   //const std::int64_t dim = matrix_in.row_dim;
-   const std::int64_t dim = matrix_in.size();
+   const std::int64_t dim = matrix_in.row_dim;
    std::vector<RealType> rrr(dim);
    std::vector<RealType> ppp(dim);
    std::vector<RealType> yyy(dim);

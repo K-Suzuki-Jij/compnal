@@ -180,8 +180,10 @@ public:
       const auto system_size = lattice_.GetSystemSize();
       const double magnitude_spin = 0.5*magnitude_2spin_;
       const double total_sz = 0.5*conserved_quantum_number;
-      auto partition_integers = utility::GenerateIntegerPartition(static_cast<std::int32_t>(system_size*magnitude_spin - total_sz),
-                                                                  magnitude_2spin_, system_size);
+      std::int32_t partitioned_number = system_size*magnitude_spin - total_sz;
+      std::vector<std::vector<std::int32_t>> partition_integers;
+      std::vector<std::int32_t> initi_list;
+      utility::GenerateIntegerPartition(&partition_integers, initi_list, partitioned_number, magnitude_2spin_, system_size);
       
       for (auto &&it : partition_integers) {
          it.resize(system_size, 0);
@@ -195,20 +197,20 @@ public:
       const std::int64_t dim_target = CalculateTargetDim(conserved_quantum_number);
       std::vector<std::int64_t> basis;
       basis.reserve(dim_target);
-      
+      /*
       std::vector<std::vector<std::int64_t>> temp_basis(num_threads);
       for (const auto &integer_list : partition_integers) {
          const std::int64_t size = utility::CalculateNumPermutation(integer_list);
 #pragma omp parallel num_threads(num_threads)
          {
             const std::int32_t thread_num = omp_get_thread_num();
-            const std::int64_t loop_begin = thread_num * size / num_threads;
-            const std::int64_t loop_end = (thread_num + 1) * size / num_threads;
+            const std::int64_t loop_begin = thread_num*size/num_threads;
+            const std::int64_t loop_end = (thread_num + 1)*size/num_threads;
             std::vector<std::int32_t> n_th_integer_list = utility::GenerateNthPermutation(integer_list, loop_begin);
             for (std::int64_t j = loop_begin; j < loop_end; ++j) {
                std::int64_t basis_global = 0;
                for (std::size_t k = 0; k < n_th_integer_list.size(); ++k) {
-                  basis_global += n_th_integer_list[k] * site_constant[k];
+                  basis_global += n_th_integer_list[k]*site_constant[k];
                }
                temp_basis[thread_num].push_back(basis_global);
                std::next_permutation(n_th_integer_list.begin(), n_th_integer_list.end());
@@ -219,7 +221,18 @@ public:
          basis.insert(basis.end(), it.begin(), it.end());
          std::vector<std::int64_t>().swap(it);
       }
-      
+      */
+      for (std::size_t i = 0; i < partition_integers.size(); ++i) {
+         auto &integer_list = partition_integers[i];
+         std::sort(integer_list.begin(), integer_list.end());
+         do {
+            std::int64_t basis_global = 0;
+            for (std::size_t j = 0; j < integer_list.size(); ++j) {
+               basis_global += integer_list[j] * site_constant[j];
+            }
+            basis.push_back(basis_global);
+         } while (std::next_permutation(integer_list.begin(), integer_list.end()));
+      }
       basis.shrink_to_fit();
       
       if (static_cast<std::int64_t>(basis.size()) != dim_target) {

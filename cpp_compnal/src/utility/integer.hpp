@@ -220,16 +220,13 @@ std::vector<T> GenerateNthPermutation(const std::vector<T> &list, const std::int
    return out;
 }
 
-//! @brief Generate partitions of a positive integer.
-//! @tparam IntegerType Integer type
-//! @param partitioned_number A positive integer to be partitioned.
-//! @param max_number The maximum number in the partition list.
-//! @param max_size The maximum list size.
-template<typename IntegerType>
-std::vector<std::vector<IntegerType>> GenerateIntegerPartition(const IntegerType partitioned_number,
-                                                               IntegerType max_number,
-                                                               const IntegerType max_size) {
-   static_assert(std::is_integral<IntegerType>::value, "Template parameter IntegerType must be integer type");
+template<typename T>
+void GenerateIntegerPartition(std::vector<std::vector<T>> *out,
+                              const std::vector<T> &init_list,
+                              const T partitioned_number,
+                              const T max_number,
+                              const T max_size) {
+   static_assert(std::is_integral<T>::value, "Template parameter T must be integer type");
    
    if (partitioned_number < 0 || max_number <= 0 || max_size <= 0) {
       std::stringstream ss;
@@ -240,77 +237,35 @@ std::vector<std::vector<IntegerType>> GenerateIntegerPartition(const IntegerType
       ss << "max_size=" << max_size << std::endl;
       throw std::runtime_error(ss.str());
    }
-   
+      
    if (partitioned_number == 0) {
-      std::vector<std::vector<IntegerType>>{std::vector<IntegerType>(max_size)};
-   }
-   
-   auto generate_next = [](const std::vector<IntegerType> &vec) -> std::vector<IntegerType> {
-      std::int64_t size = static_cast<std::int64_t>(vec.size());
-      std::vector<IntegerType> out = vec;
-      for (std::int64_t i = size - 1; i >= 0; --i) {
-         if (vec[i] > 1) {
-            if (i + 1 < size) {
-               if (vec[i] - 1 >= vec[i + 1] + 1) {
-                  out[i]--;
-                  out[i + 1]++;
-                  return out;
-               }
-               else {
-                  out[i]--;
-                  out.push_back(1);
-                  return out;
-               }
-            }
-            else {
-               out[i]--;
-               out.push_back(1);
-               return out;
-            }
-         }
+      if (init_list.size() <= max_size) {
+         out->push_back(init_list);
       }
-      return std::vector<IntegerType>();
-   };
-   
-   std::vector<std::vector<IntegerType>> out;
-   
-   if (max_number >= partitioned_number) {
-      max_number = partitioned_number;
-      out.push_back({max_number});
+   }
+   else if (partitioned_number == 1) {
+      if (init_list.size() + 1 <= max_size) {
+         out->push_back(init_list);
+         out->back().push_back(1);
+      }
+   }
+   else if (max_number == 1) {
+      if (init_list.size() + partitioned_number <= max_size) {
+         std::vector<T> added(partitioned_number, 1);
+         out->push_back(init_list);
+         out->back().insert(out->back().end(), added.begin(), added.end());
+      }
    }
    else {
-      std::vector<IntegerType> temp = {max_number};
-      IntegerType rem = partitioned_number - max_number;
-      while (rem != 0) {
-         if (rem <= max_number) {
-            temp.push_back(rem);
-            rem = 0;
-         }
-         else {
-            temp.push_back(max_number);
-            rem -= max_number;
-         }
+      if (partitioned_number >= max_number) {
+         std::vector<T> new_initi_list = init_list;
+         new_initi_list.push_back(max_number);
+         GenerateIntegerPartition(out, new_initi_list, partitioned_number - max_number, max_number, max_size);
       }
-      if (static_cast<IntegerType>(temp.size()) > max_size) {
-         return std::vector<std::vector<IntegerType>>();
-      }
-      else {
-         out.push_back(temp);
-      }
+      GenerateIntegerPartition(out, init_list, partitioned_number, max_number - 1, max_size);
    }
-   
-   while (true) {
-      auto next_partition = generate_next(out.back());
-      if (0 < next_partition.size() && static_cast<IntegerType>(next_partition.size()) <= max_size) {
-         out.push_back(next_partition);
-      }
-      else {
-         break;
-      }
-   }
-   
-   return out;
 }
+
 
 } // namespace utility
 } // namespace compnal

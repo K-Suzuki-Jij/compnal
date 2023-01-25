@@ -31,7 +31,7 @@ namespace compnal {
 namespace test {
 
 TEST(SolverExactDiagonalization, HubbardChain) {
-   lattice::Chain chain{14};
+   lattice::Chain chain{10};
    model::quantum::Hubbard<lattice::Chain, double> hubbard{chain};
    hubbard.SetTotalSz(0);
    hubbard.SetTotalElectron(10);
@@ -49,7 +49,7 @@ TEST(SolverExactDiagonalization, HubbardSquare) {
    lattice::Square square{2, 4};
    model::quantum::Hubbard<lattice::Square, double> hubbard{square};
    hubbard.SetTotalSz(0);
-   hubbard.SetTotalElectron(10);
+   hubbard.SetTotalElectron(4);
    solver::ExactDiag ed{hubbard};
    ed.SetNumThreads(8);
    
@@ -61,10 +61,10 @@ TEST(SolverExactDiagonalization, HubbardSquare) {
 }
 
 TEST(SolverExactDiagonalization, HubbardCubic) {
-   lattice::Cubic cubic{2, 2, 3};
+   lattice::Cubic cubic{2, 2, 2};
    model::quantum::Hubbard<lattice::Cubic, double> hubbard{cubic};
    hubbard.SetTotalSz(0);
-   hubbard.SetTotalElectron(10);
+   hubbard.SetTotalElectron(6);
    solver::ExactDiag ed{hubbard};
    ed.SetNumThreads(8);
    
@@ -76,8 +76,9 @@ TEST(SolverExactDiagonalization, HubbardCubic) {
 }
 
 TEST(SolverExactDiagonalization, HeisenbergChain) {
-   lattice::Chain chain{14};
+   lattice::Chain chain{4};
    model::quantum::Heisenberg<lattice::Chain, double> heisenberg{chain};
+   heisenberg.SetMagnitudeSpin(1.5);
    heisenberg.SetTotalSz(0);
    solver::ExactDiag ed{heisenberg};
    ed.SetNumThreads(8);

@@ -446,7 +446,7 @@ private:
       
       blas::DASPM<RealType> ham(dim_target);
             
-//#pragma omp parallel num_threads(num_threads_)
+#pragma omp parallel num_threads(num_threads_)
       {
          ed_utility::ExactDiagMatrixComponents<RealType> components;
          components.site_constant.resize(model_.GetSystemSize());
@@ -456,7 +456,7 @@ private:
          }
          components.basis_onsite.resize(model_.GetSystemSize());
          
-//#pragma omp for schedule(guided)
+#pragma omp for schedule(guided)
          for (std::int64_t row = 0; row < dim_target; ++row) {
             ed_utility::GenerateMatrixComponents(&components, basis[row], model_);
             std::vector<std::pair<std::int64_t, RealType>> temp_col_val_list;

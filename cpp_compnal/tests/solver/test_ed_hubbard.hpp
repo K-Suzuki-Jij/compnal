@@ -119,11 +119,11 @@ TEST(SolverExactDiagonalization, HeisenbergCubic) {
 }
 
 TEST(SolverExactDiagonalization, KondoLatticeChain) {
-   lattice::Chain chain{4};
+   lattice::Chain chain{6};
    model::quantum::KondoLattice<lattice::Chain, double> kondo_lattice{chain};
    
    kondo_lattice.SetTotalSz(0);
-   kondo_lattice.SetTotalElectron(4);
+   kondo_lattice.SetTotalElectron(6);
    solver::ExactDiag ed{kondo_lattice};
    ed.SetNumThreads(8);
    

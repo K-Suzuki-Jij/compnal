@@ -266,6 +266,15 @@ void GenerateIntegerPartition(std::vector<std::vector<T>> *out,
    }
 }
 
+template<typename T>
+std::int64_t CalculatePower(const T base, const T expo) {
+   std::int64_t out = 1;
+   for (T i = 0; i < expo; ++i) {
+      out *= base;
+   }
+   return out;
+}
+
 
 } // namespace utility
 } // namespace compnal

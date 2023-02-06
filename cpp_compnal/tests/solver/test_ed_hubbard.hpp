@@ -31,10 +31,10 @@ namespace compnal {
 namespace test {
 
 TEST(SolverExactDiagonalization, HubbardChain) {
-   lattice::Chain chain{10};
+   lattice::Chain chain{6};
    model::quantum::Hubbard<lattice::Chain, double> hubbard{chain};
    hubbard.SetTotalSz(0);
-   hubbard.SetTotalElectron(10);
+   hubbard.SetTotalElectron(6);
    solver::ExactDiag ed{hubbard};
    ed.SetNumThreads(8);
    
@@ -116,6 +116,19 @@ TEST(SolverExactDiagonalization, HeisenbergCubic) {
    std::cout << ed.CalculateExpectationValue(heisenberg.GetOnsiteOperatorSz(), {0, 0, 0}) << std::endl;
    std::cout << ed.CalculateCorrelationFunction(heisenberg.GetOnsiteOperatorSx(), {0, 0, 0},
                                                 heisenberg.GetOnsiteOperatorSx(), {0, 1, 0}) << std::endl;
+}
+
+TEST(SolverExactDiagonalization, KondoLatticeChain) {
+   lattice::Chain chain{4};
+   model::quantum::KondoLattice<lattice::Chain, double> kondo_lattice{chain};
+   
+   kondo_lattice.SetTotalSz(0);
+   kondo_lattice.SetTotalElectron(4);
+   solver::ExactDiag ed{kondo_lattice};
+   ed.SetNumThreads(8);
+   
+   ed.CalculateGroundState();
+   
 }
 
 

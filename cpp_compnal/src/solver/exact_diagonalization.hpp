@@ -149,7 +149,7 @@ public:
       
       if (bases_.count(target_sector) == 0) {
          const auto start = std::chrono::system_clock::now();
-         bases_[target_sector] = model_.GenerateBasis(target_sector, num_threads_);
+         bases_[target_sector] = model_.GenerateBasis(target_sector);
          inverse_bases_[target_sector] = GenerateInverseBasis(bases_.at(target_sector));
          if (flag_display_info_) {
             const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
@@ -296,7 +296,7 @@ public:
       for (const auto &sector : target_sector_set) {
          if (bases_.count(sector) == 0) {
             const auto start = std::chrono::system_clock::now();
-            bases_[sector] = model_.GenerateBasis(sector, num_threads_);
+            bases_[sector] = model_.GenerateBasis(sector);
             inverse_bases_[sector] = GenerateInverseBasis(bases_.at(sector));
             if (flag_display_info_) {
                const std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
@@ -446,7 +446,7 @@ private:
       
       blas::DASPM<RealType> ham(dim_target);
             
-#pragma omp parallel num_threads(num_threads_)
+//#pragma omp parallel num_threads(num_threads_)
       {
          ed_utility::ExactDiagMatrixComponents<RealType> components;
          components.site_constant.resize(model_.GetSystemSize());
@@ -456,7 +456,7 @@ private:
          }
          components.basis_onsite.resize(model_.GetSystemSize());
          
-#pragma omp for schedule(guided)
+//#pragma omp for schedule(guided)
          for (std::int64_t row = 0; row < dim_target; ++row) {
             ed_utility::GenerateMatrixComponents(&components, basis[row], model_);
             std::vector<std::pair<std::int64_t, RealType>> temp_col_val_list;

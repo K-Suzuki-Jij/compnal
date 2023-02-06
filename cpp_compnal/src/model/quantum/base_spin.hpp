@@ -50,7 +50,7 @@ public:
    using CQNType = std::int32_t;
    
    using CQNHash = std::hash<std::int32_t>;
-      
+   
    BaseSpin(const LatticeType &lattice): lattice_(lattice) {
       SetOnsiteOperator();
    }
@@ -118,13 +118,19 @@ public:
    }
    
    bool ValidateQNumber(const CQNType conserved_quantum_number) const {
-      const auto system_size = lattice_.GetSystemSize();
-      const bool c1 = ((system_size*magnitude_2spin_ - conserved_quantum_number) % 2 == 0);
-      const bool c2 = (-system_size*magnitude_2spin_ <= conserved_quantum_number);
-      const bool c3 = (conserved_quantum_number <= system_size * magnitude_2spin_);
+      return ValidateQNumber(lattice_.GetSystemSize(), magnitude_2spin_, conserved_quantum_number);
+   }
+   
+   static bool ValidateQNumber(const std::int32_t system_size,
+                               const std::int32_t magnitude_2spin,
+                               const std::int32_t total_2sz) {
+      const bool c1 = ((system_size*magnitude_2spin - total_2sz)%2 == 0);
+      const bool c2 = (-system_size*magnitude_2spin <= total_2sz);
+      const bool c3 = (total_2sz <= system_size * magnitude_2spin);
       if (c1 && c2 && c3) {
          return true;
-      } else {
+      }
+      else {
          return false;
       }
    }
@@ -134,105 +140,98 @@ public:
    }
    
    std::int64_t CalculateTargetDim(const CQNType conserved_quantum_number) const {
-      if (!ValidateQNumber(conserved_quantum_number)) {
+      return CalculateTargetDim(lattice_.GetSystemSize(), magnitude_2spin_, conserved_quantum_number);
+   }
+   
+   static std::int64_t CalculateTargetDim(const std::int32_t system_size,
+                                          const std::int32_t magnitude_2spin,
+                                          const std::int32_t total_2sz) {
+      if (!ValidateQNumber(system_size, magnitude_2spin, total_2sz)) {
          return 0;
       }
       
-      const auto system_size = lattice_.GetSystemSize();
       if (system_size <= 0) {
          return 0;
       }
-      const std::int32_t max_total_2sz = system_size*magnitude_2spin_;
+      
+      const std::int32_t max_total_2sz = system_size*magnitude_2spin;
       std::vector<std::vector<std::int64_t>> dim(system_size, std::vector<std::int64_t>(max_total_2sz + 1));
-      for (std::int32_t s = -magnitude_2spin_; s <= magnitude_2spin_; s += 2) {
-         dim[0][(s + magnitude_2spin_)/2] = 1;
+      for (std::int32_t s = -magnitude_2spin; s <= magnitude_2spin; s += 2) {
+         dim[0][(s + magnitude_2spin)/2] = 1;
       }
       for (std::int32_t site = 1; site < system_size; site++) {
-         for (std::int32_t s = -magnitude_2spin_; s <= magnitude_2spin_; s += 2) {
-            for (std::int32_t s_prev = -magnitude_2spin_*site; s_prev <= magnitude_2spin_*site; s_prev += 2) {
-               const std::int64_t a = dim[site][(s + s_prev + magnitude_2spin_*(site + 1))/2];
-               const std::int64_t b = dim[site - 1][(s_prev + magnitude_2spin_*site)/2];
+         for (std::int32_t s = -magnitude_2spin; s <= magnitude_2spin; s += 2) {
+            for (std::int32_t s_prev = -magnitude_2spin*site; s_prev <= magnitude_2spin*site; s_prev += 2) {
+               const std::int64_t a = dim[site][(s + s_prev + magnitude_2spin*(site + 1))/2];
+               const std::int64_t b = dim[site - 1][(s_prev + magnitude_2spin*site)/2];
                if (a >= INT64_MAX - b) {
                   throw std::overflow_error("Overflow detected for sumation using uint64_t");
                }
-               dim[site][(s + s_prev + magnitude_2spin_*(site + 1))/2] = a + b;
+               dim[site][(s + s_prev + magnitude_2spin*(site + 1))/2] = a + b;
             }
          }
       }
-      return dim[system_size - 1][(conserved_quantum_number + max_total_2sz)/2];
+      return dim[system_size - 1][(total_2sz + max_total_2sz)/2];
    }
    
-   std::vector<std::int64_t> GenerateBasis(const std::int32_t num_threads = 1) const {
-      return GenerateBasis(conserved_quantum_number_, num_threads);
+   
+   std::vector<std::int64_t> GenerateBasis() const {
+      return GenerateBasis(conserved_quantum_number_);
    }
    
-   std::vector<std::int64_t> GenerateBasis(const CQNType conserved_quantum_number,
-                                           const std::int32_t num_threads = 1) const {
+   std::vector<std::int64_t> GenerateBasis(const CQNType conserved_quantum_number) const {
+      std::vector<std::int64_t> site_constant(lattice_.GetSystemSize());
+      for (std::int32_t site = 0; site < lattice_.GetSystemSize(); ++site) {
+         site_constant[site] = static_cast<std::int64_t>(std::pow(dim_onsite_, site));
+      }
+      return GenerateBasis(conserved_quantum_number, lattice_.GetSystemSize(), magnitude_2spin_, site_constant);
+   }
+   
+   
+   static std::vector<std::int64_t> GenerateBasis(const CQNType conserved_quantum_number,
+                                                  const std::int32_t system_size,
+                                                  const std::int32_t magnitude_2spin,
+                                                  const std::vector<std::int64_t> site_constant) {
       
-      if (!ValidateQNumber(conserved_quantum_number)) {
+      if (!ValidateQNumber(system_size, magnitude_2spin, conserved_quantum_number)) {
          std::stringstream ss;
          ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
-         ss << "Invalid parameters: system_size(" << lattice_.GetSystemSize();
-         ss << ") or magnitude_spin(" << 0.5*magnitude_2spin_ << ") or total_sz(" << 0.5*conserved_quantum_number << ")" << std::endl;
+         ss << "Invalid parameters: system_size(" << system_size;
+         ss << ") or magnitude_spin(" << 0.5*magnitude_2spin << ") or total_sz(" << 0.5*conserved_quantum_number << ")" << std::endl;
          throw std::runtime_error(ss.str());
       }
       
-      const auto system_size = lattice_.GetSystemSize();
-      const double magnitude_spin = 0.5*magnitude_2spin_;
-      const double total_sz = 0.5*conserved_quantum_number;
-      std::int32_t partitioned_number = system_size*magnitude_spin - total_sz;
+      if (site_constant.size() != system_size) {
+         std::stringstream ss;
+         ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      
+      const std::int32_t partitioned_number = system_size*magnitude_2spin/2 - conserved_quantum_number/2;
       std::vector<std::vector<std::int32_t>> partition_integers;
       std::vector<std::int32_t> initi_list;
-      utility::GenerateIntegerPartition(&partition_integers, initi_list, partitioned_number, magnitude_2spin_, system_size);
+      utility::GenerateIntegerPartition(&partition_integers, initi_list, partitioned_number, magnitude_2spin, system_size);
       
       for (auto &&it : partition_integers) {
          it.resize(system_size, 0);
       }
       
-      std::vector<std::int64_t> site_constant(system_size);
-      for (std::int32_t site = 0; site < system_size; ++site) {
-         site_constant[site] = static_cast<std::int64_t>(std::pow(dim_onsite_, site));
-      }
-      
-      const std::int64_t dim_target = CalculateTargetDim(conserved_quantum_number);
+      const std::int64_t dim_target = CalculateTargetDim(system_size, magnitude_2spin, conserved_quantum_number);
       std::vector<std::int64_t> basis;
       basis.reserve(dim_target);
-      /*
-      std::vector<std::vector<std::int64_t>> temp_basis(num_threads);
-      for (const auto &integer_list : partition_integers) {
-         const std::int64_t size = utility::CalculateNumPermutation(integer_list);
-#pragma omp parallel num_threads(num_threads)
-         {
-            const std::int32_t thread_num = omp_get_thread_num();
-            const std::int64_t loop_begin = thread_num*size/num_threads;
-            const std::int64_t loop_end = (thread_num + 1)*size/num_threads;
-            std::vector<std::int32_t> n_th_integer_list = utility::GenerateNthPermutation(integer_list, loop_begin);
-            for (std::int64_t j = loop_begin; j < loop_end; ++j) {
-               std::int64_t basis_global = 0;
-               for (std::size_t k = 0; k < n_th_integer_list.size(); ++k) {
-                  basis_global += n_th_integer_list[k]*site_constant[k];
-               }
-               temp_basis[thread_num].push_back(basis_global);
-               std::next_permutation(n_th_integer_list.begin(), n_th_integer_list.end());
-            }
-         }
-      }
-      for (auto &&it : temp_basis) {
-         basis.insert(basis.end(), it.begin(), it.end());
-         std::vector<std::int64_t>().swap(it);
-      }
-      */
+      
       for (std::size_t i = 0; i < partition_integers.size(); ++i) {
          auto &integer_list = partition_integers[i];
          std::sort(integer_list.begin(), integer_list.end());
          do {
             std::int64_t basis_global = 0;
             for (std::size_t j = 0; j < integer_list.size(); ++j) {
-               basis_global += integer_list[j] * site_constant[j];
+               basis_global += integer_list[j]*site_constant[j];
             }
             basis.push_back(basis_global);
          } while (std::next_permutation(integer_list.begin(), integer_list.end()));
       }
+      
       basis.shrink_to_fit();
       
       if (static_cast<std::int64_t>(basis.size()) != dim_target) {
@@ -252,7 +251,7 @@ public:
    //! @param row The row in the matrix representation of an onsite operator.
    //! @param col The column in the matrix representation of an onsite operator.
    //! @return Sectors generated by an onsite operator.
-   template <typename IntegerType>
+   template<typename IntegerType>
    CQNType CalculateQNumber(const IntegerType row, const IntegerType col) const {
       static_assert(std::is_integral<IntegerType>::value, "Template parameter IntegerType must be integer type");
       if (row < 0 || col < 0 || dim_onsite_ <= row || dim_onsite_ <= col) {

@@ -59,8 +59,8 @@ public:
    //! @brief Constructor for BaseElectron class.
    //! @param lattice The lattice type.
    BaseElectron(const LatticeType &lattice,
-            const std::int32_t total_electron,
-            const double total_sz): lattice_(lattice) {
+                const std::int32_t total_electron,
+                const double total_sz): lattice_(lattice) {
       SetTotalElectron(total_electron);
       SetTotalSz(total_sz);
       SetOnsiteOperator();
@@ -81,14 +81,14 @@ public:
    //! @brief Set the total sz.
    //! @param total_sz The total sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle=\sum^{N}_{i=1}\langle\hat{S}^{z}_{i}\rangle\f$.
    void SetTotalSz(const double total_sz) {
-      if (std::floor(2 * total_sz) != 2 * total_sz) {
+      if (std::floor(2*total_sz) != 2*total_sz) {
          std::stringstream ss;
          ss << "The input number " << total_sz << " is not half-integer." << std::endl;
          throw std::runtime_error(ss.str());
       }
       conserved_quantum_number_.second = 2*total_sz;
    }
-
+   
    //! @brief Print the onsite bases.
    void PrintBasisOnsite() const {
       std::cout << "row " << 0 << ": |vac>" << std::endl;
@@ -137,9 +137,12 @@ public:
    }
    
    bool ValidateQNumber(const CQNType conserved_quantum_number) const {
+      return ValidateQNumber(conserved_quantum_number, lattice_.GetSystemSize());
+   }
+   
+   static bool ValidateQNumber(const CQNType conserved_quantum_number, const std::int32_t system_size) {
       
       auto func = [](const auto a, const auto x, const auto b) { return (x >= a)*(1 - (x >= b)); };
-      const auto system_size = lattice_.GetSystemSize();
       const auto total_electron = conserved_quantum_number.first;
       const auto total_2sz = conserved_quantum_number.second;
       
@@ -163,15 +166,16 @@ public:
       return CalculateTargetDim(conserved_quantum_number_);
    }
    
-   //! @brief Generate bases of the target Hilbert space specified by
-   //! the system size \f$ N\f$, the number of the total electrons \f$ \langle\hat{N}_{\rm e}\rangle\f$, and the total
-   //! sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle \f$.
    std::int64_t CalculateTargetDim(const CQNType conserved_quantum_number) const {
-      if (!ValidateQNumber()) {
+      return CalculateTargetDim(conserved_quantum_number, lattice_.GetSystemSize());
+   }
+   
+   static std::int64_t CalculateTargetDim(const CQNType conserved_quantum_number,
+                                          const std::int32_t system_size) {
+      if (!ValidateQNumber(conserved_quantum_number, system_size)) {
          return 0;
       }
       
-      const auto system_size = lattice_.GetSystemSize();
       if (system_size <= 0) {
          return 0;
       }
@@ -193,41 +197,50 @@ public:
       return dim;
    }
    
-   std::vector<std::int64_t> GenerateBasis(const std::int32_t num_threads = 1) const {
-      return GenerateBasis(conserved_quantum_number_, num_threads);
+   std::vector<std::int64_t> GenerateBasis() const {
+      return GenerateBasis(conserved_quantum_number_);
    }
    
    //! @brief Generate bases of the target Hilbert space specified by
    //! the system size \f$ N\f$, the number of the total electrons \f$ \langle\hat{N}_{\rm e}\rangle\f$, and the total
    //! sz \f$ \langle\hat{S}^{z}_{\rm tot}\rangle \f$.
    //! @return Corresponding basis.
-   std::vector<std::int64_t> GenerateBasis(const CQNType conserved_quantum_number,
-                                           const std::int32_t num_threads = 1) const {
+   std::vector<std::int64_t> GenerateBasis(const CQNType conserved_quantum_number) const {
+      std::vector<std::int64_t> site_constant(lattice_.GetSystemSize());
+      for (std::int32_t site = 0; site < lattice_.GetSystemSize(); ++site) {
+         site_constant[site] = static_cast<std::int64_t>(std::pow(dim_onsite_, site));
+      }
+      return GenerateBasis(conserved_quantum_number, lattice_.GetSystemSize(), site_constant);
+   }
+   
+   static std::vector<std::int64_t> GenerateBasis(const CQNType conserved_quantum_number,
+                                                  const std::int32_t system_size,
+                                                  const std::vector<std::int64_t> &site_constant) {
       
-      if (!ValidateQNumber(conserved_quantum_number)) {
+      if (!ValidateQNumber(conserved_quantum_number, system_size)) {
          std::stringstream ss;
          ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
          ss << "Invalid parameters (system_size or total_electron or total_sz)" << std::endl;
          throw std::runtime_error(ss.str());
       }
       
-      const auto system_size = lattice_.GetSystemSize();
+      if (site_constant.size() != system_size) {
+         std::stringstream ss;
+         ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
+         throw std::runtime_error(ss.str());
+      }
       
       const auto total_electron = conserved_quantum_number.first;
       const auto total_2sz = conserved_quantum_number.second;
       
-      std::vector<std::int64_t> site_constant(system_size);
-      for (std::int32_t site = 0; site < system_size; ++site) {
-         site_constant[site] = static_cast<std::int64_t>(std::pow(dim_onsite_, site));
-      }
-      
       const std::int32_t max_n_up_down = static_cast<std::int32_t>(total_electron/2);
-      
-      std::vector<std::vector<std::int32_t>> partition_integers;
+      const std::int64_t dim_target = CalculateTargetDim(conserved_quantum_number, system_size);
+      std::vector<std::int64_t> basis;
+      basis.reserve(dim_target);
       for (std::int32_t n_up_down = 0; n_up_down <= max_n_up_down; ++n_up_down) {
-         const std::int32_t n_up = (total_electron - 2 * n_up_down + total_2sz)/2;
-         const std::int32_t n_down = (total_electron - 2 * n_up_down - total_2sz)/2;
-         const std::int32_t n_vac = system_size - total_electron + n_up_down;
+         const std::int32_t n_up = (total_electron - 2*n_up_down + total_2sz)/2;
+         const std::int32_t n_down = (total_electron - 2*n_up_down - total_2sz)/2;
+         const std::int32_t n_vac = system_size - n_up - n_down - n_up_down;
          if (0 <= n_up && 0 <= n_down && 0 <= n_vac) {
             std::vector<std::int32_t> integer_list(system_size);
             for (std::int32_t s = 0; s < n_vac; ++s) {
@@ -242,36 +255,15 @@ public:
             for (std::int32_t s = 0; s < n_up_down; ++s) {
                integer_list[s + n_vac + n_up + n_down] = 3;
             }
-            partition_integers.push_back(integer_list);
-         }
-      }
-      
-      const std::int64_t dim_target = CalculateTargetDim(conserved_quantum_number);
-      std::vector<std::int64_t> basis;
-      basis.reserve(dim_target);
-      
-      std::vector<std::vector<std::int64_t>> temp_basis(num_threads);
-      for (const auto &integer_list : partition_integers) {
-         const std::int64_t size = utility::CalculateNumPermutation(integer_list);
-#pragma omp parallel num_threads(num_threads)
-         {
-            const std::int32_t thread_num = omp_get_thread_num();
-            const std::int64_t loop_begin = thread_num * size / num_threads;
-            const std::int64_t loop_end = (thread_num + 1) * size / num_threads;
-            std::vector<std::int32_t> n_th_integer_list = utility::GenerateNthPermutation(integer_list, loop_begin);
-            for (std::int64_t j = loop_begin; j < loop_end; ++j) {
+            std::sort(integer_list.begin(), integer_list.end());
+            do {
                std::int64_t basis_global = 0;
-               for (std::size_t k = 0; k < n_th_integer_list.size(); ++k) {
-                  basis_global += n_th_integer_list[k] * site_constant[k];
+               for (std::size_t j = 0; j < integer_list.size(); ++j) {
+                  basis_global += integer_list[j]*site_constant[j];
                }
-               temp_basis[thread_num].push_back(basis_global);
-               std::next_permutation(n_th_integer_list.begin(), n_th_integer_list.end());
-            }
+               basis.push_back(basis_global);
+            } while (std::next_permutation(integer_list.begin(), integer_list.end()));
          }
-      }
-      for (auto &&it : temp_basis) {
-         basis.insert(basis.end(), it.begin(), it.end());
-         std::vector<std::int64_t>().swap(it);
       }
       
       basis.shrink_to_fit();
@@ -287,6 +279,8 @@ public:
       
       return basis;
    }
+   
+   
    
    //! @brief Calculate sectors generated by an onsite operator.
    //! @tparam IntegerType Value type int row and col.

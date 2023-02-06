@@ -25,5 +25,6 @@
 
 #include "heisenberg.hpp"
 #include "hubbard.hpp"
+#include "kondo_lattice.hpp"
 
 #endif /* COMPNAL_MODEL_QUANTUM_ALL_HPP_ */

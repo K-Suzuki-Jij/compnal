@@ -1,0 +1,137 @@
+//
+//  Copyright 2023 Kohei Suzuki
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+//  mat_comp_kondo_lattice.hpp
+//  compnal
+//
+//  Created by kohei on 2023/02/06.
+//  
+//
+
+#ifndef COMPNAL_SOLVER_ED_UTILITY_MAT_COMP_KONDO_LATTICE_HPP_
+#define COMPNAL_SOLVER_ED_UTILITY_MAT_COMP_KONDO_LATTICE_HPP_
+
+#include "./ed_matrix_comp.hpp"
+
+namespace compnal {
+namespace solver {
+namespace ed_utility {
+
+template<typename RealType>
+void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
+                              const std::int64_t basis,
+                              const model::quantum::KondoLattice<lattice::Chain, RealType> &model) {
+   
+   const blas::CRS<RealType> &onsite_ham = model.GenarateOnsiteOperatorHam();
+   
+   const blas::CRS<RealType> &op_c_up = model.GetOnsiteOperatorCUp();
+   const blas::CRS<RealType> &op_c_up_d = model.GetOnsiteOperatorCUpDagger();
+   const blas::CRS<RealType> &op_c_down = model.GetOnsiteOperatorCDown();
+   const blas::CRS<RealType> &op_c_down_d = model.GetOnsiteOperatorCDownDagger();
+   const blas::CRS<RealType> &op_n = model.GetOnsiteOperatorNC();
+   const std::vector<RealType> &hop_list = model.GetHoppingEnergy();
+   const std::vector<RealType> &intersite_coulomb_list = model.GetIntersiteCoulomb();
+   
+   const std::int32_t dim_onsite = model.GetDimOnsite();
+   const std::int32_t system_size = model.GetSystemSize();
+   
+   
+   for (std::int32_t site = 0; site < system_size; ++site) {
+      edmc->basis_onsite[site] = CalculateLocalBasis(basis, site, dim_onsite);
+   }
+
+   // Onsite elements
+   for (std::int32_t site = 0; site < system_size; ++site) {
+      GenerateMatrixComponentsOnsite(edmc, basis, site, onsite_ham);
+   }
+
+   // Intersite elements
+   if (model.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
+      // Hopping
+      for (std::int32_t dist = 1; dist <= hop_list.size(); ++dist) {
+         for (std::int32_t site = 0; site < system_size; ++site) {
+            std::int32_t num_electron = 0;
+            std::int32_t f_sign = 1;
+            for (std::int32_t i = site; i < site + dist; ++i) {
+               num_electron += model.CalculateNumElectron(edmc->basis_onsite[i]);
+            }
+            if (num_electron%2 == 1) {
+               f_sign = 1;
+            }
+            else {
+               f_sign = -1;
+            }
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up_d  , (site + dist)%system_size, op_c_up    , f_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up    , (site + dist)%system_size, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down_d, (site + dist)%system_size, op_c_down  , f_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down  , (site + dist)%system_size, op_c_down_d, -f_sign*hop_list[dist - 1]);
+         }
+      }
+      
+      // Intersite Coulomb
+      for (std::int32_t dist = 1; dist <= intersite_coulomb_list.size(); ++dist) {
+         for (std::int32_t site = 0; site < system_size; ++site) {
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_n, (site + dist)%system_size, op_n, intersite_coulomb_list[dist - 1]);
+         }
+      }
+   }
+   else if (model.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
+      // Hopping
+      for (std::int32_t dist = 1; dist <= hop_list.size(); ++dist) {
+         for (std::int32_t site = 0; site < system_size - dist; ++site) {
+            std::int32_t num_electron = 0;
+            std::int32_t f_sign = 1;
+            for (std::int32_t i = site; i < site + dist; ++i) {
+               num_electron += model.CalculateNumElectron(edmc->basis_onsite[i]);
+            }
+            if (num_electron%2 == 1) {
+               f_sign = 1;
+            }
+            else {
+               f_sign = -1;
+            }
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up_d  , (site + dist), op_c_up    , f_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_up    , (site + dist), op_c_up_d  , -f_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down_d, (site + dist), op_c_down  , f_sign*hop_list[dist - 1]);
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_c_down  , (site + dist), op_c_down_d, -f_sign*hop_list[dist - 1]);
+         }
+      }
+      
+      // Intersite Coulomb
+      for (std::int32_t dist = 1; dist <= intersite_coulomb_list.size(); ++dist) {
+         for (std::int32_t site = 0; site < system_size - dist; ++site) {
+            GenerateMatrixComponentsIntersite(edmc, basis, site, op_n, (site + dist), op_n, intersite_coulomb_list[dist - 1]);
+         }
+      }
+   }
+   else {
+      throw std::runtime_error("Unsupported BoundaryCondition");
+   }
+   
+   // Fill zero in the diagonal elements for symmetric matrix vector product calculation.
+   if (edmc->inv_basis_affected.count(basis) == 0) {
+      edmc->inv_basis_affected[basis] = edmc->basis_affected.size();
+      edmc->val.push_back(0.0);
+      edmc->basis_affected.push_back(basis);
+   }
+}
+
+
+
+} // namespace ed_utility
+} // namespace solver
+} // namespace compnal
+
+#endif /* COMPNAL_SOLVER_ED_UTILITY_MAT_COMP_KONDO_LATTICE_HPP_ */

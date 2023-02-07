@@ -161,6 +161,71 @@ void pybind11ModelHeisenberg(py::module &m, const std::string &post_name = "") {
 }
 
 
+template<class LatticeType, typename RealType>
+void pybind11ModelKondoLattice(py::module &m, const std::string &post_name = "") {
+   
+   using KL = model::quantum::KondoLattice<LatticeType, RealType>;
+   std::string name = std::string("KondoLattice") + post_name;
+
+   auto py_class = py::class_<KL>(m, name.c_str(), py::module_local());
+   
+   //Constructors
+   py_class.def(py::init<const LatticeType&>(), "lattice"_a);
+   
+   //Public Member Functions
+   py_class.def("set_total_sz", &KL::SetTotalSz, "total_sz"_a);
+   py_class.def("set_total_electron", &KL::SetTotalElectron, "total_electron"_a);
+   py_class.def("set_magnitude_spin", &KL::SetMagnitudeLSpin, "magnitude_spin"_a);
+   
+   py_class.def("set_hopping_energy"    , &KL::SetHoppingEnergy    , "hopping_energy"_a    );
+   py_class.def("set_onsite_coulomb"    , &KL::SetOnsiteCoulomb    , "onsite_coulomb"_a    );
+   py_class.def("set_intersite_coulomb" , &KL::SetIntersiteCoulomb , "intersite_coulomb"_a );
+   py_class.def("set_chemical_potential", &KL::SetChemicalPotential, "chemical_potential"_a);
+   py_class.def("set_magnetic_field_electron", &KL::SetMagneticFieldElectron, "magnetic_field_electron"_a    );
+
+   py_class.def("set_kondo_exchange_z"    , &KL::SetKondoExchangeZ    , "kondo_exchange_z"_a   );
+   py_class.def("set_kondo_exchange_xy"    , &KL::SetKondoExchangeXY   , "kondo_exchange_xy"_a  );
+   py_class.def("set_magnetic_field_spin" , &KL::SetMagneticFieldSpin, "magnetic_field_spin"_a);
+   py_class.def("set_anisotropy", &KL::SetAnisotropy   , "anisotropy"_a    );
+
+   py_class.def("get_magnitude_spin", &KL::GetMagnitudeLSpin);
+
+   
+   py_class.def("get_hopping_energy"    , &KL::GetHoppingEnergy    );
+   py_class.def("get_onsite_coulomb"    , &KL::GetOnsiteCoulomb    );
+   py_class.def("get_intersite_coulomb" , &KL::GetIntersiteCoulomb );
+   py_class.def("get_chemical_potential", &KL::GetChemicalPotential);
+   py_class.def("get_magnetic_field_electron", &KL::GetMagneticFieldElectron);
+
+   py_class.def("get_kondo_exchange_z"    , &KL::GetKondoExchangeZ    );
+   py_class.def("get_kondo_exchange_xy"    , &KL::GetKondoExchangeXY   );
+   py_class.def("get_magnetic_field_spin" , &KL::GetMagneticFieldSpin);
+   py_class.def("get_anisotropy", &KL::GetAnisotropy   );
+
+   py_class.def("get_onsite_operator_CUp", &KL::GetOnsiteOperatorCUp);
+   py_class.def("get_onsite_operator_CDown", &KL::GetOnsiteOperatorCDown);
+
+   py_class.def("get_onsite_operator_CUpDagger", &KL::GetOnsiteOperatorCUpDagger);
+   py_class.def("get_onsite_operator_CDownDagger", &KL::GetOnsiteOperatorCDownDagger);
+
+   py_class.def("get_onsite_operator_NCUp", &KL::GetOnsiteOperatorNCUp);
+   py_class.def("get_onsite_operator_NCDown", &KL::GetOnsiteOperatorNCDown);
+
+   py_class.def("get_onsite_operator_NC", &KL::GetOnsiteOperatorNC);
+   py_class.def("get_onsite_operator_SxC", &KL::GetOnsiteOperatorSxC);
+   py_class.def("get_onsite_operator_iSyC", &KL::GetOnsiteOperatoriSyC);
+   py_class.def("get_onsite_operator_SzC", &KL::GetOnsiteOperatorSzC);
+   py_class.def("get_onsite_operator_SpC", &KL::GetOnsiteOperatorSpC);
+   py_class.def("get_onsite_operator_SmC", &KL::GetOnsiteOperatorSmC);
+
+   py_class.def("get_onsite_operator_SxL" , &KL::GetOnsiteOperatorSxL );
+   py_class.def("get_onsite_operator_iSyL", &KL::GetOnsiteOperatoriSyL);
+   py_class.def("get_onsite_operator_SzL" , &KL::GetOnsiteOperatorSzL );
+   py_class.def("get_onsite_operator_SpL" , &KL::GetOnsiteOperatorSpL );
+   py_class.def("get_onsite_operator_SmL" , &KL::GetOnsiteOperatorSmL );
+
+}
+
 } // namespace wrapper
 } // namespace compnal
 

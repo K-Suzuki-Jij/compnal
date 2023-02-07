@@ -119,16 +119,39 @@ TEST(SolverExactDiagonalization, HeisenbergCubic) {
 }
 
 TEST(SolverExactDiagonalization, KondoLatticeChain) {
-   lattice::Chain chain{6};
+   lattice::Chain chain{4};
    model::quantum::KondoLattice<lattice::Chain, double> kondo_lattice{chain};
    
    kondo_lattice.SetTotalSz(0);
-   kondo_lattice.SetTotalElectron(6);
+   kondo_lattice.SetTotalElectron(4);
    solver::ExactDiag ed{kondo_lattice};
    ed.SetNumThreads(8);
    
    ed.CalculateGroundState();
+}
+
+TEST(SolverExactDiagonalization, KondoLatticeSquare) {
+   lattice::Square square{2, 2};
+   model::quantum::KondoLattice<lattice::Square, double> kondo_lattice{square};
    
+   kondo_lattice.SetTotalSz(0);
+   kondo_lattice.SetTotalElectron(4);
+   solver::ExactDiag ed{kondo_lattice};
+   ed.SetNumThreads(8);
+   
+   ed.CalculateGroundState();
+}
+
+TEST(SolverExactDiagonalization, KondoLatticeCubic) {
+   lattice::Cubic cubic{2, 2, 2};
+   model::quantum::KondoLattice<lattice::Cubic, double> kondo_lattice{cubic};
+   
+   kondo_lattice.SetTotalSz(0);
+   kondo_lattice.SetTotalElectron(2);
+   solver::ExactDiag ed{kondo_lattice};
+   ed.SetNumThreads(8);
+   
+   ed.CalculateGroundState();
 }
 
 

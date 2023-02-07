@@ -128,6 +128,360 @@ void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
    }
 }
 
+template<typename RealType>
+void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
+                              const std::int64_t basis,
+                              const model::quantum::KondoLattice<lattice::Square, RealType> &model) {
+   
+   const blas::CRS<RealType> &onsite_ham = model.GenarateOnsiteOperatorHam();
+   const blas::CRS<RealType> &op_c_up = model.GetOnsiteOperatorCUp();
+   const blas::CRS<RealType> &op_c_up_d = model.GetOnsiteOperatorCUpDagger();
+   const blas::CRS<RealType> &op_c_down = model.GetOnsiteOperatorCDown();
+   const blas::CRS<RealType> &op_c_down_d = model.GetOnsiteOperatorCDownDagger();
+   const blas::CRS<RealType> &op_n = model.GetOnsiteOperatorNC();
+   const std::int32_t dim_onsite = model.GetDimOnsite();
+   const std::int32_t x_size = model.GetLattice().GetXSize();
+   const std::int32_t y_size = model.GetLattice().GetYSize();
+   const std::vector<RealType> &hop_list = model.GetHoppingEnergy();
+   const std::vector<RealType> &intersite_coulomb_list = model.GetIntersiteCoulomb();
+   
+   for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+      for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+         const std::int32_t index = coo_y*x_size + coo_x;
+         edmc->basis_onsite[index] = CalculateLocalBasis(basis, index, dim_onsite);
+      }
+   }
+
+   // Onsite elements
+   for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+      for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+         const std::int32_t index = coo_y*x_size + coo_x;
+         GenerateMatrixComponentsOnsite(edmc, basis, index, onsite_ham);
+      }
+   }
+
+   // Intersite elements
+   if (model.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
+      // Hopping
+      for (std::int32_t dist = 1; dist <= hop_list.size(); ++dist) {
+         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               const std::int32_t ind = coo_y*x_size + coo_x;
+               const std::int32_t ind_x = coo_y*x_size + (coo_x + dist)%x_size;
+               const std::int32_t ind_y = ((coo_y + dist)%y_size)*x_size + coo_x;
+               std::int32_t num_electron_x = 0;
+               std::int32_t num_electron_y = 0;
+               std::int32_t f_sign = 1;
+               for (std::int32_t i = ind; i < ind_x; ++i) {
+                  num_electron_x += model.CalculateNumElectron(edmc->basis_onsite[i]);
+               }
+               
+               if (num_electron_x%2 == 1) { f_sign = 1; }
+               else { f_sign = -1;}
+               
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_x, op_c_up    , f_sign*hop_list[dist - 1]);
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_x, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_x, op_c_down  , f_sign*hop_list[dist - 1]);
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_x, op_c_down_d, -f_sign*hop_list[dist - 1]);
+               
+               for (std::int32_t i = ind; i < ind_y; ++i) {
+                  num_electron_y += model.CalculateNumElectron(edmc->basis_onsite[i]);
+               }
+               if (num_electron_y%2 == 1) { f_sign = 1; }
+               else { f_sign = -1;}
+               
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_y, op_c_up    , f_sign*hop_list[dist - 1]);
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_y, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_y, op_c_down  , f_sign*hop_list[dist - 1]);
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_y, op_c_down_d, -f_sign*hop_list[dist - 1]);
+            }
+         }
+      }
+      
+      // Intersite Coulomb
+      for (std::int32_t dist = 1; dist <= intersite_coulomb_list.size(); ++dist) {
+         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               const std::int32_t ind = coo_y*x_size + coo_x;
+               const std::int32_t ind_x = coo_y*x_size + (coo_x + dist)%x_size;
+               const std::int32_t ind_y = ((coo_y + dist)%y_size)*x_size + coo_x;
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_x, op_n, intersite_coulomb_list[dist - 1]);
+               GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_y, op_n, intersite_coulomb_list[dist - 1]);
+            }
+         }
+      }
+   }
+   else if (model.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
+      // Hopping
+      for (std::int32_t dist = 1; dist <= hop_list.size(); ++dist) {
+         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               const std::int32_t ind = coo_y*x_size + coo_x;
+               if (coo_x + dist < x_size) {
+                  const std::int32_t ind_x = coo_y*x_size + coo_x + dist;
+                  std::int32_t num_electron_x = 0;
+                  std::int32_t f_sign = 1;
+                  for (std::int32_t i = ind; i < ind_x; ++i) {
+                     num_electron_x += model.CalculateNumElectron(edmc->basis_onsite[i]);
+                  }
+                  if (num_electron_x%2 == 1) { f_sign = 1; }
+                  else { f_sign = -1;}
+                  
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_x, op_c_up    , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_x, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_x, op_c_down  , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_x, op_c_down_d, -f_sign*hop_list[dist - 1]);
+               }
+               if (coo_y + dist < y_size) {
+                  const std::int32_t ind_y = (coo_y + dist)*x_size + coo_x;
+                  std::int32_t num_electron_y = 0;
+                  std::int32_t f_sign = 1;
+                  for (std::int32_t i = ind; i < ind_y; ++i) {
+                     num_electron_y += model.CalculateNumElectron(edmc->basis_onsite[i]);
+                  }
+                  if (num_electron_y%2 == 1) { f_sign = 1; }
+                  else { f_sign = -1;}
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_y, op_c_up    , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_y, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_y, op_c_down  , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_y, op_c_down_d, -f_sign*hop_list[dist - 1]);
+               }
+            }
+         }
+      }
+      
+      // Intersite Coulomb
+      for (std::int32_t dist = 1; dist <= intersite_coulomb_list.size(); ++dist) {
+         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               const std::int32_t ind = coo_y*x_size + coo_x;
+               if (coo_x + dist < x_size) {
+                  const std::int32_t ind_x = coo_y*x_size + coo_x + dist;
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_x, op_n, intersite_coulomb_list[dist - 1]);
+               }
+               if (coo_y + dist < y_size) {
+                  const std::int32_t ind_y = (coo_y + dist)*x_size + coo_x;
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_y, op_n, intersite_coulomb_list[dist - 1]);
+               }
+            }
+         }
+      }
+   }
+   else {
+      throw std::runtime_error("Unsupported BoundaryCondition");
+   }
+   
+   // Fill zero in the diagonal elements for symmetric matrix vector product calculation.
+   if (edmc->inv_basis_affected.count(basis) == 0) {
+      edmc->inv_basis_affected[basis] = edmc->basis_affected.size();
+      edmc->val.push_back(0.0);
+      edmc->basis_affected.push_back(basis);
+   }
+}
+
+
+template<typename RealType>
+void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
+                              const std::int64_t basis,
+                              const model::quantum::KondoLattice<lattice::Cubic, RealType> &model) {
+   
+   const blas::CRS<RealType> &onsite_ham = model.GenarateOnsiteOperatorHam();
+   const blas::CRS<RealType> &op_c_up = model.GetOnsiteOperatorCUp();
+   const blas::CRS<RealType> &op_c_up_d = model.GetOnsiteOperatorCUpDagger();
+   const blas::CRS<RealType> &op_c_down = model.GetOnsiteOperatorCDown();
+   const blas::CRS<RealType> &op_c_down_d = model.GetOnsiteOperatorCDownDagger();
+   const blas::CRS<RealType> &op_n = model.GetOnsiteOperatorNC();
+   const std::int32_t dim_onsite = model.GetDimOnsite();
+   const std::int32_t x_size = model.GetLattice().GetXSize();
+   const std::int32_t y_size = model.GetLattice().GetYSize();
+   const std::int32_t z_size = model.GetLattice().GetZSize();
+   const std::vector<RealType> &hop_list = model.GetHoppingEnergy();
+   const std::vector<RealType> &intersite_coulomb_list = model.GetIntersiteCoulomb();
+   
+   for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+      for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+         for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+            const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
+            edmc->basis_onsite[index] = CalculateLocalBasis(basis, index, dim_onsite);
+         }
+      }
+   }
+
+   // Onsite elements
+   for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+      for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+         for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+            const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
+            GenerateMatrixComponentsOnsite(edmc, basis, index, onsite_ham);
+         }
+      }
+   }
+
+   // Intersite elements
+   if (model.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
+      // Hopping
+      for (std::int32_t dist = 1; dist <= hop_list.size(); ++dist) {
+         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                  const std::int32_t ind   = coo_z*x_size*y_size + coo_y*x_size + coo_x;
+                  const std::int32_t ind_x = coo_z*x_size*y_size + coo_y*x_size + (coo_x + dist)%x_size;
+                  const std::int32_t ind_y = coo_z*x_size*y_size + ((coo_y + dist)%y_size)*x_size + coo_x;
+                  const std::int32_t ind_z = ((coo_z + dist)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
+                  std::int32_t num_electron_x = 0;
+                  std::int32_t num_electron_y = 0;
+                  std::int32_t num_electron_z = 0;
+                  std::int32_t f_sign = 1;
+                  for (std::int32_t i = ind; i < ind_x; ++i) {
+                     num_electron_x += model.CalculateNumElectron(edmc->basis_onsite[i]);
+                  }
+                  
+                  if (num_electron_x%2 == 1) { f_sign = 1; }
+                  else { f_sign = -1;}
+                  
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_x, op_c_up    , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_x, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_x, op_c_down  , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_x, op_c_down_d, -f_sign*hop_list[dist - 1]);
+                  
+                  for (std::int32_t i = ind; i < ind_y; ++i) {
+                     num_electron_y += model.CalculateNumElectron(edmc->basis_onsite[i]);
+                  }
+                  if (num_electron_y%2 == 1) { f_sign = 1; }
+                  else { f_sign = -1;}
+                  
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_y, op_c_up    , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_y, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_y, op_c_down  , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_y, op_c_down_d, -f_sign*hop_list[dist - 1]);
+                  
+                  for (std::int32_t i = ind; i < ind_z; ++i) {
+                     num_electron_z += model.CalculateNumElectron(edmc->basis_onsite[i]);
+                  }
+                  if (num_electron_z%2 == 1) { f_sign = 1; }
+                  else { f_sign = -1;}
+                  
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_z, op_c_up    , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_z, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_z, op_c_down  , f_sign*hop_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_z, op_c_down_d, -f_sign*hop_list[dist - 1]);
+               }
+            }
+         }
+      }
+      
+      // Intersite Coulomb
+      for (std::int32_t dist = 1; dist <= intersite_coulomb_list.size(); ++dist) {
+         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                  const std::int32_t ind   = coo_z*x_size*y_size + coo_y*x_size + coo_x;
+                  const std::int32_t ind_x = coo_z*x_size*y_size + coo_y*x_size + (coo_x + dist)%x_size;
+                  const std::int32_t ind_y = coo_z*x_size*y_size + ((coo_y + dist)%y_size)*x_size + coo_x;
+                  const std::int32_t ind_z = ((coo_z + dist)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_x, op_n, intersite_coulomb_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_y, op_n, intersite_coulomb_list[dist - 1]);
+                  GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_z, op_n, intersite_coulomb_list[dist - 1]);
+               }
+            }
+         }
+      }
+   }
+   else if (model.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
+      // Hopping
+      for (std::int32_t dist = 1; dist <= hop_list.size(); ++dist) {
+         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                  const std::int32_t ind = coo_z*x_size*y_size + coo_y*x_size + coo_x;
+
+                  if (coo_x + dist < x_size) {
+                     const std::int32_t ind_x = coo_z*x_size*y_size + coo_y*x_size + coo_x + dist;
+                     std::int32_t num_electron_x = 0;
+                     std::int32_t f_sign = 1;
+                     for (std::int32_t i = ind; i < ind_x; ++i) {
+                        num_electron_x += model.CalculateNumElectron(edmc->basis_onsite[i]);
+                     }
+                     
+                     if (num_electron_x%2 == 1) { f_sign = 1; }
+                     else { f_sign = -1;}
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_x, op_c_up    , f_sign*hop_list[dist - 1]);
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_x, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_x, op_c_down  , f_sign*hop_list[dist - 1]);
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_x, op_c_down_d, -f_sign*hop_list[dist - 1]);
+                  }
+
+                  if (coo_y + dist < y_size) {
+                     const std::int32_t ind_y = coo_z*x_size*y_size + (coo_y + dist)*x_size + coo_x;
+                     std::int32_t num_electron_y = 0;
+                     std::int32_t f_sign = 1;
+                     for (std::int32_t i = ind; i < ind_y; ++i) {
+                        num_electron_y += model.CalculateNumElectron(edmc->basis_onsite[i]);
+                     }
+                     if (num_electron_y%2 == 1) { f_sign = 1; }
+                     else { f_sign = -1;}
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_y, op_c_up    , f_sign*hop_list[dist - 1]);
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_y, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_y, op_c_down  , f_sign*hop_list[dist - 1]);
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_y, op_c_down_d, -f_sign*hop_list[dist - 1]);
+                  }
+                  
+                  
+                  
+                  if (coo_z + dist < z_size) {
+                     const std::int32_t ind_z = (coo_z + dist)*x_size*y_size + coo_y*x_size + coo_x;
+                     std::int32_t num_electron_z = 0;
+                     std::int32_t f_sign = 1;
+                     for (std::int32_t i = ind; i < ind_z; ++i) {
+                        num_electron_z += model.CalculateNumElectron(edmc->basis_onsite[i]);
+                     }
+                     if (num_electron_z%2 == 1) { f_sign = 1; }
+                     else { f_sign = -1;}
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up_d  , ind_z, op_c_up    , f_sign*hop_list[dist - 1]);
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_up    , ind_z, op_c_up_d  , -f_sign*hop_list[dist - 1]);
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down_d, ind_z, op_c_down  , f_sign*hop_list[dist - 1]);
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_c_down  , ind_z, op_c_down_d, -f_sign*hop_list[dist - 1]);
+                  }
+               }
+            }
+         }
+      }
+      
+      // Intersite Coulomb
+      for (std::int32_t dist = 1; dist <= intersite_coulomb_list.size(); ++dist) {
+         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                  const std::int32_t ind = coo_z*x_size*y_size + coo_y*x_size + coo_x;
+                  if (coo_x + dist < x_size) {
+                     const std::int32_t ind_x = coo_z*x_size*y_size + coo_y*x_size + coo_x + dist;
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_x, op_n, intersite_coulomb_list[dist - 1]);
+                  }
+                  if (coo_y + dist < y_size) {
+                     const std::int32_t ind_y = coo_z*x_size*y_size + (coo_y + dist)*x_size + coo_x;
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_y, op_n, intersite_coulomb_list[dist - 1]);
+                  }
+                  if (coo_z + dist < z_size) {
+                     const std::int32_t ind_z = (coo_z + dist)*x_size*y_size + coo_y*x_size + coo_x;
+                     GenerateMatrixComponentsIntersite(edmc, basis, ind, op_n, ind_z, op_n, intersite_coulomb_list[dist - 1]);
+                  }
+               }
+            }
+         }
+      }
+   }
+   else {
+      throw std::runtime_error("Unsupported BoundaryCondition");
+   }
+   
+   // Fill zero in the diagonal elements for symmetric matrix vector product calculation.
+   if (edmc->inv_basis_affected.count(basis) == 0) {
+      edmc->inv_basis_affected[basis] = edmc->basis_affected.size();
+      edmc->val.push_back(0.0);
+      edmc->basis_affected.push_back(basis);
+   }
+}
+
 
 
 } // namespace ed_utility

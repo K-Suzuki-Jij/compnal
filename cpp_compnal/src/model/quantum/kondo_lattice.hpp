@@ -65,6 +65,14 @@ public:
    void SetAnisotropy(const RealType anisotropy) {
       anisotropy_ = anisotropy;
    }
+
+   void SetKondoExchangeZ(const RealType kondo_exchange_z) {
+      kondo_exchange_z_ = kondo_exchange_z;
+   }
+
+   void SetKondoExchangeXY(const RealType kondo_exchange_xy) {
+      kondo_exchange_xy_ = kondo_exchange_xy;
+   }
    
    std::vector<RealType> GetHoppingEnergy() const {
       return hopping_energy_;
@@ -92,6 +100,14 @@ public:
    
    RealType GetAnisotropy() const {
       return anisotropy_;
+   }
+
+   RealType GetKondoExchangeZ() {
+      return kondo_exchange_z_;
+   }
+
+   RealType GetKondoExchangeXY() {
+      return kondo_exchange_xy_;
    }
    
    blas::CRS<RealType> GenarateOnsiteOperatorHam() const {

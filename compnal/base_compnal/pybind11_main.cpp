@@ -53,6 +53,10 @@ PYBIND11_MODULE(base_compnal, m) {
    compnal::wrapper::pybind11ModelHeisenberg<compnal::lattice::Chain, RealType>(m_model, "Chain");
    compnal::wrapper::pybind11ModelHeisenberg<compnal::lattice::Square, RealType>(m_model, "Square");
    compnal::wrapper::pybind11ModelHeisenberg<compnal::lattice::Cubic, RealType>(m_model, "Cubic");
+
+   compnal::wrapper::pybind11ModelKondoLattice<compnal::lattice::Chain, RealType>(m_model, "Chain");
+   compnal::wrapper::pybind11ModelKondoLattice<compnal::lattice::Square, RealType>(m_model, "Square");
+   compnal::wrapper::pybind11ModelKondoLattice<compnal::lattice::Cubic, RealType>(m_model, "Cubic");
    
    py::module_ m_solver = m.def_submodule("base_solver");
    compnal::wrapper::pybind11SolverCMCUpdater(m_solver);
@@ -76,6 +80,10 @@ PYBIND11_MODULE(base_compnal, m) {
    compnal::wrapper::pybind11SolverExactDiag<compnal::model::quantum::Heisenberg<compnal::lattice::Chain, RealType>>(m_solver, "HeisenbergChain");
    compnal::wrapper::pybind11SolverExactDiag<compnal::model::quantum::Heisenberg<compnal::lattice::Square, RealType>>(m_solver, "HeisenbergSquare");
    compnal::wrapper::pybind11SolverExactDiag<compnal::model::quantum::Heisenberg<compnal::lattice::Cubic, RealType>>(m_solver, "HeisenbergCubic");
+
+   compnal::wrapper::pybind11SolverExactDiag<compnal::model::quantum::KondoLattice<compnal::lattice::Chain, RealType>>(m_solver, "KondoLatticeChain");
+   compnal::wrapper::pybind11SolverExactDiag<compnal::model::quantum::KondoLattice<compnal::lattice::Square, RealType>>(m_solver, "KondoLatticeSquare");
+   compnal::wrapper::pybind11SolverExactDiag<compnal::model::quantum::KondoLattice<compnal::lattice::Cubic, RealType>>(m_solver, "KondoLatticeCubic");
 
 
 };

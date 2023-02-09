@@ -18,12 +18,16 @@
 #include "src/pybind11_lattice.hpp"
 #include "src/pybind11_model.hpp"
 #include "src/pybind11_solver.hpp"
+#include "src/pybind11_blas.hpp"
 
 
 PYBIND11_MODULE(base_compnal, m) {
    namespace py = pybind11;
    
    using RealType = double;
+   
+   py::module_ m_blas = m.def_submodule("base_blas");
+   compnal::wrapper::pybind11CRS<RealType>(m_blas);
       
    py::module_ m_lattice = m.def_submodule("base_lattice");
    compnal::wrapper::pybind11BoundaryCondition(m_lattice);

@@ -23,6 +23,10 @@
 #ifndef COMPNAL_MODEL_QUANTUM_ALL_HPP_
 #define COMPNAL_MODEL_QUANTUM_ALL_HPP_
 
+#include "base_electron.hpp"
+#include "base_spin.hpp"
+#include "base_spin_electron.hpp"
+#include "base_spin_multi_electron.hpp"
 #include "heisenberg.hpp"
 #include "hubbard.hpp"
 #include "kondo_lattice.hpp"

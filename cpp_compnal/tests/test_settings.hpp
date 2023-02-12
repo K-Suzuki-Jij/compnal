@@ -13,17 +13,23 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  all.hpp
+//  test_settings.hpp
 //  compnal
 //
 //  Created by kohei on 2023/02/12.
 //  
 //
 
-#ifndef COMPNAL_INTERACTION_ALL_HPP_
-#define COMPNAL_INTERACTION_ALL_HPP_
+#ifndef COMPNAL_TEST_SETTINGS_HPP_
+#define COMPNAL_TEST_SETTINGS_HPP_
 
-#include "quadratic_any.hpp"
-#include "polynomial_any.hpp"
+namespace compnal {
+namespace test {
 
-#endif /* COMPNAL_INTERACTION_ALL_HPP_ */
+using TestRealType = double;
+
+} // namespace test
+} // namespace compnal
+
+
+#endif /* COMPNAL_TEST_SETTINGS_HPP_ */

@@ -25,7 +25,7 @@
 
 #include "../../lattice/all.hpp"
 #include "../../utility/type.hpp"
-#include "../../interaction/quadratic_any_interaction.hpp"
+#include "../../interaction/classical/quadratic_any.hpp"
 #include <vector>
 
 namespace compnal {
@@ -407,19 +407,19 @@ public:
    using ValueType = RealType;
    
    //! @brief The index type.
-   using IndexType = typename interaction::QuadraticAnyInteraction<RealType>::IndexType;
+   using IndexType = typename interaction::classical::QuadraticAny<RealType>::IndexType;
    
    //! @brief The operator type, which here is the type of Ising spin -1 or +1.
    using OPType = utility::SpinType;
    
    //! @brief The hash for IndexType.
-   using IndexHash = typename interaction::QuadraticAnyInteraction<RealType>::IndexHash;
+   using IndexHash = typename interaction::classical::QuadraticAny<RealType>::IndexHash;
    
    //! @brief The linear interaction type.
-   using LinearType = typename interaction::QuadraticAnyInteraction<RealType>::LinearType;
+   using LinearType = typename interaction::classical::QuadraticAny<RealType>::LinearType;
    
    //! @brief The quadratic interaction type.
-   using QuadraticType = typename interaction::QuadraticAnyInteraction<RealType>::QuadraticType;
+   using QuadraticType = typename interaction::classical::QuadraticAny<RealType>::QuadraticType;
    
    //! @brief Constructor for Ising class.
    //! @param linear The linear interaction.
@@ -583,7 +583,7 @@ public:
    
 private:
    //! @brief The interaction.
-   const interaction::QuadraticAnyInteraction<RealType> interaction_;
+   const interaction::classical::QuadraticAny<RealType> interaction_;
    
    //! @brief The linear interaction.
    const lattice::AnyLattice lattice_;

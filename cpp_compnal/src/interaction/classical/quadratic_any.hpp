@@ -13,29 +13,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  quadratic_any_interaction.hpp
+//  quadratic_any.hpp
 //  compnal
 //
 //  Created by kohei on 2022/08/13.
 //  
 //
 
-#ifndef COMPNAL_INTERACTION_QUADRATIC_ANY_INTERACTION_HPP_
-#define COMPNAL_INTERACTION_QUADRATIC_ANY_INTERACTION_HPP_
+#ifndef COMPNAL_INTERACTION_QUADRATIC_ANY_HPP_
+#define COMPNAL_INTERACTION_QUADRATIC_ANY_HPP_
 
-#include "../utility/hash.hpp"
-#include "../utility/type.hpp"
+#include "../../utility/hash.hpp"
+#include "../../utility/type.hpp"
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
 
 namespace compnal {
 namespace interaction {
+namespace classical {
 
 //! @brief Class to represent any linear- and quadratic-interactions.
 //! @tparam RealType The value type, which must be floating point type.
 template<typename RealType>
-class QuadraticAnyInteraction {
+class QuadraticAny {
    static_assert(std::is_floating_point<RealType>::value, "Template parameter RealType must be floating point type");
    
 public:
@@ -51,10 +52,10 @@ public:
    //! @brief The quadratic interaction type.
    using QuadraticType = std::unordered_map<std::pair<IndexType, IndexType>, RealType, utility::AnyIndexPairHash>;
    
-   //! @brief Constructor for QuadraticAnyInteraction class.
+   //! @brief Constructor for QuadraticAny class.
    //! @param linear The linear interaction.
    //! @param quadratic The quadratic interaction.
-   QuadraticAnyInteraction(const LinearType &linear,
+   QuadraticAny(const LinearType &linear,
                            const QuadraticType &quadratic) {
       
       std::unordered_set<IndexType, IndexHash> index_set;
@@ -191,7 +192,7 @@ public:
    
 private:
    //! @brief The degree of the interactions.
-   int32_t degree_ = 0;
+   std::int32_t degree_ = 0;
    
    //! @brief The mapping from the index to the integer.
    std::unordered_map<IndexType, std::int32_t, IndexHash> index_map_;
@@ -218,7 +219,8 @@ private:
 };
 
 
+} // namespace classical
 } // namespace interaction
 } // namespace compnal
 
-#endif /* COMPNAL_INTERACTION_QUADRATIC_ANY_INTERACTION_HPP_ */
+#endif /* COMPNAL_INTERACTION_QUADRATIC_ANY_HPP_ */

@@ -13,30 +13,31 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  polynomial_any_interaction.hpp
+//  polynomial_any.hpp
 //  compnal
 //
 //  Created by kohei on 2022/08/13.
 //  
 //
 
-#ifndef COMPNAL_INTERACTION_POLYNOMIAL_ANY_INTERACTION_HPP_
-#define COMPNAL_INTERACTION_POLYNOMIAL_ANY_INTERACTION_HPP_
+#ifndef COMPNAL_INTERACTION_POLYNOMIAL_ANY_HPP_
+#define COMPNAL_INTERACTION_POLYNOMIAL_ANY_HPP_
 
-#include "../utility/hash.hpp"
-#include "../utility/type.hpp"
-#include "../utility/sort.hpp"
+#include "../../utility/hash.hpp"
+#include "../../utility/type.hpp"
+#include "../../utility/sort.hpp"
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
 
 namespace compnal {
 namespace interaction {
+namespace classical {
 
 //! @brief Class to represent any polynomial-interactions.
 //! @tparam RealType The value type, which must be floating point type.
 template<typename RealType>
-class PolynomialAnyInteraction {
+class PolynomialAny {
    static_assert(std::is_floating_point<RealType>::value, "Template parameter RealType must be floating point type");
    
 public:
@@ -50,9 +51,9 @@ public:
    using PolynomialType = std::unordered_map<std::vector<IndexType>, RealType, utility::AnyIndexVectorHash>;
    
    
-   //! @brief Constructor for PolynomialAnyInteraction class.
+   //! @brief Constructor for PolynomialAny class.
    //! @param interaction The polynomial interaction.
-   PolynomialAnyInteraction(const PolynomialType &interaction) {
+   PolynomialAny(const PolynomialType &interaction) {
       std::unordered_set<IndexType, IndexHash> index_set;
       for (const auto &it: interaction) {
          index_set.insert(it.first.begin(), it.first.end());
@@ -161,9 +162,9 @@ private:
    std::vector<std::vector<std::size_t>> adjacency_list_;
 };
 
-
+} // namespace classical
 } // namespace interaction
 } // namespace compnal
 
 
-#endif /* COMPNAL_INTERACTION_POLYNOMIAL_ANY_INTERACTION_HPP_ */
+#endif /* COMPNAL_INTERACTION_POLYNOMIAL_ANY_HPP_ */

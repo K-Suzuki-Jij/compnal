@@ -23,14 +23,14 @@
 #ifndef COMPNAL_TEST_INTERACTION_POLYNOMIAL_ANY_HPP_
 #define COMPNAL_TEST_INTERACTION_POLYNOMIAL_ANY_HPP_
 
-#include "../../src/interaction/polynomial_any_interaction.hpp"
-#include <gtest/gtest.h>
+#include "../../src/interaction/classical/polynomial_any.hpp"
+#include "../test_settings.hpp"
 
 namespace compnal {
 namespace test {
 
 TEST(InteractionPolynomialAny, Basic) {
-   using PolyClass = interaction::PolynomialAnyInteraction<double>;
+   using PolyClass = interaction::classical::PolynomialAny<TestRealType>;
    
    const PolyClass::PolynomialType poly = {
       {{0, 1, 2}, -1.0},
@@ -55,7 +55,7 @@ TEST(InteractionPolynomialAny, Basic) {
 }
 
 TEST(InteractionPolynomialAny, IntKeys) {
-   using PolyClass = interaction::PolynomialAnyInteraction<double>;
+   using PolyClass = interaction::classical::PolynomialAny<TestRealType>;
    
    const PolyClass::PolynomialType poly = {
       {{0, 1}, -1.0},
@@ -106,7 +106,6 @@ TEST(InteractionPolynomialAny, IntKeys) {
    EXPECT_EQ(poly_interaction.GetAdjacencyList().at(5).at(0), 2);
 
 }
-
 
 
 } // namespace test

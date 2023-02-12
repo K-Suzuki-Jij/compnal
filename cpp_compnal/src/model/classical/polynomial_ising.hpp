@@ -19,7 +19,7 @@
 #define COMPNAL_MODEL_POLYNOMIAL_ISING_HPP_
 
 #include "../../lattice/all.hpp"
-#include "../../interaction/polynomial_any_interaction.hpp"
+#include "../../interaction/classical/polynomial_any.hpp"
 #include "../../utility/type.hpp"
 #include <vector>
 #include <unordered_map>
@@ -172,9 +172,9 @@ class PolynomialIsing<lattice::AnyLattice, RealType> {
 public:
    using ValueType = RealType;
    using OPType = utility::SpinType;
-   using IndexType = typename interaction::PolynomialAnyInteraction<RealType>::IndexType;
-   using IndexHash = typename interaction::PolynomialAnyInteraction<RealType>::IndexHash;
-   using PolynomialType = typename interaction::PolynomialAnyInteraction<RealType>::PolynomialType;
+   using IndexType = typename interaction::classical::PolynomialAny<RealType>::IndexType;
+   using IndexHash = typename interaction::classical::PolynomialAny<RealType>::IndexHash;
+   using PolynomialType = typename interaction::classical::PolynomialAny<RealType>::PolynomialType;
    
    PolynomialIsing(const lattice::AnyLattice &lattice,
                    const PolynomialType &interaction):
@@ -281,7 +281,7 @@ public:
    }
    
 private:
-   interaction::PolynomialAnyInteraction<RealType> interaction_;
+   interaction::classical::PolynomialAny<RealType> interaction_;
    lattice::AnyLattice lattice_;
    
    RealType CalculateMagnetization(const std::vector<OPType> &sample) const {

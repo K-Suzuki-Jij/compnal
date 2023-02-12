@@ -20,12 +20,12 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_ED_UTILITY_ALL_HPP_
-#define COMPNAL_SOLVER_ED_UTILITY_ALL_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_EXACT_DIAG_ALL_HPP_
+#define COMPNAL_SOLVER_UTILITY_EXACT_DIAG_ALL_HPP_
 
 #include "./ed_matrix_comp.hpp"
 #include "./mat_comp_hubbard.hpp"
 #include "./mat_comp_heisenberg.hpp"
 #include "./mat_comp_kondo_lattice.hpp"
 
-#endif /* COMPNAL_SOLVER_ED_UTILITY_ALL_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_EXACT_DIAG_ALL_HPP_ */

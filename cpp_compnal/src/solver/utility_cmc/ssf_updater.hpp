@@ -20,14 +20,14 @@
 //
 //
 
-#ifndef COMPNAL_SOLVER_CMC_UTILITY_SSF_UPDATER_HPP_
-#define COMPNAL_SOLVER_CMC_UTILITY_SSF_UPDATER_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_CMC_SSF_UPDATER_HPP_
+#define COMPNAL_SOLVER_UTILITY_CMC_SSF_UPDATER_HPP_
 
 #include <random>
 
 namespace compnal {
 namespace solver {
-namespace cmc_utility {
+namespace utility_cmc {
 
 template<class SystemType>
 void SSFUpdater(SystemType *system,
@@ -153,9 +153,9 @@ void IRKMRUpdater(SystemType *system,
 
 
 
-} // namespace cmc_utility
+} // namespace utility_cmc
 } // namespace solver
 } // namespace compnal
 
 
-#endif /* COMPNAL_SOLVER_CMC_UTILITY_SSF_UPDATER_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_CMC_SSF_UPDATER_HPP_ */

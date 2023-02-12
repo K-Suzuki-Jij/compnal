@@ -13,15 +13,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  system_ising_any_lattice.hpp
+//  system_ising_infinite_range.hpp
 //  compnal
 //
 //  Created by kohei on 2022/11/23.
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CMC_UTILITY_SYSTEM_ISING_ANY_LATTICE_HPP_
-#define COMPNAL_SOLVER_CMC_UTILITY_SYSTEM_ISING_ANY_LATTICE_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_CMC_SYSTEM_ISING_INFINITE_RANGE_HPP_
+#define COMPNAL_SOLVER_UTILITY_CMC_SYSTEM_ISING_INFINITE_RANGE_HPP_
 
 #include "../../lattice/all.hpp"
 #include "../../model/all.hpp"
@@ -29,12 +29,12 @@
 
 namespace compnal {
 namespace solver {
-namespace cmc_utility {
+namespace utility_cmc {
 
 template<typename RealType>
-class CMCSystem<model::Ising<lattice::AnyLattice, RealType>>: public CMCBaseIsingSystem {
+class CMCSystem<model::classical::Ising<lattice::InfiniteRange, RealType>>: public CMCBaseIsingSystem {
    
-   using ModelType = model::Ising<lattice::AnyLattice, RealType>;
+   using ModelType = model::classical::Ising<lattice::InfiniteRange, RealType>;
    
 public:
    using ValueType = typename ModelType::ValueType;
@@ -42,10 +42,8 @@ public:
    CMCSystem(const ModelType &model):
    system_size_(model.GetSystemSize()),
    bc_(model.GetBoundaryCondition()),
-   col_ptr_(model.GetColPtr()),
-   val_ptr_(model.GetValPtr()),
-   row_ptr_(model.GetRowPtr()),
-   linear_(model.GetLinear()){}
+   quadratic_(model.GetQuadratic()),
+   linear_(model.GetLinear()) {}
    
    void InitializeSSF(const uint64_t seed) {
       sample_ = this->GenerateRandomSpin(seed, system_size_);
@@ -54,11 +52,14 @@ public:
    
    void Flip(const std::int32_t index) {
       const auto spin = sample_[index];
-      sample_[index] *= -1;
-      energy_difference_[index] *= -1;
-      for (std::int64_t i = row_ptr_[index]; i < row_ptr_[index + 1]; ++i) {
-         energy_difference_[col_ptr_[i]] += 4*val_ptr_[i]*sample_[col_ptr_[i]]*spin;
+      for (std::int32_t i = 0; i < index; ++i) {
+         energy_difference_[i] += 4*quadratic_*sample_[i]*spin;
       }
+      for (std::int32_t i = index + 1; i < system_size_; ++i) {
+         energy_difference_[i] += 4*quadratic_*sample_[i]*spin;
+      }
+      energy_difference_[index] *= -1;
+      sample_[index] *= -1;
    }
    
    const std::vector<typename ModelType::OPType> &GetSample() const {
@@ -76,22 +77,20 @@ public:
 private:
    const std::int32_t system_size_;
    const lattice::BoundaryCondition bc_;
-   const std::vector<std::int32_t> &col_ptr_;
-   const std::vector<typename ModelType::ValueType> &val_ptr_;
-   const std::vector<std::int64_t> &row_ptr_;
-   const std::vector<typename ModelType::ValueType> &linear_;
-
+   const typename ModelType::QuadraticType quadratic_;
+   const typename ModelType::LinearType linear_;
+   
    std::vector<typename ModelType::OPType> sample_;
    std::vector<typename ModelType::ValueType> energy_difference_;
    
    std::vector<typename ModelType::ValueType> GenerateEnergyDifference(const std::vector<typename ModelType::OPType> &sample) const {
       std::vector<typename ModelType::ValueType> energy_difference(system_size_);
       for (std::int32_t i = 0; i < system_size_; ++i) {
-         const auto spin = sample[i];
-         for (std::int64_t j = row_ptr_[i]; j < row_ptr_[i + 1]; ++j) {
-            energy_difference[col_ptr_[j]] += -2*val_ptr_[j]*sample[col_ptr_[j]]*spin;
+         energy_difference[i] += -2*linear_*sample[i];
+         for (std::int32_t j = i + 1; j < system_size_; ++j) {
+            energy_difference[i] += -2*quadratic_*sample[i]*sample[j];
+            energy_difference[j] += -2*quadratic_*sample[i]*sample[j];
          }
-         energy_difference[i] += - 2*linear_[i]*sample[i];
       }
       return energy_difference;
    }
@@ -99,12 +98,11 @@ private:
 };
 
 template<typename RealType>
-CMCSystem(const model::Ising<lattice::AnyLattice, RealType>) -> CMCSystem<model::Ising<lattice::AnyLattice, RealType>>;
+CMCSystem(const model::classical::Ising<lattice::InfiniteRange, RealType>) -> CMCSystem<model::classical::Ising<lattice::InfiniteRange, RealType>>;
 
-
-} // namespace cmc_utility
+} // namespace utility_cmc
 } // namespace solver
 } // namespace compnal
 
 
-#endif /* COMPNAL_SOLVER_CMC_UTILITY_SYSTEM_ISING_ANY_LATTICE_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_CMC_SYSTEM_ISING_INFINITE_RANGE_HPP_ */

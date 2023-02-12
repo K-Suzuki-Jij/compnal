@@ -20,14 +20,14 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_ED_UTILITY_ED_MATRIX_COMP_HPP_
-#define COMPNAL_SOLVER_ED_UTILITY_ED_MATRIX_COMP_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_EXACT_DIAG_ED_MATRIX_COMP_HPP_
+#define COMPNAL_SOLVER_UTILITY_EXACT_DIAG_ED_MATRIX_COMP_HPP_
 
 #include "../../blas/all.hpp"
 
 namespace compnal {
 namespace solver {
-namespace ed_utility {
+namespace utility_exact_diag {
 
 //! @brief Information for calculating the matrix elements of the Hamiltonian.
 template<typename RealType>
@@ -121,8 +121,8 @@ void GenerateMatrixComponentsIntersite(ExactDiagMatrixComponents<RealType> *edmc
    }
 }
 
-} // namespace ed_utility
+} // namespace utility_exact_diag
 } // namespace solver
 } // namespace compnal
 
-#endif /* COMPNAL_SOLVER_ED_UTILITY_ED_MATRIX_COMP_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_EXACT_DIAG_ED_MATRIX_COMP_HPP_ */

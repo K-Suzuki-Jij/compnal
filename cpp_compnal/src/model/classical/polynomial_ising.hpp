@@ -26,6 +26,7 @@
 
 namespace compnal {
 namespace model {
+namespace classical {
 
 //! @brief Polynomial Ising class.
 template<class LatticeType, typename RealType>
@@ -38,7 +39,7 @@ public:
    using IndexType = std::int32_t;
    using OPType = utility::SpinType;
    using PolynomialType = std::unordered_map<std::int32_t, RealType>;
-      
+   
    PolynomialIsing(const LatticeType &lattice,
                    const PolynomialType &interaction):
    lattice_(lattice) {
@@ -49,11 +50,11 @@ public:
          interaction_[it.first] = it.second;
       }
    }
-
+   
    const std::vector<RealType> &GetInteraction() const {
       return interaction_;
    }
-         
+   
    std::int32_t GetSystemSize() const {
       return lattice_.GetSystemSize();
    }
@@ -99,7 +100,7 @@ public:
    }
    
    RealType CalculateOnsiteAverage(const std::vector<std::vector<OPType>> &samples,
-                                         const IndexType index) const {
+                                   const IndexType index) const {
       if (index < 0) {
          throw std::runtime_error("The index is out of range.");
       }
@@ -127,7 +128,7 @@ public:
 private:
    LatticeType lattice_;
    std::vector<RealType> interaction_;
-
+   
    
    RealType CalculateEnergy(const lattice::Chain &chain_lattice,
                             const std::vector<OPType> &sample) const {
@@ -167,14 +168,14 @@ private:
 template<typename RealType>
 class PolynomialIsing<lattice::AnyLattice, RealType> {
    static_assert(std::is_floating_point<RealType>::value, "Template parameter RealType must be floating point type");
-  
+   
 public:
    using ValueType = RealType;
    using OPType = utility::SpinType;
    using IndexType = typename interaction::PolynomialAnyInteraction<RealType>::IndexType;
    using IndexHash = typename interaction::PolynomialAnyInteraction<RealType>::IndexHash;
    using PolynomialType = typename interaction::PolynomialAnyInteraction<RealType>::PolynomialType;
-      
+   
    PolynomialIsing(const lattice::AnyLattice &lattice,
                    const PolynomialType &interaction):
    lattice_(lattice), interaction_(interaction) {}
@@ -233,7 +234,7 @@ public:
    }
    
    RealType CalculateOnsiteAverage(const std::vector<std::vector<OPType>> &samples,
-                                         const IndexType index) const {
+                                   const IndexType index) const {
       const std::unordered_map<IndexType, std::int32_t, IndexHash> &index_map = interaction_.GetIndexMap();
       if (index_map.count(index) == 0) {
          throw std::runtime_error("The index is out of range.");
@@ -299,6 +300,7 @@ auto make_polynomial_ising(const LatticeType &lattice,
    return PolynomialIsing<LatticeType, RealType>{lattice, interaction};
 }
 
+} // namespace classical
 } // namespace model
 } // namespace compnal
 

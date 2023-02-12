@@ -29,7 +29,7 @@ namespace compnal {
 namespace test {
 
 TEST(ModelIsing, AnyLatticeBasic) {
-   using IsingClass = model::Ising<lattice::AnyLattice, double>;
+   using IsingClass = model::classical::Ising<lattice::AnyLattice, double>;
    using LinearType = IsingClass::LinearType;
    using QuadType = IsingClass::QuadraticType;
    
@@ -67,7 +67,7 @@ TEST(ModelIsing, AnyLatticeBasic) {
 }
 
 TEST(ModelIsing, AnyLatticeInt) {
-   using IsingClass = model::Ising<lattice::AnyLattice, double>;
+   using IsingClass = model::classical::Ising<lattice::AnyLattice, double>;
    using LinearType = IsingClass::LinearType;
    using QuadType = IsingClass::QuadraticType;
    
@@ -127,8 +127,8 @@ TEST(ModelIsing, AnyLatticeInt) {
 
 TEST(ModelIsing, Square) {
    
-   const auto e_pbc = model::make_ising<lattice::Square, double>(lattice::Square{2, 3, lattice::BoundaryCondition::PBC}, 0, -2).CalculateEnergy({1, -1, 1, 1, -1, 1});
-   const auto e_obc = model::make_ising<lattice::Square, double>(lattice::Square{2, 3, lattice::BoundaryCondition::OBC}, 0, -2).CalculateEnergy({1, -1, 1, 1, -1, 1});
+   const auto e_pbc = model::classical::make_ising<lattice::Square, double>(lattice::Square{2, 3, lattice::BoundaryCondition::PBC}, 0, -2).CalculateEnergy({1, -1, 1, 1, -1, 1});
+   const auto e_obc = model::classical::make_ising<lattice::Square, double>(lattice::Square{2, 3, lattice::BoundaryCondition::OBC}, 0, -2).CalculateEnergy({1, -1, 1, 1, -1, 1});
    EXPECT_DOUBLE_EQ(e_obc, 2.0);
    EXPECT_DOUBLE_EQ(e_pbc, 8.0);
 

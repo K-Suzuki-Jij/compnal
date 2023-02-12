@@ -58,7 +58,7 @@ void CalculateMatrixVectorProduct(std::vector<T1> *vector_out,
                                   const T2 coeff,
                                   const DASPM<T3> &matrix_in,
                                   const std::vector<T4> &vector_in,
-                                  const std::int32_t num_threads = 1) {
+                                  const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    if (matrix_in.col_dim != vector_in.size()) {
       std::stringstream ss;
@@ -88,7 +88,7 @@ void CalculateSymmetricMatrixVectorProduct(std::vector<T1> *vector_out,
                                            const T2 coeff,
                                            const DASPM<T3> &matrix_in,
                                            const std::vector<T4> &vector_in,
-                                           const std::int32_t num_threads = 1) {
+                                           const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    if (matrix_in.row_dim != matrix_in.col_dim) {
       std::stringstream ss;
@@ -148,7 +148,7 @@ void CalculateSymmetricMatrixVectorProduct(std::vector<T1> *vector_out,
 template<typename T1, typename T2>
 void AddSymmetricDiagonalElements(DASPM<T1> *matrix_in,
                                   const T2 diag_add,
-                                  const std::int32_t num_threads = 1) {
+                                  const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    if (matrix_in->row_dim != matrix_in->col_dim) {
       std::stringstream ss;
@@ -170,7 +170,7 @@ void AddSymmetricDiagonalElements(DASPM<T1> *matrix_in,
 template<typename T1, typename T2>
 void AddDiagonalElements(DASPM<T1> *matrix_in,
                          const T2 diag_add,
-                         const std::int32_t num_threads = 1) {
+                         const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    if (matrix_in->row_dim != matrix_in->col_dim) {
       std::stringstream ss;

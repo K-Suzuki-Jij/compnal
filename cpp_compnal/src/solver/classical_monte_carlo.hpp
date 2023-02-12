@@ -19,7 +19,7 @@
 #define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
 
 #include "../utility/type.hpp"
-#include "./cmc_utility/all.hpp"
+#include "./utility_cmc/all.hpp"
 #include <vector>
 #include <random>
 #include <sstream>
@@ -66,7 +66,7 @@ public:
       beta_ = 1/temperature;
    }
    
-   void SetAlgorithm(const cmc_utility::Algorithm algorithm) {
+   void SetAlgorithm(const utility_cmc::Algorithm algorithm) {
       algorithm_ = algorithm;
    }
    
@@ -86,7 +86,7 @@ public:
       return 1/beta_;
    }
    
-   cmc_utility::Algorithm GetAlgorithm() const {
+   utility_cmc::Algorithm GetAlgorithm() const {
       return algorithm_;
    }
 
@@ -125,34 +125,34 @@ public:
       samples_.shrink_to_fit();
       samples_.resize(num_samples_);
       
-      if (algorithm_ == cmc_utility::Algorithm::METROPOLIS) {
+      if (algorithm_ == utility_cmc::Algorithm::METROPOLIS) {
 #pragma omp parallel for schedule(guided) num_threads(num_threads_)
          for (std::int32_t sample_count = 0; sample_count < num_samples_; sample_count++) {
-            cmc_utility::CMCSystem system{model_};
+            utility_cmc::CMCSystem system{model_};
             system.InitializeSSF(system_seed_list[sample_count]);
-            cmc_utility::SSFUpdater(&system, num_sweeps_, beta_, mc_seed_list[sample_count], cmc_utility::metropolis_transition<RealType>);
+            utility_cmc::SSFUpdater(&system, num_sweeps_, beta_, mc_seed_list[sample_count], utility_cmc::metropolis_transition<RealType>);
             samples_[sample_count] = system.GetSample();
          }
       }
-      else if (algorithm_ == cmc_utility::Algorithm::HEAT_BATH) {
+      else if (algorithm_ == utility_cmc::Algorithm::HEAT_BATH) {
 #pragma omp parallel for schedule(guided) num_threads(num_threads_)
          for (std::int32_t sample_count = 0; sample_count < num_samples_; sample_count++) {
-            cmc_utility::CMCSystem system{model_};
+            utility_cmc::CMCSystem system{model_};
             system.InitializeSSF(system_seed_list[sample_count]);
-            cmc_utility::SSFUpdater(&system, num_sweeps_, beta_, mc_seed_list[sample_count], cmc_utility::heat_bath_transition<RealType>);
+            utility_cmc::SSFUpdater(&system, num_sweeps_, beta_, mc_seed_list[sample_count], utility_cmc::heat_bath_transition<RealType>);
             samples_[sample_count] = system.GetSample();
          }
       }
-      else if (algorithm_ == cmc_utility::Algorithm::IRKMR) {
+      else if (algorithm_ == utility_cmc::Algorithm::IRKMR) {
          throw std::runtime_error("Under Construction");
       }
-      else if (algorithm_ == cmc_utility::Algorithm::RKMR) {
+      else if (algorithm_ == utility_cmc::Algorithm::RKMR) {
          throw std::runtime_error("Under Construction");
       }
-      else if (algorithm_ == cmc_utility::Algorithm::SWENDSEN_WANG) {
+      else if (algorithm_ == utility_cmc::Algorithm::SWENDSEN_WANG) {
          throw std::runtime_error("Under Construction");
       }
-      else if (algorithm_ == cmc_utility::Algorithm::WOLFF) {
+      else if (algorithm_ == utility_cmc::Algorithm::WOLFF) {
          throw std::runtime_error("Under Construction");
       }
       else {
@@ -199,7 +199,7 @@ private:
    std::int32_t num_samples_ = 1;
    std::int32_t num_threads_ = 1;
    RealType beta_            = 1;
-   cmc_utility::Algorithm algorithm_ = cmc_utility::Algorithm::METROPOLIS;
+   utility_cmc::Algorithm algorithm_ = utility_cmc::Algorithm::METROPOLIS;
    std::uint64_t seed_ = std::random_device()();
    const ModelType model_;
    std::vector<std::vector<OPType>> samples_;

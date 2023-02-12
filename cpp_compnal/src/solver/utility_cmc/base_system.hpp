@@ -20,14 +20,14 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CMC_UTILITY_BASE_SYSTEM_HPP_
-#define COMPNAL_SOLVER_CMC_UTILITY_BASE_SYSTEM_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_CMC_BASE_SYSTEM_HPP_
+#define COMPNAL_SOLVER_UTILITY_CMC_BASE_SYSTEM_HPP_
 
 #include "../../utility/all.hpp"
 
 namespace compnal {
 namespace solver {
-namespace cmc_utility {
+namespace utility_cmc {
 
 template<class ModelType>
 class CMCSystem;
@@ -47,9 +47,9 @@ protected:
    
 };
 
-} // namespace cmc_utility
+} // namespace utility_cmc
 } // namespace solver
 } // namespace compnal
 
 
-#endif /* COMPNAL_SOLVER_CMC_UTILITY_BASE_SYSTEM_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_CMC_BASE_SYSTEM_HPP_ */

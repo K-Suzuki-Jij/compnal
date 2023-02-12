@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CMC_UTILITY_ALL_HPP_
-#define COMPNAL_SOLVER_CMC_UTILITY_ALL_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_CMC_ALL_HPP_
+#define COMPNAL_SOLVER_UTILITY_CMC_ALL_HPP_
 
 #include "algorithm.hpp"
 #include "base_system.hpp"
@@ -37,4 +37,4 @@
 #include "system_poly_ising_infinite_range.hpp"
 #include "system_poly_ising_any_lattice.hpp"
 
-#endif /* COMPNAL_SOLVER_CMC_UTILITY_ALL_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_CMC_ALL_HPP_ */

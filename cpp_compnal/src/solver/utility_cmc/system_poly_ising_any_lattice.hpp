@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CMC_UTILITY_SYSTEM_POLY_ISING_ANY_LATTICE_HPP_
-#define COMPNAL_SOLVER_CMC_UTILITY_SYSTEM_POLY_ISING_ANY_LATTICE_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_CMC_SYSTEM_POLY_ISING_ANY_LATTICE_HPP_
+#define COMPNAL_SOLVER_UTILITY_CMC_SYSTEM_POLY_ISING_ANY_LATTICE_HPP_
 
 #include "../../lattice/all.hpp"
 #include "../../model/all.hpp"
@@ -29,12 +29,12 @@
 
 namespace compnal {
 namespace solver {
-namespace cmc_utility {
+namespace utility_cmc {
 
 template<typename RealType>
-class CMCSystem<model::PolynomialIsing<lattice::AnyLattice, RealType>>: public CMCBaseIsingSystem {
+class CMCSystem<model::classical::PolynomialIsing<lattice::AnyLattice, RealType>>: public CMCBaseIsingSystem {
    
-   using ModelType = model::PolynomialIsing<lattice::AnyLattice, RealType>;
+   using ModelType = model::classical::PolynomialIsing<lattice::AnyLattice, RealType>;
    
 public:
    using ValueType = typename ModelType::ValueType;
@@ -113,11 +113,11 @@ private:
 };
 
 template<typename RealType>
-CMCSystem(const model::PolynomialIsing<lattice::AnyLattice, RealType>) -> CMCSystem<model::PolynomialIsing<lattice::AnyLattice, RealType>>;
+CMCSystem(const model::classical::PolynomialIsing<lattice::AnyLattice, RealType>) -> CMCSystem<model::classical::PolynomialIsing<lattice::AnyLattice, RealType>>;
 
 
-} // namespace cmc_utility
+} // namespace utility_cmc
 } // namespace solver
 } // namespace compnal
 
-#endif /* COMPNAL_SOLVER_CMC_UTILITY_SYSTEM_POLY_ISING_ANY_LATTICE_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_CMC_SYSTEM_POLY_ISING_ANY_LATTICE_HPP_ */

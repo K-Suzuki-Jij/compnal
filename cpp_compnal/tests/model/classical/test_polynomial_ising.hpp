@@ -25,8 +25,8 @@ namespace compnal {
 namespace test {
 
 TEST(ModelPolynomialIsing, Chain) {
-   using OPType = typename model::PolynomialIsing<lattice::Chain, double>::OPType;
-   auto model = model::make_polynomial_ising<lattice::Chain, double>(lattice::Chain{4}, {{1, -1.0}, {3, +2.0}});
+   using OPType = typename model::classical::PolynomialIsing<lattice::Chain, double>::OPType;
+   auto model = model::classical::make_polynomial_ising<lattice::Chain, double>(lattice::Chain{4}, {{1, -1.0}, {3, +2.0}});
    EXPECT_EQ(model.GetInteraction(), (std::vector<double>{0.0, -1.0, 0.0, +2.0}));
    EXPECT_EQ(model.GetSystemSize(), 4);
    EXPECT_EQ(model.GetBoundaryCondition(), lattice::BoundaryCondition::OBC);
@@ -36,7 +36,7 @@ TEST(ModelPolynomialIsing, Chain) {
 }
 
 TEST(ModelPolynomialIsing, AnyLattice) {
-   auto model = model::make_polynomial_ising<lattice::AnyLattice, double>(lattice::AnyLattice{}, {{{1, 2, "a"}, -1.0}, {{1, utility::AnyTupleType{1, 1}}, -2.0}});
+   auto model = model::classical::make_polynomial_ising<lattice::AnyLattice, double>(lattice::AnyLattice{}, {{{1, 2, "a"}, -1.0}, {{1, utility::AnyTupleType{1, 1}}, -2.0}});
       
    EXPECT_EQ(model.GetSystemSize(), 4);
    EXPECT_EQ(model.GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
@@ -46,7 +46,7 @@ TEST(ModelPolynomialIsing, InfiniteRange) {
    
    lattice::InfiniteRange lattice{10};
    std::unordered_map<std::int32_t, double> interaction{{0, -1.0}, {3, +1.0}};
-   auto model = model::make_polynomial_ising<lattice::InfiniteRange, double>(lattice, interaction);
+   auto model = model::classical::make_polynomial_ising<lattice::InfiniteRange, double>(lattice, interaction);
    model.CalculateEnergy({});
    
 }

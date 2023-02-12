@@ -38,7 +38,7 @@ template<typename RealType>
 struct DiagParams {
    std::int32_t min_step = 0;
    std::int32_t max_step = 1000;
-   std::int32_t num_threads = 1;
+   std::int32_t num_threads = utility::DEFAULT_NUM_THREADS;
    std::uint32_t seed = std::random_device()();
    RealType acc = std::pow(10, -14);
    bool flag_use_initial_vec = false;

@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CMC_UTILITY_SYSTEM_ISING_CUBIC_HPP_
-#define COMPNAL_SOLVER_CMC_UTILITY_SYSTEM_ISING_CUBIC_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_CMC_SYSTEM_ISING_CUBIC_HPP_
+#define COMPNAL_SOLVER_UTILITY_CMC_SYSTEM_ISING_CUBIC_HPP_
 
 #include "../../lattice/all.hpp"
 #include "../../model/all.hpp"
@@ -29,12 +29,12 @@
 
 namespace compnal {
 namespace solver {
-namespace cmc_utility {
+namespace utility_cmc {
 
 template<typename RealType>
-class CMCSystem<model::Ising<lattice::Cubic, RealType>>: public CMCBaseIsingSystem {
+class CMCSystem<model::classical::Ising<lattice::Cubic, RealType>>: public CMCBaseIsingSystem {
    
-   using ModelType = model::Ising<lattice::Cubic, RealType>;
+   using ModelType = model::classical::Ising<lattice::Cubic, RealType>;
 
 public:
    using ValueType = typename ModelType::ValueType;
@@ -280,11 +280,11 @@ private:
 };
 
 template<typename RealType>
-CMCSystem(const model::Ising<lattice::Cubic, RealType>) -> CMCSystem<model::Ising<lattice::Cubic, RealType>>;
+CMCSystem(const model::classical::Ising<lattice::Cubic, RealType>) -> CMCSystem<model::classical::Ising<lattice::Cubic, RealType>>;
 
 
-} // namespace cmc_utility
+} // namespace utility_cmc
 } // namespace solver
 } // namespace compnal
 
-#endif /* COMPNAL_SOLVER_CMC_UTILITY_SYSTEM_ISING_CUBIC_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_CMC_SYSTEM_ISING_CUBIC_HPP_ */

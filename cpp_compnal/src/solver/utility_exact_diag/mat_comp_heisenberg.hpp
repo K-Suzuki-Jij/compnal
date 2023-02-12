@@ -20,14 +20,14 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_ED_UTILITY_MAT_COMP_HEISENBERG_HPP_
-#define COMPNAL_SOLVER_ED_UTILITY_MAT_COMP_HEISENBERG_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_EXACT_DIAG_MAT_COMP_HEISENBERG_HPP_
+#define COMPNAL_SOLVER_UTILITY_EXACT_DIAG_MAT_COMP_HEISENBERG_HPP_
 
 #include "./ed_matrix_comp.hpp"
 
 namespace compnal {
 namespace solver {
-namespace ed_utility {
+namespace utility_exact_diag {
 
 template<typename RealType>
 void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
@@ -346,8 +346,8 @@ void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
 
 
 
-} // namespace ed_utility
+} // namespace utility_exact_diag
 } // namespace solver
 } // namespace compnal
 
-#endif /* COMPNAL_SOLVER_ED_UTILITY_MAT_COMP_HEISENBERG_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_EXACT_DIAG_MAT_COMP_HEISENBERG_HPP_ */

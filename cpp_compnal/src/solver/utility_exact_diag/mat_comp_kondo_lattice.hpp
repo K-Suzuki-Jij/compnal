@@ -13,37 +13,40 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  mat_comp_hubbard.hpp
+//  mat_comp_kondo_lattice.hpp
 //  compnal
 //
-//  Created by kohei on 2023/01/18.
+//  Created by kohei on 2023/02/06.
 //  
 //
 
-#ifndef COMPNAL_SOLVER_ED_UTILITY_MAT_COMP_HUBBARD_HPP_
-#define COMPNAL_SOLVER_ED_UTILITY_MAT_COMP_HUBBARD_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_EXACT_DIAG_MAT_COMP_KONDO_LATTICE_HPP_
+#define COMPNAL_SOLVER_UTILITY_EXACT_DIAG_MAT_COMP_KONDO_LATTICE_HPP_
 
 #include "./ed_matrix_comp.hpp"
 
 namespace compnal {
 namespace solver {
-namespace ed_utility {
+namespace utility_exact_diag {
 
 template<typename RealType>
 void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
                               const std::int64_t basis,
-                              const model::quantum::Hubbard<lattice::Chain, RealType> &model) {
+                              const model::quantum::KondoLattice<lattice::Chain, RealType> &model) {
    
    const blas::CRS<RealType> &onsite_ham = model.GenarateOnsiteOperatorHam();
+   
    const blas::CRS<RealType> &op_c_up = model.GetOnsiteOperatorCUp();
    const blas::CRS<RealType> &op_c_up_d = model.GetOnsiteOperatorCUpDagger();
    const blas::CRS<RealType> &op_c_down = model.GetOnsiteOperatorCDown();
    const blas::CRS<RealType> &op_c_down_d = model.GetOnsiteOperatorCDownDagger();
    const blas::CRS<RealType> &op_n = model.GetOnsiteOperatorNC();
-   const std::int32_t dim_onsite = model.GetDimOnsite();
-   const std::int32_t system_size = model.GetSystemSize();
    const std::vector<RealType> &hop_list = model.GetHoppingEnergy();
    const std::vector<RealType> &intersite_coulomb_list = model.GetIntersiteCoulomb();
+   
+   const std::int32_t dim_onsite = model.GetDimOnsite();
+   const std::int32_t system_size = model.GetSystemSize();
+   
    
    for (std::int32_t site = 0; site < system_size; ++site) {
       edmc->basis_onsite[site] = CalculateLocalBasis(basis, site, dim_onsite);
@@ -125,11 +128,10 @@ void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
    }
 }
 
-
 template<typename RealType>
 void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
                               const std::int64_t basis,
-                              const model::quantum::Hubbard<lattice::Square, RealType> &model) {
+                              const model::quantum::KondoLattice<lattice::Square, RealType> &model) {
    
    const blas::CRS<RealType> &onsite_ham = model.GenarateOnsiteOperatorHam();
    const blas::CRS<RealType> &op_c_up = model.GetOnsiteOperatorCUp();
@@ -281,7 +283,7 @@ void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
 template<typename RealType>
 void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
                               const std::int64_t basis,
-                              const model::quantum::Hubbard<lattice::Cubic, RealType> &model) {
+                              const model::quantum::KondoLattice<lattice::Cubic, RealType> &model) {
    
    const blas::CRS<RealType> &onsite_ham = model.GenarateOnsiteOperatorHam();
    const blas::CRS<RealType> &op_c_up = model.GetOnsiteOperatorCUp();
@@ -482,8 +484,8 @@ void GenerateMatrixComponents(ExactDiagMatrixComponents<RealType> *edmc,
 
 
 
-} // namespace ed_utility
+} // namespace utility_exact_diag
 } // namespace solver
 } // namespace compnal
 
-#endif /* mat_comp_hubbaCOMPNAL_SOLVER_ED_UTILITY_MAT_COMP_HUBBARD_HPP_rd_chain_h */
+#endif /* COMPNAL_SOLVER_UTILITY_EXACT_DIAG_MAT_COMP_KONDO_LATTICE_HPP_ */

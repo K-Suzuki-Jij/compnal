@@ -34,7 +34,7 @@ namespace blas {
 template<typename RealType>
 struct IIParams {
    std::int32_t max_step = 3;
-   std::int32_t num_threads = 1;
+   std::int32_t num_threads = utility::DEFAULT_NUM_THREADS;
    RealType diag_add = std::pow(10, -11);
    RealType acc = std::pow(10, -7);
    LinearEqParams<RealType> linear_eq_params;

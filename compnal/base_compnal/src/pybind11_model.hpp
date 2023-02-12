@@ -36,7 +36,7 @@ using namespace pybind11::literals;
 template<class LatticeType, typename RealType>
 void pybind11ModelIsing(py::module &m, const std::string &post_name = "") {
    
-   using Ising = model::Ising<LatticeType, RealType>;
+   using Ising = model::classical::Ising<LatticeType, RealType>;
    std::string name = std::string("Ising") + post_name;
    
    auto py_class = py::class_<Ising>(m, name.c_str(), py::module_local());
@@ -61,7 +61,7 @@ void pybind11ModelIsing(py::module &m, const std::string &post_name = "") {
 template<class LatticeType, typename RealType>
 void pybind11ModelPolynomialIsing(py::module &m, const std::string &post_name = "") {
    
-   using PolyIsing = model::PolynomialIsing<LatticeType, RealType>;
+   using PolyIsing = model::classical::PolynomialIsing<LatticeType, RealType>;
    std::string name = std::string("PolynomialIsing") + post_name;
 
    auto py_class = py::class_<PolyIsing>(m, name.c_str(), py::module_local());

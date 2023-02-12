@@ -34,7 +34,7 @@ namespace test {
 TEST(SolverClassicalMonteCarlo, IsingChainOBC) {
    const std::int32_t system_size = 10;
    const lattice::Chain lattice(system_size, lattice::BoundaryCondition::OBC);
-   model::Ising model(lattice, 0.0, -1.0);
+   model::classical::Ising model(lattice, 0.0, -1.0);
    
    const std::uint64_t seed = 1;
    solver::ClassicalMonteCarlo solver(model);
@@ -52,7 +52,7 @@ TEST(SolverClassicalMonteCarlo, IsingChainOBC) {
 TEST(SolverClassicalMonteCarlo, IsingChainPBC) {
    const std::int32_t system_size = 10;
    const lattice::Chain lattice(system_size, lattice::BoundaryCondition::PBC);
-   model::Ising model(lattice, 0.0, -1.0);
+   model::classical::Ising model(lattice, 0.0, -1.0);
    
    const std::uint64_t seed = 1;
    solver::ClassicalMonteCarlo solver(model);
@@ -71,7 +71,7 @@ TEST(SolverClassicalMonteCarlo, IsingSquareOBC) {
    const std::int32_t x_size = 3;
    const std::int32_t y_size = 4;
    const lattice::Square lattice(x_size, y_size, lattice::BoundaryCondition::OBC);
-   model::Ising model(lattice, 0.0, -1.0);
+   model::classical::Ising model(lattice, 0.0, -1.0);
    
    const std::uint64_t seed = 1;
    solver::ClassicalMonteCarlo solver(model);
@@ -91,7 +91,7 @@ TEST(SolverClassicalMonteCarlo, IsingSquarePBC) {
    const std::int32_t x_size = 3;
    const std::int32_t y_size = 5;
    const lattice::Square lattice(x_size, y_size, lattice::BoundaryCondition::PBC);
-   model::Ising model(lattice, 0.0, -1.0);
+   model::classical::Ising model(lattice, 0.0, -1.0);
    
    const std::uint64_t seed = 1;
    solver::ClassicalMonteCarlo solver(model);
@@ -111,7 +111,7 @@ TEST(SolverClassicalMonteCarlo, IsingCubicOBC) {
    const std::int32_t y_size = 4;
    const std::int32_t z_size = 5;
    const lattice::Cubic lattice(x_size, y_size, z_size, lattice::BoundaryCondition::OBC);
-   model::Ising model(lattice, 0.0, -1.0);
+   model::classical::Ising model(lattice, 0.0, -1.0);
    
    const std::uint64_t seed = 1;
    solver::ClassicalMonteCarlo solver(model);
@@ -136,7 +136,7 @@ TEST(SolverClassicalMonteCarlo, IsingCubicPBC) {
    const std::int32_t y_size = 4;
    const std::int32_t z_size = 5;
    const lattice::Cubic lattice(x_size, y_size, z_size, lattice::BoundaryCondition::PBC);
-   model::Ising model(lattice, 0.0, -1.0);
+   model::classical::Ising model(lattice, 0.0, -1.0);
    
    const std::uint64_t seed = 1;
    solver::ClassicalMonteCarlo solver(model);
@@ -160,7 +160,7 @@ TEST(SolverClassicalMonteCarlo, IsingCubicPBC) {
 TEST(SolverClassicalMonteCarlo, IsingInfiniteRange) {
    const std::int32_t system_size = 10;
    const lattice::InfiniteRange lattice(system_size);
-   model::Ising model(lattice, 0.0, -1.0);
+   model::classical::Ising model(lattice, 0.0, -1.0);
    
    const std::uint64_t seed = 1;
    solver::ClassicalMonteCarlo solver(model);
@@ -178,8 +178,8 @@ TEST(SolverClassicalMonteCarlo, IsingInfiniteRange) {
 
 TEST(SolverClassicalMonteCarlo, IsingAnyLattice) {
    
-   using LinearType = model::Ising<lattice::AnyLattice, double>::LinearType;
-   using QuadraticType = model::Ising<lattice::AnyLattice, double>::QuadraticType;
+   using LinearType = model::classical::Ising<lattice::AnyLattice, double>::LinearType;
+   using QuadraticType = model::classical::Ising<lattice::AnyLattice, double>::QuadraticType;
    const std::int32_t system_size = 10;
    
    QuadraticType quad;
@@ -191,7 +191,7 @@ TEST(SolverClassicalMonteCarlo, IsingAnyLattice) {
    }
    
    const std::uint64_t seed = 1;
-   auto model = model::make_ising<lattice::AnyLattice, double>(lattice::AnyLattice{}, LinearType{}, quad);
+   auto model = model::classical::make_ising<lattice::AnyLattice, double>(lattice::AnyLattice{}, LinearType{}, quad);
    solver::ClassicalMonteCarlo solver(model);
    solver.SetNumThreads(4);
    solver.SetNumSweeps(10000);

@@ -23,7 +23,7 @@
 #ifndef COMPNAL_MODEL_QUANTUM_BASE_SPIN_ELECTRON_HPP_
 #define COMPNAL_MODEL_QUANTUM_BASE_SPIN_ELECTRON_HPP_
 
-#include "../../solver/ed_utility/ed_matrix_comp.hpp"
+#include "../../solver/utility_exact_diag/ed_matrix_comp.hpp"
 #include "../../lattice/all.hpp"
 #include "../../blas/all.hpp"
 #include "../../utility/hash.hpp"
@@ -179,34 +179,50 @@ public:
          ss << "Invalid parameters" << std::endl;
          throw std::runtime_error(ss.str());
       }
-      if (row_electron == col_electron && 0 <= row_electron && row_electron < 4 && 0 <= col_electron &&
+      if (row_electron == col_electron &&
+          0 <= row_electron &&
+          row_electron < 4  &&
+          0 <= col_electron &&
           col_electron < 4) {
          return {+0 + conserved_quantum_number_.first, +0 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 0 && col_electron == 1) {
+      }
+      else if (row_electron == 0 && col_electron == 1) {
          return {-1 + conserved_quantum_number_.first, -1 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 0 && col_electron == 2) {
+      }
+      else if (row_electron == 0 && col_electron == 2) {
          return {-1 + conserved_quantum_number_.first, +1 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 0 && col_electron == 3) {
+      }
+      else if (row_electron == 0 && col_electron == 3) {
          return {-2 + conserved_quantum_number_.first, +0 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 1 && col_electron == 0) {
+      }
+      else if (row_electron == 1 && col_electron == 0) {
          return {+1 + conserved_quantum_number_.first, +1 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 1 && col_electron == 2) {
+      }
+      else if (row_electron == 1 && col_electron == 2) {
          return {+0 + conserved_quantum_number_.first, +2 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 1 && col_electron == 3) {
+      }
+      else if (row_electron == 1 && col_electron == 3) {
          return {-1 + conserved_quantum_number_.first, +1 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 2 && col_electron == 0) {
+      }
+      else if (row_electron == 2 && col_electron == 0) {
          return {+1 + conserved_quantum_number_.first, -1 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 2 && col_electron == 1) {
+      }
+      else if (row_electron == 2 && col_electron == 1) {
          return {+0 + conserved_quantum_number_.first, -2 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 2 && col_electron == 3) {
+      }
+      else if (row_electron == 2 && col_electron == 3) {
          return {-1 + conserved_quantum_number_.first, -1 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 3 && col_electron == 0) {
+      }
+      else if (row_electron == 3 && col_electron == 0) {
          return {+2 + conserved_quantum_number_.first, +0 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 3 && col_electron == 1) {
+      }
+      else if (row_electron == 3 && col_electron == 1) {
          return {+1 + conserved_quantum_number_.first, -1 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else if (row_electron == 3 && col_electron == 2) {
+      }
+      else if (row_electron == 3 && col_electron == 2) {
          return {+1 + conserved_quantum_number_.first, +1 + total_sz_from_2lspin + conserved_quantum_number_.second};
-      } else {
+      }
+      else {
          std::stringstream ss;
          ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
          ss << "The dimenstion of the matrix must be 4";

@@ -35,13 +35,13 @@ using namespace pybind11::literals;
 
 void pybind11SolverCMCUpdater(py::module &m) {
    
-   py::enum_<solver::cmc_utility::Algorithm>(m, "Algorithm")
-      .value("METROPOLIS", solver::cmc_utility::Algorithm::METROPOLIS)
-      .value("HEAT_BATH" , solver::cmc_utility::Algorithm::HEAT_BATH)
-      .value("IRKMR" , solver::cmc_utility::Algorithm::IRKMR)
-      .value("RKMR" , solver::cmc_utility::Algorithm::RKMR)
-      .value("SWENDSEN_WANG" , solver::cmc_utility::Algorithm::SWENDSEN_WANG)
-      .value("WOLFF" , solver::cmc_utility::Algorithm::WOLFF);
+   py::enum_<solver::utility_cmc::Algorithm>(m, "Algorithm")
+      .value("METROPOLIS", solver::utility_cmc::Algorithm::METROPOLIS)
+      .value("HEAT_BATH" , solver::utility_cmc::Algorithm::HEAT_BATH)
+      .value("IRKMR" , solver::utility_cmc::Algorithm::IRKMR)
+      .value("RKMR" , solver::utility_cmc::Algorithm::RKMR)
+      .value("SWENDSEN_WANG" , solver::utility_cmc::Algorithm::SWENDSEN_WANG)
+      .value("WOLFF" , solver::utility_cmc::Algorithm::WOLFF);
 
 }
 

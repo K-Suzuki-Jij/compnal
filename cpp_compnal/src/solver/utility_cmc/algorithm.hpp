@@ -20,12 +20,12 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CMC_UTILITY_ALGORITHM_HPP_
-#define COMPNAL_SOLVER_CMC_UTILITY_ALGORITHM_HPP_
+#ifndef COMPNAL_SOLVER_UTILITY_CMC_ALGORITHM_HPP_
+#define COMPNAL_SOLVER_UTILITY_CMC_ALGORITHM_HPP_
 
 namespace compnal {
 namespace solver {
-namespace cmc_utility {
+namespace utility_cmc {
 
 enum class Algorithm {
    
@@ -59,9 +59,9 @@ auto heat_bath_transition = [](const RealType delta_energy, const RealType beta,
 };
 
 
-} // namespace cmc_utility
+} // namespace utility_cmc
 } // namespace solver
 } // namespace compnal
 
 
-#endif /* COMPNAL_SOLVER_CMC_UTILITY_ALGORITHM_HPP_ */
+#endif /* COMPNAL_SOLVER_UTILITY_CMC_ALGORITHM_HPP_ */

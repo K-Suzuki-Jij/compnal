@@ -30,6 +30,7 @@
 
 namespace compnal {
 namespace model {
+namespace classical {
 
 //! @brief Class for representing the classical Ising models.
 //! @tparam LatticeType The lattice type.
@@ -407,7 +408,7 @@ public:
    
    //! @brief The index type.
    using IndexType = typename interaction::QuadraticAnyInteraction<RealType>::IndexType;
-
+   
    //! @brief The operator type, which here is the type of Ising spin -1 or +1.
    using OPType = utility::SpinType;
    
@@ -440,7 +441,7 @@ public:
    const std::vector<RealType> &GetLinear() const {
       return interaction_.GetLinear();
    }
-
+   
    //! @brief Get rows of the quadratic interaction as CRS format.
    //! @return The rows.
    const std::vector<std::int64_t> &GetRowPtr() const {
@@ -482,19 +483,19 @@ public:
    const std::unordered_map<IndexType, std::int32_t, IndexHash> &GetIndexMap() const {
       return interaction_.GetIndexMap();
    }
-
+   
    //! @brief Get the degree of the interactions.
    //! @return The degree.
    std::int32_t GetDegree() const {
       return interaction_.GetDegree();
    }
-
+   
    //! @brief Get the lattice.
    //! @return The lattice::AnyLattice object.
    const lattice::AnyLattice &GetLattice() const {
       return lattice_;
    }
-
+   
    //! @brief Calculate energy corresponding to the spin configuration.
    //! @param spin_configuration The spin configuration.
    //! @return The energy.
@@ -599,6 +600,7 @@ auto make_ising(const LatticeType &lattice,
    return Ising<LatticeType, RealType>{lattice, linear, quadratic};
 }
 
+} // namespace classical
 } // namespace model
 } // namespace compnal
 

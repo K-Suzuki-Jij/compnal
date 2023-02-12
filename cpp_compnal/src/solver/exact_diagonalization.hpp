@@ -24,7 +24,7 @@
 #define COMPNAL_SOLVER_EXACT_DIAGONALIZATION_HPP_
 
 #include "../blas/all.hpp"
-#include "./ed_utility/all.hpp"
+#include "./utility_exact_diag/all.hpp"
 
 #include <vector>
 #include <omp.h>
@@ -33,21 +33,6 @@
 
 namespace compnal {
 namespace solver {
-
-template<typename RealType>
-struct ExactDiagLog {
-   
-   std::string execute_time;
-   RealType time_gen_basis;
-   RealType time_gen_ham;
-   RealType time_diag;
-   RealType time_ii;
-   RealType time_cg;
-   std::int32_t diag_step;
-   std::int32_t ii_step;
-   std::int32_t cg_step;
-   
-};
 
 template<class ModelType>
 class ExactDiag {
@@ -233,7 +218,7 @@ public:
 #pragma omp parallel for schedule(guided) reduction(+ : val) num_threads(num_threads_)
       for (std::int64_t i = 0; i < dim; ++i) {
          const std::int64_t global_basis = basis[i];
-         const std::int32_t local_basis = ed_utility::CalculateLocalBasis(global_basis, one_dim_site_index, dim_onsite);
+         const std::int32_t local_basis = utility_exact_diag::CalculateLocalBasis(global_basis, one_dim_site_index, dim_onsite);
          RealType temp_val = 0.0;
          for (std::int64_t j = m.row[local_basis]; j < m.row[local_basis + 1]; ++j) {
             const std::int64_t a_basis = global_basis - (local_basis - m.col[j])*site_constant;
@@ -313,10 +298,10 @@ public:
 #pragma omp parallel for num_threads(num_threads_)
          for (std::int64_t i = 0; i < dim_target; ++i) {
             const std::int64_t global_basis = basis[i];
-            const std::int32_t local_basis_m1 = ed_utility::CalculateLocalBasis(global_basis,
+            const std::int32_t local_basis_m1 = utility_exact_diag::CalculateLocalBasis(global_basis,
                                                                                 one_dim_site_index_1,
                                                                                 dim_onsite);
-            const std::int32_t local_basis_m2 = ed_utility::CalculateLocalBasis(global_basis,
+            const std::int32_t local_basis_m2 = utility_exact_diag::CalculateLocalBasis(global_basis,
                                                                                 one_dim_site_index_2,
                                                                                 dim_onsite);
             RealType temp_val_m1 = 0.0;
@@ -326,7 +311,7 @@ public:
             if (m_1.tag == blas::CRSTag::FERMION) {
                std::int32_t num_electron = 0;
                for (std::int32_t site = 0; site < one_dim_site_index_1; site++) {
-                  num_electron += model_.CalculateNumElectron(ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite));
+                  num_electron += model_.CalculateNumElectron(utility_exact_diag::CalculateLocalBasis(global_basis, site, dim_onsite));
                }
                if (num_electron%2 == 1) {
                   fermion_sign_m1 = -1;
@@ -345,7 +330,7 @@ public:
             if (m_2.tag == blas::CRSTag::FERMION) {
                std::int32_t num_electron = 0;
                for (std::int32_t site = 0; site < one_dim_site_index_2; site++) {
-                  num_electron += model_.CalculateNumElectron(ed_utility::CalculateLocalBasis(global_basis, site, dim_onsite));
+                  num_electron += model_.CalculateNumElectron(utility_exact_diag::CalculateLocalBasis(global_basis, site, dim_onsite));
                }
                if (num_electron%2 == 1) {
                   fermion_sign_m2 = -1;
@@ -448,7 +433,7 @@ private:
             
 #pragma omp parallel num_threads(num_threads_)
       {
-         ed_utility::ExactDiagMatrixComponents<RealType> components;
+         utility_exact_diag::ExactDiagMatrixComponents<RealType> components;
          components.site_constant.resize(model_.GetSystemSize());
          for (std::int32_t site = 0; site < model_.GetSystemSize(); ++site) {
             components.site_constant[site] =
@@ -458,7 +443,7 @@ private:
          
 #pragma omp for schedule(guided)
          for (std::int64_t row = 0; row < dim_target; ++row) {
-            ed_utility::GenerateMatrixComponents(&components, basis[row], model_);
+            utility_exact_diag::GenerateMatrixComponents(&components, basis[row], model_);
             std::vector<std::pair<std::int64_t, RealType>> temp_col_val_list;
             const std::size_t size = components.basis_affected.size();
             for (std::size_t i = 0; i < size; ++i) {

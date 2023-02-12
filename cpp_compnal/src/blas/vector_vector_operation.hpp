@@ -31,7 +31,7 @@ namespace blas {
 template<typename RealType>
 RealType CalculateInnerProduct(const std::vector<RealType> &v_1,
                                const std::vector<RealType> &v_2,
-                               const std::int32_t num_threads = 1) {
+                               const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    RealType inner_product = 0;
    
@@ -46,7 +46,7 @@ RealType CalculateInnerProduct(const std::vector<RealType> &v_1,
 
 template<typename RealType>
 RealType CalculateL1Norm(const std::vector<RealType> &v,
-                         const std::int32_t num_threads = 1) {
+                         const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    RealType norm = 0;
    
@@ -61,7 +61,7 @@ RealType CalculateL1Norm(const std::vector<RealType> &v,
 
 template<typename RealType>
 RealType CalculateL2Norm(const std::vector<RealType> &v,
-                         const std::int32_t num_threads = 1) {
+                         const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    return std::sqrt(CalculateInnerProduct(v, v, num_threads));
    
@@ -69,7 +69,7 @@ RealType CalculateL2Norm(const std::vector<RealType> &v,
 
 template<typename RealType>
 void Normalize(std::vector<RealType> *v,
-               const std::int32_t num_threads = 1) {
+               const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    const RealType norm = CalculateL2Norm(*v, num_threads);
    
@@ -95,7 +95,7 @@ void CalculateVectorVectorSum(std::vector<T1> *vector_out,
                               const std::vector<T3> &vector_1,
                               const T4 coeff_2,
                               const std::vector<T5> &vector_2,
-                              const std::int32_t num_threads = 1) {
+                              const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    if (vector_1.size() != vector_2.size()) {
       std::stringstream ss;
@@ -118,7 +118,7 @@ void CalculateVectorVectorSum(std::vector<T1> *vector_out,
 template<typename T>
 void CopyVector(std::vector<T> *copied,
                 const std::vector<T> &v,
-                const std::int32_t num_threads = 1) {
+                const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    copied->resize(v.size());
 #pragma omp parallel for num_threads(num_threads)
@@ -143,7 +143,7 @@ auto CalculateL1Distance(const T1 coeff_1,
                          const std::vector<T2> &vector_1,
                          const T3 coeff_2,
                          const std::vector<T4> &vector_2,
-                         const std::int32_t num_threads = 1)
+                         const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS)
 -> decltype(std::declval<T1>()*std::declval<T2>() - std::declval<T3>()*std::declval<T4>()) {
    if (vector_1.size() != vector_2.size()) {
       std::stringstream ss;

@@ -853,7 +853,7 @@ void CalculateMatrixVectorProduct(std::vector<T1> *vector_out,
                                   const T2 coeff,
                                   const CRS<T3> &matrix_in,
                                   const std::vector<T4> &vector_in,
-                                  const std::int32_t num_threads = 1) {
+                                  const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    if (matrix_in.col_dim != vector_in.size()) {
       std::stringstream ss;
       ss << "Error at " << __LINE__ << " in " << __func__ << " in " << __FILE__ << std::endl;
@@ -899,7 +899,7 @@ void CalculateSymmetricMatrixVectorProduct(std::vector<T1> *vector_out,
                                            const T2 coeff,
                                            const CRS<T3> &matrix_in,
                                            const std::vector<T4> &vector_in,
-                                           const std::int32_t num_threads = 1) {
+                                           const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) {
    
    if (matrix_in.row_dim != matrix_in.col_dim) {
       std::stringstream ss;

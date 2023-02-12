@@ -34,7 +34,7 @@ namespace blas {
 template<typename RealType>
 void Orthonormalize(std::vector<RealType> *target_vector,
                     const std::vector<std::vector<RealType>> &vectors,
-                    const std::int32_t num_threads = 1,
+                    const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS,
                     const bool flag_normalize = true) {
          
    for (std::size_t i = 0; i < vectors.size(); ++i) {

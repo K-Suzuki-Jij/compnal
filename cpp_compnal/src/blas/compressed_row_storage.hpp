@@ -24,6 +24,7 @@
 #define COMPNAL_BLAS_COMPRESSED_ROW_STORAGE_HPP_
 
 #include "../utility/sort.hpp"
+#include "../utility/type.hpp"
 
 #include <cstdint>
 #include <iomanip>

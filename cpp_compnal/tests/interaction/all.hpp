@@ -1,3 +1,4 @@
+//
 //  Copyright 2023 Kohei Suzuki
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +13,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  Created by Kohei Suzuki on 2022/07/13.
+//  all.hpp
+//  compnal
+//
+//  Created by kohei on 2023/02/12.
+//  
 //
 
-#ifndef COMPNAL_HPP_
-#define COMPNAL_HPP_
+#ifndef COMPNAL_TEST_INTERACTION_ALL_HPP_
+#define COMPNAL_TEST_INTERACTION_ALL_HPP_
 
-#include "blas/all.hpp"
-#include "interaction/all.hpp"
-#include "lattice/all.hpp"
-#include "model/all.hpp"
-#include "solver/all.hpp"
-#include "utility/all.hpp"
+#include "test_quadratic_any_interaction.hpp"
+#include "test_polynomial_any_interaction.hpp"
 
-#endif /* COMPNAL_HPP_ */
+#endif /* COMPNAL_TEST_INTERACTION_ALL_HPP_ */

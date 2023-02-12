@@ -16,21 +16,12 @@
 //
 
 
-#include "utility/test_integer.hpp"
-#include "lattice/test_base_one_dimensional_lattice.hpp"
-#include "lattice/test_base_two_dimensional_lattice.hpp"
-#include "lattice/test_base_three_dimensional_lattice.hpp"
-#include "lattice/test_infinite_range.hpp"
-#include "lattice/test_any_lattice.hpp"
-#include "interaction/test_quadratic_any_interaction.hpp"
-#include "interaction/test_polynomial_any_interaction.hpp"
-#include "model/classical/test_polynomial_ising.hpp"
-#include "model/classical/test_ising.hpp"
-#include "model/quantum/test_electron.hpp"
-#include "solver/test_cmc_polynomial_ising.hpp"
-#include "solver/test_cmc_ising.hpp"
-#include "solver/test_ed_hubbard.hpp"
-#include "blas/test_crs.hpp"
+#include "blas/all.hpp"
+#include "interaction/all.hpp"
+#include "lattice/all.hpp"
+#include "model/all.hpp"
+#include "solver/all.hpp"
+#include "utility/all.hpp"
 #include "gtest/gtest.h"
 
 std::int32_t main(std::int32_t argc, char **argv) {

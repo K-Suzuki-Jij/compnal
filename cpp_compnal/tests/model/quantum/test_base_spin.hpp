@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_QUANTUM_BASE_SPIN_HPP_
-#define COMPNAL_TEST_QUANTUM_BASE_SPIN_HPP_
+#ifndef COMPNAL_TEST_MODEL_QUANTUM_BASE_SPIN_HPP_
+#define COMPNAL_TEST_MODEL_QUANTUM_BASE_SPIN_HPP_
 
 #include "../../../src/model/quantum/base_spin.hpp"
 
@@ -30,8 +30,7 @@ namespace test {
 
 TEST(ModelQuantum, BaseSpin) {
    lattice::Chain chain{10};
-   model::quantum::BaseSpin<lattice::Chain, double>(chain, 10, 0);
-   
+   model::quantum::BaseSpin<lattice::Chain, double> model(chain);
 
 }
 
@@ -39,4 +38,4 @@ TEST(ModelQuantum, BaseSpin) {
 } // namespace compnal
 
 
-#endif /* COMPNAL_TEST_QUANTUM_BASE_SPIN_HPP_ */
+#endif /* COMPNAL_TEST_MODEL_QUANTUM_BASE_SPIN_HPP_ */

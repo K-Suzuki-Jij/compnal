@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_QUANTUM_ELECTRON_HPP_
-#define COMPNAL_TEST_QUANTUM_ELECTRON_HPP_
+#ifndef COMPNAL_TEST_MODEL_QUANTUM_ELECTRON_HPP_
+#define COMPNAL_TEST_MODEL_QUANTUM_ELECTRON_HPP_
 
 #include "../../../src/model/quantum/base_electron.hpp"
 
@@ -58,4 +58,4 @@ TEST(ModelQuantum, ElectronValidateQNumber) {
 } // namespace test
 } // namespace compnal
 
-#endif /* COMPNAL_TEST_QUANTUM_ELECTRON_HPP_ */
+#endif /* COMPNAL_TEST_MODEL_QUANTUM_ELECTRON_HPP_ */

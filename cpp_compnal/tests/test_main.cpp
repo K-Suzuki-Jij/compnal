@@ -16,12 +16,12 @@
 //
 
 
-#include "blas/all.hpp"
+//#include "blas/all.hpp"
 #include "interaction/all.hpp"
 #include "lattice/all.hpp"
-#include "model/all.hpp"
-#include "solver/all.hpp"
-#include "utility/all.hpp"
+//#include "model/all.hpp"
+//#include "solver/all.hpp"
+//#include "utility/all.hpp"
 #include "gtest/gtest.h"
 
 std::int32_t main(std::int32_t argc, char **argv) {

@@ -23,7 +23,7 @@
 #ifndef COMPNAL_INTERACTION_ALL_HPP_
 #define COMPNAL_INTERACTION_ALL_HPP_
 
-#include "quadratic_any.hpp"
-#include "polynomial_any.hpp"
+#include "./classical/quadratic_any.hpp"
+#include "./classical/polynomial_any.hpp"
 
 #endif /* COMPNAL_INTERACTION_ALL_HPP_ */

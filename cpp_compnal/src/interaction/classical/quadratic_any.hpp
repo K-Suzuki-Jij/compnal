@@ -56,7 +56,7 @@ public:
    //! @param linear The linear interaction.
    //! @param quadratic The quadratic interaction.
    QuadraticAny(const LinearType &linear,
-                           const QuadraticType &quadratic) {
+                const QuadraticType &quadratic) {
       
       std::unordered_set<IndexType, IndexHash> index_set;
       for (const auto &it: linear) {
@@ -122,17 +122,12 @@ public:
       row_ptr_.resize(adjacency_list.size() + 1);
       row_ptr_[0] = 0;
       for (std::size_t i = 0; i < adjacency_list.size(); ++i) {
-         row_ptr_[i + 1] = static_cast<std::int64_t>(adjacency_list[i].size());
+         row_ptr_[i + 1] = static_cast<std::int64_t>(adjacency_list[i].size()) + row_ptr_[i];
          for (const auto it: adjacency_list[i]) {
             col_ptr_.push_back(it.first);
             val_ptr_.push_back(it.second);
          }
       }
-      
-      for (std::int64_t i = 0; i < static_cast<std::int64_t>(row_ptr_.size()) - 1; ++i) {
-         row_ptr_[i + 1] += row_ptr_[i];
-      }
-      
    }
    
    //! @brief Get the system size.
@@ -145,18 +140,6 @@ public:
    //! @return The degree.
    std::int32_t GetDegree() const {
       return degree_;
-   }
-   
-   //! @brief Get the index list of the interactions.
-   //! @return The index list.
-   const std::vector<IndexType> &GetIndexList() const {
-      return index_list_;
-   }
-   
-   //! @brief Get the mapping from the index to the integer.
-   //! @return The index map.
-   const std::unordered_map<IndexType, std::int32_t, IndexHash> &GetIndexMap() const {
-      return index_map_;
    }
    
    //! @brief Get the constant value of the interactions,
@@ -189,6 +172,19 @@ public:
    const std::vector<RealType> &GetValPtr() const {
       return val_ptr_;
    }
+   
+   //! @brief Get the index list of the interactions.
+   //! @return The index list.
+   const std::vector<IndexType> &GetIndexList() const {
+      return index_list_;
+   }
+   
+   //! @brief Get the mapping from the index to the integer.
+   //! @return The index map.
+   const std::unordered_map<IndexType, std::int32_t, IndexHash> &GetIndexMap() const {
+      return index_map_;
+   }
+   
    
 private:
    //! @brief The degree of the interactions.

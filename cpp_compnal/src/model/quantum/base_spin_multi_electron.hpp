@@ -48,7 +48,7 @@ public:
    //! @brief The type of conserved quantum number (total electron, twice the number of total sz) pair.
    using CQNType = std::pair<std::vector<std::int32_t>, std::int32_t>;
    
-   using CQNHash = utility::VecIntHash;
+   using CQNHash = utility::PairVecHash;
    
    BaseSpinMultiElectron(const LatticeType &lattice): lattice_(lattice) {
       SetOnsiteOperator();

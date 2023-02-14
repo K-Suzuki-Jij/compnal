@@ -29,81 +29,151 @@
 namespace compnal {
 namespace test {
 
-TEST(InteractionPolynomialAny, Basic) {
-   using PolyClass = interaction::classical::PolynomialAny<TestRealType>;
+TEST(InteractionPolynomialAny, Linear) {
+   using InteractionType = interaction::classical::PolynomialAny<TestRealType>;
    
-   const PolyClass::PolynomialType poly = {
-      {{0, 1, 2}, -1.0},
-      {{"a", 0, "b"}, +1.5},
-      {{0, utility::AnyTupleType{2, "b"}, utility::AnyTupleType{2, "a"}}, +2.0}
+   const InteractionType::PolynomialType poly = {
+      {{"a"}, -1.0},
+      {{"b"}, +1.5},
+      {{"c"}, +2.0}
    };
    
-   const auto poly_interaction = PolyClass{poly};
-   auto index_list = std::vector<PolyClass::IndexType>{
-      0, 1, 2, "a", "b",
-      utility::AnyTupleType{2, "b"}, utility::AnyTupleType{2, "a"}
-   };
+   const InteractionType interaction = InteractionType{poly};
    
-   std::sort(index_list.begin(), index_list.end());
+   EXPECT_EQ(interaction.GetSystemSize(), 3);
+   EXPECT_EQ(interaction.GetDegree(), 1);
    
-   EXPECT_EQ(poly_interaction.GetSystemSize(), 7);
-   EXPECT_EQ(poly_interaction.GetDegree(), 3);
-   EXPECT_EQ(poly_interaction.GetIndexList(), index_list);
-   for (const auto &it: poly_interaction.GetIndexMap()) {
-      EXPECT_EQ(it.first, index_list[it.second]);
-   }
+   EXPECT_EQ(interaction.GetKeyValueList().size(), 3);
+   EXPECT_EQ(interaction.GetKeyValueList().at(0).first.size(), 1);
+   EXPECT_EQ(interaction.GetKeyValueList().at(1).first.size(), 1);
+   EXPECT_EQ(interaction.GetKeyValueList().at(2).first.size(), 1);
+   EXPECT_EQ(interaction.GetKeyValueList().at(0).first.at(0), 0);
+   EXPECT_EQ(interaction.GetKeyValueList().at(1).first.at(0), 1);
+   EXPECT_EQ(interaction.GetKeyValueList().at(2).first.at(0), 2);
+   EXPECT_NEAR(interaction.GetKeyValueList().at(0).second, -1.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR(interaction.GetKeyValueList().at(1).second, +1.5, test_epsilon<TestRealType>);
+   EXPECT_NEAR(interaction.GetKeyValueList().at(2).second, +2.0, test_epsilon<TestRealType>);
+   
+   EXPECT_EQ(interaction.GetIndexList(), (std::vector<InteractionType::IndexType>{"a", "b", "c"}));
+   
+   EXPECT_EQ(interaction.GetIndexMap().size(), 3);
+   EXPECT_EQ(interaction.GetIndexMap().at("a"), 0);
+   EXPECT_EQ(interaction.GetIndexMap().at("b"), 1);
+   EXPECT_EQ(interaction.GetIndexMap().at("c"), 2);
+   
+   EXPECT_EQ(interaction.GetAdjacencyList().size(), 3);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(0).size(), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(1).size(), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(2).size(), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(0).at(0), 0);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(1).at(0), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(2).at(0), 2);
+   
 }
 
-TEST(InteractionPolynomialAny, IntKeys) {
-   using PolyClass = interaction::classical::PolynomialAny<TestRealType>;
+TEST(InteractionPolynomialAny, Quadratic) {
+   using Tup = utility::AnyTupleType;
+   using InteractionType = interaction::classical::PolynomialAny<TestRealType>;
    
-   const PolyClass::PolynomialType poly = {
-      {{0, 1}, -1.0},
-      {{0, 1, 2}, +1.5},
-      {{2, 3, 4, 5}, +2.0}
+   const InteractionType::PolynomialType poly = {
+      {{"a", "b"}, -1.0},
+      {{"b", "a"}, +1.5},
+      {{"b", Tup{1, "a"}}, +2.0}
    };
    
-   const auto poly_interaction = PolyClass{poly};
-   EXPECT_EQ(poly_interaction.GetSystemSize(), 6);
-   EXPECT_EQ(poly_interaction.GetDegree(), 4);
-   EXPECT_EQ(poly_interaction.GetIndexList(), (std::vector<PolyClass::IndexType>{0, 1, 2, 3, 4, 5}));
-   EXPECT_EQ(poly_interaction.GetKeyList().size(), 3);
-   EXPECT_EQ(poly_interaction.GetValueList().size(), 3);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(0).size(), 2);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(0).at(0), 0);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(0).at(1), 1);
-   EXPECT_DOUBLE_EQ(poly_interaction.GetValueList().at(0), -1.0);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(1).size(), 3);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(1).at(0), 0);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(1).at(1), 1);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(1).at(2), 2);
-   EXPECT_DOUBLE_EQ(poly_interaction.GetValueList().at(1), +1.5);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(2).size(), 4);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(2).at(0), 2);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(2).at(1), 3);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(2).at(2), 4);
-   EXPECT_EQ(poly_interaction.GetKeyList().at(2).at(3), 5);
-   EXPECT_DOUBLE_EQ(poly_interaction.GetValueList().at(2), +2.0);
+   const InteractionType interaction = InteractionType{poly};
+   
+   EXPECT_EQ(interaction.GetSystemSize(), 3);
+   EXPECT_EQ(interaction.GetDegree(), 2);
+   
+   EXPECT_EQ(interaction.GetKeyValueList().size(), 2);
+   EXPECT_EQ(interaction.GetKeyValueList().at(0).first.size(), 2);
+   EXPECT_EQ(interaction.GetKeyValueList().at(1).first.size(), 2);
+   EXPECT_EQ(interaction.GetKeyValueList().at(0).first.at(0), 0);
+   EXPECT_EQ(interaction.GetKeyValueList().at(0).first.at(1), 1);
+   EXPECT_EQ(interaction.GetKeyValueList().at(1).first.at(0), 1);
+   EXPECT_EQ(interaction.GetKeyValueList().at(1).first.at(1), 2);
+   EXPECT_NEAR(interaction.GetKeyValueList().at(0).second, 0.5, test_epsilon<TestRealType>);
+   EXPECT_NEAR(interaction.GetKeyValueList().at(1).second, 2.0, test_epsilon<TestRealType>);
+   
+   EXPECT_EQ(interaction.GetIndexList(), (std::vector<InteractionType::IndexType>{"a", "b", Tup{1, "a"}}));
+   
+   EXPECT_EQ(interaction.GetIndexMap().size(), 3);
+   EXPECT_EQ(interaction.GetIndexMap().at("a"), 0);
+   EXPECT_EQ(interaction.GetIndexMap().at("b"), 1);
+   EXPECT_EQ(interaction.GetIndexMap().at(Tup{1, "a"}), 2);
+   
+   EXPECT_EQ(interaction.GetAdjacencyList().size(), 3);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(0).size(), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(1).size(), 2);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(2).size(), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(0).at(0), 0);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(1).at(0), 0);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(1).at(1), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(2).at(0), 1);
+   
+}
 
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().size(), 6);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(0).size(), 2);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(0).at(0), 0);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(0).at(1), 1);
+TEST(InteractionPolynomialAny, Poly) {
+   using Tup = utility::AnyTupleType;
+   using InteractionType = interaction::classical::PolynomialAny<TestRealType>;
    
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(1).size(), 2);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(1).at(0), 0);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(1).at(1), 1);
+   const InteractionType::PolynomialType poly = {
+      {{0, 1}, -1.0},
+      {{0, 1, 2}, +1.5},
+      {{2, 3, 4, Tup{1, "a"}}, +2.0}
+   };
    
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(2).size(), 2);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(2).at(0), 1);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(2).at(1), 2);
+   const InteractionType interaction = InteractionType{poly};
+   EXPECT_EQ(interaction.GetSystemSize(), 6);
+   EXPECT_EQ(interaction.GetDegree(), 4);
    
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(3).size(), 1);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(3).at(0), 2);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(4).size(), 1);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(4).at(0), 2);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(5).size(), 1);
-   EXPECT_EQ(poly_interaction.GetAdjacencyList().at(5).at(0), 2);
+   EXPECT_EQ(interaction.GetKeyValueList().size(), 3);
+   EXPECT_EQ(interaction.GetKeyValueList().at(0).first.size(), 2);
+   EXPECT_EQ(interaction.GetKeyValueList().at(0).first.at(0), 0);
+   EXPECT_EQ(interaction.GetKeyValueList().at(0).first.at(1), 1);
+   EXPECT_NEAR(interaction.GetKeyValueList().at(0).second, -1.0, test_epsilon<TestRealType>);
+   EXPECT_EQ(interaction.GetKeyValueList().at(1).first.size(), 3);
+   EXPECT_EQ(interaction.GetKeyValueList().at(1).first.at(0), 0);
+   EXPECT_EQ(interaction.GetKeyValueList().at(1).first.at(1), 1);
+   EXPECT_EQ(interaction.GetKeyValueList().at(1).first.at(2), 2);
+   EXPECT_NEAR(interaction.GetKeyValueList().at(1).second, +1.5, test_epsilon<TestRealType>);
+   EXPECT_EQ(interaction.GetKeyValueList().at(2).first.size(), 4);
+   EXPECT_EQ(interaction.GetKeyValueList().at(2).first.at(0), 2);
+   EXPECT_EQ(interaction.GetKeyValueList().at(2).first.at(1), 3);
+   EXPECT_EQ(interaction.GetKeyValueList().at(2).first.at(2), 4);
+   EXPECT_EQ(interaction.GetKeyValueList().at(2).first.at(3), 5);
+   EXPECT_NEAR(interaction.GetKeyValueList().at(2).second, +2.0, test_epsilon<TestRealType>);
+   
+   EXPECT_EQ(interaction.GetIndexList(), (std::vector<InteractionType::IndexType>{0, 1, 2, 3, 4, Tup{1, "a"}}));
+   
+   EXPECT_EQ(interaction.GetIndexMap().size(), 6);
+   EXPECT_EQ(interaction.GetIndexMap().at(0), 0);
+   EXPECT_EQ(interaction.GetIndexMap().at(1), 1);
+   EXPECT_EQ(interaction.GetIndexMap().at(2), 2);
+   EXPECT_EQ(interaction.GetIndexMap().at(3), 3);
+   EXPECT_EQ(interaction.GetIndexMap().at(4), 4);
+   EXPECT_EQ(interaction.GetIndexMap().at(Tup{1, "a"}), 5);
+
+   EXPECT_EQ(interaction.GetAdjacencyList().size(), 6);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(0).size(), 2);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(0).at(0), 0);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(0).at(1), 1);
+   
+   EXPECT_EQ(interaction.GetAdjacencyList().at(1).size(), 2);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(1).at(0), 0);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(1).at(1), 1);
+   
+   EXPECT_EQ(interaction.GetAdjacencyList().at(2).size(), 2);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(2).at(0), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(2).at(1), 2);
+   
+   EXPECT_EQ(interaction.GetAdjacencyList().at(3).size(), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(3).at(0), 2);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(4).size(), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(4).at(0), 2);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(5).size(), 1);
+   EXPECT_EQ(interaction.GetAdjacencyList().at(5).at(0), 2);
 
 }
 

@@ -28,6 +28,9 @@ namespace test {
 
 using TestRealType = double;
 
+template<typename RealType>
+const RealType test_epsilon = 4*std::numeric_limits<RealType>::epsilon();
+
 } // namespace test
 } // namespace compnal
 

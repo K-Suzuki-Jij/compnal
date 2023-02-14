@@ -68,33 +68,41 @@ public:
          count++;
       }
       
-      key_list_.reserve(interaction.size());
-      value_list_.reserve(interaction.size());
+      std::unordered_map<std::vector<std::int32_t>, RealType, utility::VectorHash> poly;
+      poly.reserve(interaction.size());
       for (const auto &it: interaction) {
          std::vector<std::int32_t> keys(it.first.size());
          for (std::size_t i = 0; i < it.first.size(); ++i) {
             keys[i] = index_map_.at(it.first[i]);
          }
          std::sort(keys.begin(), keys.end());
-         key_list_.push_back(keys);
-         value_list_.push_back(it.second);
+         poly[keys] += it.second;
          if (degree_ < keys.size()) {
             degree_ = static_cast<std::int32_t>(keys.size());
          }
       }
       
-      //Sort key_list_ and value_list_ by the size of key_list_.
-      utility::QuickSortVectorBySize(&key_list_, &value_list_, 0, value_list_.size());
+      key_value_list_.reserve(poly.size());
+      for (const auto &it: poly) {
+         key_value_list_.push_back({it.first, it.second});
+      }
+      
+      poly.clear();
+      
+      //Sort by keys.
+      std::sort(key_value_list_.begin(), key_value_list_.end(), [](const auto &a, const auto &b) {
+         return a.first < b.first;
+      });
       
       adjacency_list_.resize(index_list_.size());
-      for (std::size_t i = 0; i < key_list_.size(); ++i) {
-         for (const auto &index: key_list_[i]) {
+      for (std::size_t i = 0; i < key_value_list_.size(); ++i) {
+         for (const auto &index: key_value_list_[i].first) {
             adjacency_list_[index].push_back(i);
          }
       }
       
-      // Save memory
       for (std::size_t i = 0; i < index_list_.size(); ++i) {
+         // Save memory
          adjacency_list_[i].shrink_to_fit();
          std::sort(adjacency_list_[i].begin(), adjacency_list_[i].end());
       }
@@ -106,22 +114,16 @@ public:
       return static_cast<std::int32_t>(index_list_.size());
    }
    
-   //! @brief Get the list of relabeled-keys by integers in the polynomial interactions.
-   //! @return The list of keys.
-   const std::vector<std::vector<std::int32_t>> &GetKeyList() const {
-      return key_list_;
-   }
-   
-   //! @brief Get the list of value in the polynomial interactions.
-   //! @return The list of value.
-   const std::vector<RealType> &GetValueList() const {
-      return value_list_;
-   }
-   
    //! @brief Get the degree of the polynomial interactions.
    //! @return The degree.
    std::int32_t GetDegree() const {
       return degree_;
+   }
+   
+   //! @brief Get the integer key and value list as pair.
+   //! @return The integer key and value list as pair.
+   const std::vector<std::pair<std::vector<std::int32_t>, RealType>> &GetKeyValueList() const {
+      return key_value_list_;
    }
    
    //! @brief Get the index list of the polynomial interactions.
@@ -136,7 +138,8 @@ public:
       return index_map_;
    }
    
-   //! @brief Get the adjacency list, which stored the integer index of the polynomial interaction specified by the site index.
+   //! @brief Get the adjacency list, which stored the integer index of
+   //! the polynomial interaction specified by the site index.
    //! @return The adjacency list.
    const std::vector<std::vector<std::size_t>> &GetAdjacencyList() const {
       return adjacency_list_;
@@ -149,17 +152,16 @@ private:
    //! @brief The mapping from the index to the integer.
    std::unordered_map<IndexType, std::int32_t, IndexHash> index_map_;
    
-   //! @brief The list of keys in the polynomial interactions.
-   std::vector<std::vector<std::int32_t>> key_list_;
-   
-   //! @brief The list of value in the polynomial interactions.
-   std::vector<RealType> value_list_;
+   //! @brief The integer key and value list as pair.
+   std::vector<std::pair<std::vector<std::int32_t>, RealType>> key_value_list_;
    
    //! @brief The index list of the polynomial interactions.
    std::vector<IndexType> index_list_;
    
-   //! @brief The adjacency list, which stored the integer index of the polynomial interaction specified by the site index.
+   //! @brief The adjacency list, which stored the integer index of
+   //! the polynomial interaction specified by the site index.
    std::vector<std::vector<std::size_t>> adjacency_list_;
+   
 };
 
 } // namespace classical

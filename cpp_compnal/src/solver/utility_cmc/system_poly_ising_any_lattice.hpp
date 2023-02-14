@@ -80,9 +80,9 @@ public:
 private:
    const std::int32_t system_size_;
    const lattice::BoundaryCondition bc_;
-   const std::vector<std::vector<std::int32_t>> key_list_;
-   const std::vector<typename ModelType::ValueType> value_list_;
-   const std::vector<std::vector<std::size_t>> adjacency_list_;
+   const std::vector<std::vector<std::int32_t>> &key_list_;
+   const std::vector<typename ModelType::ValueType> &value_list_;
+   const std::vector<std::vector<std::size_t>> &adjacency_list_;
 
    std::vector<typename ModelType::OPType> sample_;
    std::vector<typename ModelType::ValueType> energy_difference_;

@@ -72,6 +72,18 @@ struct AnyIndexVectorHash {
    }
 };
 
+//! @brief Hash struct of std::vector<AnyIndexType>.
+struct VectorHash {
+   template<class T>
+   std::size_t operator()(const std::vector<T> &v) const {
+      std::size_t hash = v.size();
+      for (const auto &i : v) {
+         hash ^= std::hash<T>()(i) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+      }
+      return hash;
+   }
+};
+
 //! @brief Hash struct of std::pair<AnyIndexType>.
 struct AnyIndexPairHash {
    std::size_t operator()(const std::pair<AnyIndexType, AnyIndexType> &p) const {
@@ -92,7 +104,7 @@ struct PairHash {
 };
 
 //! @brief Hash struct of std::pair including std::vector.
-struct VecIntHash {
+struct PairVecHash {
    template <class T1, class T2>
    std::size_t operator()(const std::pair<std::vector<T1>, T2> &p) const {
       std::size_t hash = p.first.size();

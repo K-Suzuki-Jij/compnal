@@ -210,7 +210,7 @@ public:
       
       const std::int64_t dim = static_cast<std::int64_t>(eigenvector.size());
       const std::int32_t dim_onsite = static_cast<std::int32_t>(m.row_dim);
-      const std::int32_t one_dim_site_index = model_.GetLattice().CalculateOneDimSiteIndex(site_index);
+      const std::int32_t one_dim_site_index = model_.GetLattice().CalculateIntegerSiteIndex(site_index);
       const std::int64_t site_constant = static_cast<std::int64_t>(std::pow(dim_onsite, one_dim_site_index));
       
       RealType val = 0.0;
@@ -269,8 +269,8 @@ public:
       const auto target_sector_set = GenerateTargetSector(m1_dagger, m_2);
       const auto &basis_inv = inverse_bases_.at(model_.GetTaretSector());
       const std::int32_t dim_onsite = model_.GetDimOnsite();
-      const std::int32_t one_dim_site_index_1 = model_.GetLattice().CalculateOneDimSiteIndex(site_index_1);
-      const std::int32_t one_dim_site_index_2 = model_.GetLattice().CalculateOneDimSiteIndex(site_index_2);
+      const std::int32_t one_dim_site_index_1 = model_.GetLattice().CalculateIntegerSiteIndex(site_index_1);
+      const std::int32_t one_dim_site_index_2 = model_.GetLattice().CalculateIntegerSiteIndex(site_index_2);
       const std::int64_t site_constant_m1 = static_cast<std::int64_t>(std::pow(dim_onsite, one_dim_site_index_1));
       const std::int64_t site_constant_m2 = static_cast<std::int64_t>(std::pow(dim_onsite, one_dim_site_index_2));
       const auto &eigenvector = eigenvectors_.at(level);

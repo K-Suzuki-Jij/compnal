@@ -30,25 +30,34 @@
 namespace compnal {
 namespace test {
 
-TEST(LatticeBaseOneDimensionalLattice, Basic) {
+TEST(Lattice, BaseOneDimensional) {
+   using Lat = lattice::BaseOneDimensionalLattice;
+   using BC = lattice::BoundaryCondition;
    
-   EXPECT_EQ(lattice::BaseOneDimensionalLattice{8}.GetSystemSize(), 8);
-   EXPECT_EQ(lattice::BaseOneDimensionalLattice{8}.GetBoundaryCondition(), lattice::BoundaryCondition::OBC);
+   EXPECT_THROW(Lat{-1}, std::runtime_error);
+   EXPECT_THROW((Lat{1, BC::NONE}), std::runtime_error);
+   
+   EXPECT_EQ(Lat{4}.GetSystemSize(), 4);
+   EXPECT_EQ(Lat{4}.GetBoundaryCondition(), BC::OBC);
 
-   EXPECT_EQ((lattice::BaseOneDimensionalLattice{
-      8, lattice::BoundaryCondition::PBC
-   }.GetSystemSize()), 8);
-   EXPECT_EQ((lattice::BaseOneDimensionalLattice{
-      8, lattice::BoundaryCondition::PBC
-   }.GetBoundaryCondition()), lattice::BoundaryCondition::PBC);
-
-   EXPECT_THROW(lattice::BaseOneDimensionalLattice{-1}, std::runtime_error);
-   EXPECT_THROW((lattice::BaseOneDimensionalLattice{1, lattice::BoundaryCondition::NONE}), std::runtime_error);
+   EXPECT_EQ((Lat{4, BC::PBC}.GetSystemSize()), 4);
+   EXPECT_EQ((Lat{4, BC::PBC}.GetBoundaryCondition()), BC::PBC);
+   
+   EXPECT_TRUE(Lat{3}.ValidateCOOIndex(0));
+   EXPECT_TRUE(Lat{3}.ValidateCOOIndex(1));
+   EXPECT_TRUE(Lat{3}.ValidateCOOIndex(2));
+   EXPECT_FALSE(Lat{3}.ValidateCOOIndex(-1));
+   EXPECT_FALSE(Lat{3}.ValidateCOOIndex(-3));
+   
+   EXPECT_EQ(Lat{3}.CalculateIntegerSiteIndex(0), 0);
+   EXPECT_EQ(Lat{3}.CalculateIntegerSiteIndex(2), 2);
 
 }
 
-TEST(LatticeChain, Basic) {
-   EXPECT_EQ((lattice::Chain{8}.GenerateIndexList()), (std::vector<std::int32_t>{0,1,2,3,4,5,6,7}));
+TEST(Lattice, Chain) {
+   using Lat = lattice::Chain;
+   std::vector<typename Lat::COOIndexType> index_list{0,1,2,3,4,5,6,7};
+   EXPECT_EQ((Lat{8}.GenerateIndexList()), index_list);
 }
 
 } // namespace test

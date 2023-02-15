@@ -36,15 +36,18 @@ namespace lattice {
 class BaseThreeDimensionalLattice {
   
 public:
+   //! @brief Cordinate index type.
    using COOIndexType = std::tuple<std::int32_t, std::int32_t, std::int32_t>;
-   
+      
    //! @brief Constructor of BaseThreeDimensionalLattice.
    //! @param x_size The size of the x-direction.
    //! @param y_size The size of the y-direction.
    //! @param z_size The size of the z-direction.
+   //! @param bc Boundary condtion. BoundaryCondition::NONE cannot be used here.
    BaseThreeDimensionalLattice(const std::int32_t x_size,
                                const std::int32_t y_size,
-                               const std::int32_t z_size) {
+                               const std::int32_t z_size,
+                               const BoundaryCondition bc = BoundaryCondition::OBC) {
       if (x_size <= 0) {
          throw std::runtime_error("x_size must be larger than 0.");
       }
@@ -54,25 +57,13 @@ public:
       if (z_size <= 0) {
          throw std::runtime_error("z_size must be larger than 0.");
       }
-      
+      if (bc == BoundaryCondition::NONE) {
+         throw std::runtime_error("BoundaryCondition::NONE cannot be set.");
+      }
       x_size_ = x_size;
       y_size_ = y_size;
       z_size_ = z_size;
-   }
-   
-   //! @brief Constructor of BaseThreeDimensionalLattice.
-   //! @param x_size The size of the x-direction.
-   //! @param y_size The size of the y-direction.
-   //! @param z_size The size of the z-direction.
-   //! @param boundary_condition Boundary condtion. BoundaryCondition::NONE cannot be used here.
-   BaseThreeDimensionalLattice(const std::int32_t x_size,
-                               const std::int32_t y_size,
-                               const std::int32_t z_size,
-                               const BoundaryCondition boundary_condition): BaseThreeDimensionalLattice(x_size, y_size, z_size) {
-      if (boundary_condition == BoundaryCondition::NONE) {
-         throw std::runtime_error("BoundaryCondition::NONE cannot be set.");
-      }
-      bc_ = boundary_condition;
+      bc_ = bc;
    }
       
    //! @brief Get size of the x-direction.
@@ -105,6 +96,9 @@ public:
       return bc_;
    }
    
+   //! @brief Check if the value of the coordinate is in the system.
+   //! @param site_index Value of the coordinate.
+   //! @return True or False.
    bool ValidateCOOIndex(const COOIndexType site_index) const {
       if (std::get<0>(site_index)  >= x_size_ ||
           std::get<0>(site_index)  <  0       ||
@@ -119,7 +113,10 @@ public:
       }
    }
    
-   std::int32_t CalculateOneDimSiteIndex(const COOIndexType site_index) const {
+   //! @brief Calculate site index as integer from the value of the coordinate.
+   //! @param site_index Value of the coordinate.
+   //! @return Site index as integer.
+   std::int32_t CalculateIntegerSiteIndex(const COOIndexType site_index) const {
       return std::get<2>(site_index)*x_size_*y_size_ + std::get<1>(site_index)*x_size_ + std::get<0>(site_index);
    }
    

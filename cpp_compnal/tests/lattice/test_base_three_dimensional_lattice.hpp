@@ -29,38 +29,38 @@
 namespace compnal {
 namespace test {
 
-TEST(LatticeBaseThreeDimensionalLattice, Constructor) {
+TEST(Lattice, BaseThreeDimensional) {
+   using Lat = lattice::BaseThreeDimensionalLattice;
+   using BC = lattice::BoundaryCondition;
    
-   EXPECT_EQ((lattice::BaseThreeDimensionalLattice{8, 7, 3}.GetSystemSize()), 8*7*3);
-   EXPECT_EQ((lattice::BaseThreeDimensionalLattice{8, 7, 3}.GetBoundaryCondition()), lattice::BoundaryCondition::OBC);
+   EXPECT_THROW((Lat{-1, +9, +2}), std::runtime_error);
+   EXPECT_THROW((Lat{+1, -9, +2}), std::runtime_error);
+   EXPECT_THROW((Lat{+1, +9, -2}), std::runtime_error);
+   EXPECT_THROW((Lat{+2, +2, +2, BC::NONE}), std::runtime_error);
+   EXPECT_THROW((Lat{-2, -2, -2, BC::NONE}), std::runtime_error);
    
-   EXPECT_EQ((lattice::BaseThreeDimensionalLattice{
-      8, 7, 3, lattice::BoundaryCondition::PBC
-   }.GetSystemSize()), 8*7*3);
-   EXPECT_EQ((lattice::BaseThreeDimensionalLattice{
-      8, 7, 3, lattice::BoundaryCondition::PBC
-   }.GetXSize()), 8);
-   EXPECT_EQ((lattice::BaseThreeDimensionalLattice{
-      8, 7, 3, lattice::BoundaryCondition::PBC
-   }.GetYSize()), 7);
-   EXPECT_EQ((lattice::BaseThreeDimensionalLattice{
-      8, 7, 3, lattice::BoundaryCondition::PBC
-   }.GetZSize()), 3);
-   EXPECT_EQ((lattice::BaseThreeDimensionalLattice{
-      8, 7, 3, lattice::BoundaryCondition::PBC
-   }.GetBoundaryCondition()), lattice::BoundaryCondition::PBC);
+   EXPECT_EQ((Lat{8, 7, 3}.GetSystemSize()), 8*7*3);
+   EXPECT_EQ((Lat{8, 7, 3}.GetBoundaryCondition()), BC::OBC);
    
-   EXPECT_THROW((lattice::BaseThreeDimensionalLattice{-1, +9, +2}), std::runtime_error);
-   EXPECT_THROW((lattice::BaseThreeDimensionalLattice{+1, -9, +2}), std::runtime_error);
-   EXPECT_THROW((lattice::BaseThreeDimensionalLattice{+1, +9, -2}), std::runtime_error);
+   EXPECT_EQ((Lat{8, 7, 3, BC::PBC}.GetSystemSize()), 8*7*3);
+   EXPECT_EQ((Lat{8, 7, 3, BC::PBC}.GetXSize()), 8);
+   EXPECT_EQ((Lat{8, 7, 3, BC::PBC}.GetYSize()), 7);
+   EXPECT_EQ((Lat{8, 7, 3, BC::PBC}.GetZSize()), 3);
+   EXPECT_EQ((Lat{8, 7, 3, BC::PBC}.GetBoundaryCondition()), BC::PBC);
    
-   EXPECT_THROW((lattice::BaseThreeDimensionalLattice{+2, +2, +2, lattice::BoundaryCondition::NONE}), std::runtime_error);
-   EXPECT_THROW((lattice::BaseThreeDimensionalLattice{-2, -2, -2, lattice::BoundaryCondition::NONE}), std::runtime_error);
+   EXPECT_TRUE((Lat{2, 3, 4}.ValidateCOOIndex({1, 2, 3})));
+   EXPECT_TRUE((Lat{2, 3, 4}.ValidateCOOIndex({0, 0, 0})));
+   EXPECT_FALSE((Lat{2, 3, 4}.ValidateCOOIndex({1, 3, 3})));
+   EXPECT_FALSE((Lat{2, 3, 4}.ValidateCOOIndex({1, 2, 4})));
+   EXPECT_FALSE((Lat{2, 3, 4}.ValidateCOOIndex({1, -1, 1})));
    
+   EXPECT_EQ((Lat{1, 2, 3}.CalculateIntegerSiteIndex({1, 1, 1})), 4);
+   EXPECT_EQ((Lat{4, 3, 3}.CalculateIntegerSiteIndex({2, 1, 2})), 30);
 }
 
-TEST(LatticeCubic, Basic) {
-   auto index_list = std::vector<std::tuple<std::int32_t, std::int32_t, std::int32_t>>{
+TEST(Lattice, Cubic) {
+   using Lat = lattice::Cubic;
+   std::vector<typename Lat::COOIndexType> index_list{
       {0, 0, 0}, {0, 0, 1},
       {0, 1, 0}, {0, 1, 1},
       {0, 2, 0}, {0, 2, 1},

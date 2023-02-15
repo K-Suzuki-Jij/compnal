@@ -34,26 +34,23 @@ namespace lattice {
 class BaseOneDimensionalLattice {
    
 public:
+   //! @brief Cordinate index type.
    using COOIndexType = std::int32_t;
-   
+      
    //! @brief Constructor of BaseOneDimensionalLattice class.
    //! @param system_size System size.
-   BaseOneDimensionalLattice(const std::int32_t system_size) {
+   //! @param bc Boundary condtion. BoundaryCondition::NONE cannot be used here.
+   //! Defaults to BoundaryCondition::OBC.
+   BaseOneDimensionalLattice(const std::int32_t system_size,
+                             const BoundaryCondition bc = BoundaryCondition::OBC) {
       if (system_size <= 0) {
          throw std::runtime_error("system_size must be larger than 0.");
       }
-      system_size_ = system_size;
-   }
-   
-   //! @brief Constructor of BaseOneDimensionalLattice class.
-   //! @param system_size System size.
-   //! @param boundary_condition Boundary condtion. BoundaryCondition::NONE cannot be used here.
-   BaseOneDimensionalLattice(const std::int32_t system_size,
-                             const BoundaryCondition boundary_condition): BaseOneDimensionalLattice(system_size) {
-      if (boundary_condition == BoundaryCondition::NONE) {
+      if (bc == BoundaryCondition::NONE) {
          throw std::runtime_error("BoundaryCondition::NONE cannot be set.");
       }
-      bc_ = boundary_condition;
+      system_size_ = system_size;
+      bc_ = bc;
    }
       
    //! @brief Get system size.
@@ -68,6 +65,9 @@ public:
       return bc_;
    }
    
+   //! @brief Check if the value of the coordinate is in the system.
+   //! @param site_index Value of the coordinate.
+   //! @return True or False.
    bool ValidateCOOIndex(const COOIndexType site_index) const {
       if (site_index  >= system_size_ || site_index < 0) {
          return false;
@@ -77,7 +77,11 @@ public:
       }
    }
    
-   std::int32_t CalculateOneDimSiteIndex(const COOIndexType site_index) const {
+   //! @brief Calculate site index as integer from the value of the coordinate.
+   //! This function return the same value of the input.
+   //! @param site_index Value of the coordinate.
+   //! @return Site index as integer.
+   std::int32_t CalculateIntegerSiteIndex(const COOIndexType site_index) const {
       return site_index;
    }
    

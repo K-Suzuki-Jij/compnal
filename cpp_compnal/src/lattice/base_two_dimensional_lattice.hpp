@@ -34,35 +34,28 @@ namespace lattice {
 class BaseTwoDimensionalLattice {
    
 public:
+   //! @brief Cordinate index type.
    using COOIndexType = std::pair<std::int32_t, std::int32_t>;
-   
+      
    //! @brief Constructor of BaseTwoDimensionalLattice class.
    //! @param x_size The size of the x-direction.
    //! @param y_size The size of the y-direction.
+   //! @param bc Boundary condtion. BoundaryCondition::NONE cannot be used here.
    BaseTwoDimensionalLattice(const std::int32_t x_size,
-                             const std::int32_t y_size) {
+                             const std::int32_t y_size,
+                             const BoundaryCondition bc = BoundaryCondition::OBC) {
       if (x_size <= 0) {
          throw std::runtime_error("x_size must be larger than 0.");
       }
       if (y_size <= 0) {
          throw std::runtime_error("y_size must be larger than 0.");
       }
-      
-      x_size_ = x_size;
-      y_size_ = y_size;
-   }
-   
-   //! @brief Constructor of BaseTwoDimensionalLattice class.
-   //! @param x_size The size of the x-direction.
-   //! @param y_size The size of the y-direction.
-   //! @param boundary_condition Boundary condtion. BoundaryCondition::NONE cannot be used here.
-   BaseTwoDimensionalLattice(const std::int32_t x_size,
-                             const std::int32_t y_size,
-                             const BoundaryCondition boundary_condition): BaseTwoDimensionalLattice(x_size, y_size) {
-      if (boundary_condition == BoundaryCondition::NONE) {
+      if (bc == BoundaryCondition::NONE) {
          throw std::runtime_error("BoundaryCondition::NONE cannot be set.");
       }
-      bc_ = boundary_condition;
+      x_size_ = x_size;
+      y_size_ = y_size;
+      bc_ = bc;
    }
    
    //! @brief Get size of the x-direction.
@@ -89,6 +82,9 @@ public:
       return bc_;
    }
    
+   //! @brief Check if the value of the coordinate is in the system.
+   //! @param site_index Value of the coordinate.
+   //! @return True or False.
    bool ValidateCOOIndex(const COOIndexType site_index) const {
       if (site_index.first  >= x_size_ ||
           site_index.first  <  0       ||
@@ -101,7 +97,10 @@ public:
       }
    }
    
-   std::int32_t CalculateOneDimSiteIndex(const COOIndexType site_index) const {
+   //! @brief Calculate site index as integer from the value of the coordinate.
+   //! @param site_index Value of the coordinate.
+   //! @return Site index as integer.
+   std::int32_t CalculateIntegerSiteIndex(const COOIndexType site_index) const {
       return site_index.second*x_size_ + site_index.first;
    }
    

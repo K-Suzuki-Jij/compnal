@@ -29,7 +29,7 @@
 namespace compnal {
 namespace test {
 
-TEST(LatticeAnyLattice, Basic) {
+TEST(Lattice, Any) {
    lattice::AnyLattice lattice;
    EXPECT_EQ(lattice.GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
 }

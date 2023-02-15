@@ -30,36 +30,34 @@
 namespace compnal {
 namespace test {
 
-TEST(LatticeBaseTwoDimensionalLattice, Constructor) {
+TEST(Lattice, BaseTwoDimensionalLattice) {
+   using Lat = lattice::BaseTwoDimensionalLattice;
+   using BC = lattice::BoundaryCondition;
    
-   EXPECT_EQ((lattice::BaseTwoDimensionalLattice{8, 7}.GetSystemSize()), 56);
-   EXPECT_EQ((lattice::BaseTwoDimensionalLattice{8, 7}.GetBoundaryCondition()), lattice::BoundaryCondition::OBC);
+   EXPECT_THROW((Lat{-1, +9}), std::runtime_error);
+   EXPECT_THROW((Lat{+3, -1}), std::runtime_error);
+   EXPECT_THROW((Lat{+2, +1, BC::NONE}), std::runtime_error);
+   
+   EXPECT_EQ((Lat{8, 7}.GetSystemSize()), 56);
+   EXPECT_EQ((Lat{8, 7}.GetXSize()), 8);
+   EXPECT_EQ((Lat{8, 7}.GetYSize()), 7);
+   EXPECT_EQ((Lat{8, 7}.GetBoundaryCondition()), BC::OBC);
+   EXPECT_EQ((Lat{8, 7, BC::PBC}.GetBoundaryCondition()), BC::PBC);
 
-   EXPECT_EQ((lattice::BaseTwoDimensionalLattice{
-      8, 7, lattice::BoundaryCondition::PBC
-   }.GetSystemSize()), 56);
-   EXPECT_EQ((lattice::BaseTwoDimensionalLattice{
-      8, 7, lattice::BoundaryCondition::PBC
-   }.GetXSize()), 8);
-   EXPECT_EQ((lattice::BaseTwoDimensionalLattice{
-      8, 7, lattice::BoundaryCondition::PBC
-   }.GetYSize()), 7);
-   EXPECT_EQ((lattice::BaseTwoDimensionalLattice{
-      8, 7, lattice::BoundaryCondition::PBC
-   }.GetBoundaryCondition()), lattice::BoundaryCondition::PBC);
-
-   EXPECT_THROW((lattice::BaseTwoDimensionalLattice{-1, +9}), std::runtime_error);
-   EXPECT_THROW((lattice::BaseTwoDimensionalLattice{+3, -1}), std::runtime_error);
-   EXPECT_THROW((lattice::BaseTwoDimensionalLattice{-2, -1}), std::runtime_error);
-
-   EXPECT_THROW((lattice::BaseTwoDimensionalLattice{+2, +2, lattice::BoundaryCondition::NONE}), std::runtime_error);
-   EXPECT_THROW((lattice::BaseTwoDimensionalLattice{-2, -2, lattice::BoundaryCondition::NONE}), std::runtime_error);
-
+   EXPECT_TRUE((Lat{3, 4}.ValidateCOOIndex({2, 3})));
+   EXPECT_TRUE((Lat{3, 4}.ValidateCOOIndex({0, 0})));
+   EXPECT_FALSE((Lat{3, 4}.ValidateCOOIndex({2, 4})));
+   EXPECT_FALSE((Lat{3, 4}.ValidateCOOIndex({-1, 0})));
+   
+   EXPECT_EQ((Lat{2, 4}.CalculateIntegerSiteIndex({1, 1})), 3);
+   EXPECT_EQ((Lat{2, 3}.CalculateIntegerSiteIndex({1, 1})), 3);
+   EXPECT_EQ((Lat{3, 3}.CalculateIntegerSiteIndex({1, 1})), 4);
 }
 
-TEST(LatticeSquare, Basic) {
-   auto index_list = std::vector<std::pair<std::int32_t, std::int32_t>>{{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}};
-   EXPECT_EQ((lattice::Square{2, 3}.GenerateIndexList()), index_list);
+TEST(Lattice, Square) {
+   using Lat = lattice::Square;
+   std::vector<typename Lat::COOIndexType> index_list{{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}};
+   EXPECT_EQ((Lat{2, 3}.GenerateIndexList()), index_list);
 }
 
 

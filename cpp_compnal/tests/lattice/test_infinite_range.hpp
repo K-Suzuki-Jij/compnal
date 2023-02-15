@@ -30,7 +30,7 @@
 namespace compnal {
 namespace test {
 
-TEST(LatticeInfiniteRange, Constructor) {
+TEST(Lattice, InfiniteRange) {
    EXPECT_EQ(lattice::InfiniteRange{2}.GetSystemSize(), 2);
    EXPECT_EQ(lattice::InfiniteRange{2}.GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
    EXPECT_THROW(lattice::InfiniteRange{-1}.GetSystemSize(), std::runtime_error);

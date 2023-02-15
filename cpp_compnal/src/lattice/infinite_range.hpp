@@ -35,6 +35,8 @@ namespace lattice {
 class InfiniteRange {
    
 public:
+   //! @brief Cordinate index type.
+   using COOIndexType = std::int32_t;
    
    //! @brief Constructor of InfiniteRange class.
    //! @param system_size System size.
@@ -55,6 +57,26 @@ public:
    //! @return Boundary condition, BoundaryCondition::NONE.
    BoundaryCondition GetBoundaryCondition() const {
       return BoundaryCondition::NONE;
+   }
+   
+   //! @brief Check if the value of the coordinate is in the system.
+   //! @param site_index Value of the coordinate.
+   //! @return True or False.
+   bool ValidateCOOIndex(const COOIndexType site_index) const {
+      if (site_index  >= system_size_ || site_index < 0) {
+         return false;
+      }
+      else {
+         return true;
+      }
+   }
+   
+   //! @brief Calculate site index as integer from the value of the coordinate.
+   //! This function return the same value of the input.
+   //! @param site_index Value of the coordinate.
+   //! @return Site index as integer.
+   std::int32_t CalculateIntegerSiteIndex(const COOIndexType site_index) const {
+      return site_index;
    }
    
    //! @brief Generate index list.

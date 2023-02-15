@@ -31,9 +31,23 @@ namespace compnal {
 namespace test {
 
 TEST(Lattice, InfiniteRange) {
-   EXPECT_EQ(lattice::InfiniteRange{2}.GetSystemSize(), 2);
-   EXPECT_EQ(lattice::InfiniteRange{2}.GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
-   EXPECT_THROW(lattice::InfiniteRange{-1}.GetSystemSize(), std::runtime_error);
+   using Lat = lattice::InfiniteRange;
+   using BC = lattice::BoundaryCondition;
+   
+   EXPECT_THROW(Lat{-1}, std::runtime_error);
+   EXPECT_EQ(Lat{2}.GetSystemSize(), 2);
+   EXPECT_EQ(Lat{2}.GetBoundaryCondition(), BC::NONE);
+   
+   EXPECT_TRUE(Lat{2}.ValidateCOOIndex(0));
+   EXPECT_TRUE(Lat{2}.ValidateCOOIndex(1));
+   EXPECT_FALSE(Lat{2}.ValidateCOOIndex(2));
+   EXPECT_FALSE(Lat{2}.ValidateCOOIndex(-1));
+   
+   EXPECT_EQ(Lat{3}.CalculateIntegerSiteIndex(0), 0);
+   EXPECT_EQ(Lat{3}.CalculateIntegerSiteIndex(2), 2);
+   
+   std::vector<Lat::COOIndexType> index_list{0, 1, 2, 3};
+   EXPECT_EQ(Lat{4}.GenerateIndexList(), index_list);
 }
 
 

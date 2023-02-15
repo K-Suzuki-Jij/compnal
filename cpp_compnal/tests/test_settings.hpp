@@ -26,7 +26,7 @@
 namespace compnal {
 namespace test {
 
-using TestRealType = double;
+using TestRealType = float;
 
 template<typename RealType>
 const RealType test_epsilon = 4*std::numeric_limits<RealType>::epsilon();

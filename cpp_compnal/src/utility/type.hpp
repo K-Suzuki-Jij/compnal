@@ -33,8 +33,6 @@ using AnyTupleType = std::vector<std::variant<std::int32_t, std::string>>;
 
 using AnyIndexType = std::variant<std::int32_t, std::string, AnyTupleType>;
 
-using SpinType = std::int8_t;
-
 using RandType = std::mt19937_64;
 //using RandType = std::mt19937;
 //using RandType = Xorshift;

@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_INTERACTION_POLYNOMIAL_ANY_HPP_
-#define COMPNAL_TEST_INTERACTION_POLYNOMIAL_ANY_HPP_
+#ifndef COMPNAL_TEST_INTERACTION_CLASSICAL_POLYNOMIAL_ANY_HPP_
+#define COMPNAL_TEST_INTERACTION_CLASSICAL_POLYNOMIAL_ANY_HPP_
 
 #include "../../../src/interaction/classical/polynomial_any.hpp"
 #include "../../test_settings.hpp"
@@ -182,4 +182,4 @@ TEST(InteractionClassicalPolynomialAny, Poly) {
 } // namespace compnal
 
 
-#endif /* COMPNAL_TEST_INTERACTION_POLYNOMIAL_ANY_HPP_ */
+#endif /* COMPNAL_TEST_INTERACTION_CLASSICAL_POLYNOMIAL_ANY_HPP_ */

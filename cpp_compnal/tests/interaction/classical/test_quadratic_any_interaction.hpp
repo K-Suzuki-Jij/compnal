@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_INTERACTION_QUADRATIC_ANY_HPP_
-#define COMPNAL_TEST_INTERACTION_QUADRATIC_ANY_HPP_
+#ifndef COMPNAL_TEST_INTERACTION_CLASSICAL_QUADRATIC_ANY_HPP_
+#define COMPNAL_TEST_INTERACTION_CLASSICAL_QUADRATIC_ANY_HPP_
 
 #include "../../../src/interaction/classical/quadratic_any.hpp"
 #include "../../test_settings.hpp"
@@ -193,4 +193,4 @@ TEST(InteractionClassicalQuadraticAny, Empty) {
 } // namespace compnal
 
 
-#endif /* COMPNAL_TEST_INTERACTION_QUADRATIC_ANY_HPP_ */
+#endif /* COMPNAL_TEST_INTERACTION_CLASSICAL_QUADRATIC_ANY_HPP_ */

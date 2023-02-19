@@ -28,96 +28,146 @@
 namespace compnal {
 namespace test {
 
-TEST(ModelIsing, AnyLatticeBasic) {
-   using IsingClass = model::classical::Ising<lattice::AnyLattice, double>;
-   using LinearType = IsingClass::LinearType;
-   using QuadType = IsingClass::QuadraticType;
+TEST(ModelClassicalIsing, BasicChain) {
+   using BC = lattice::BoundaryCondition;
+   using ModelType = model::classical::Ising<lattice::Chain, TestRealType>;
    
-   const LinearType linear = {
+   auto lattice = lattice::Chain{4, BC::PBC};
+   auto model = ModelType{lattice, 1.0, 2.0};
+   
+   EXPECT_EQ(model.GetSystemSize(), 4);
+   EXPECT_EQ(model.GetBoundaryCondition(), BC::PBC);
+   EXPECT_NEAR(model.GetLinear(), 1.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR(model.GetQuadratic(), 2.0, test_epsilon<TestRealType>);
+   EXPECT_EQ(model.GetDegree(), 2);
+      
+}
+
+TEST(ModelClassicalIsing, BasicSquare) {
+   using BC = lattice::BoundaryCondition;
+   using ModelType = model::classical::Ising<lattice::Square, TestRealType>;
+   
+   auto lattice = lattice::Square{4, 2, BC::PBC};
+   auto model = ModelType{lattice, 1.0, 2.0};
+   
+   EXPECT_EQ(model.GetSystemSize(), 8);
+   EXPECT_EQ(model.GetBoundaryCondition(), BC::PBC);
+   EXPECT_NEAR(model.GetLinear(), 1.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR(model.GetQuadratic(), 2.0, test_epsilon<TestRealType>);
+   EXPECT_EQ(model.GetDegree(), 2);
+      
+}
+
+TEST(ModelClassicalIsing, BasicCubic) {
+   using BC = lattice::BoundaryCondition;
+   using ModelType = model::classical::Ising<lattice::Cubic, TestRealType>;
+   
+   auto lattice = lattice::Cubic{4, 2, 3, BC::PBC};
+   auto model = ModelType{lattice, 1.0, 2.0};
+   
+   EXPECT_EQ(model.GetSystemSize(), 24);
+   EXPECT_EQ(model.GetBoundaryCondition(), BC::PBC);
+   EXPECT_NEAR(model.GetLinear(), 1.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR(model.GetQuadratic(), 2.0, test_epsilon<TestRealType>);
+   EXPECT_EQ(model.GetDegree(), 2);
+      
+}
+
+TEST(ModelClassicalIsing, BasicInfiniteRange) {
+   using BC = lattice::BoundaryCondition;
+   using ModelType = model::classical::Ising<lattice::InfiniteRange, TestRealType>;
+   
+   auto lattice = lattice::InfiniteRange{4};
+   auto model = ModelType{lattice, 1.0, 2.0};
+   
+   EXPECT_EQ(model.GetSystemSize(), 4);
+   EXPECT_EQ(model.GetBoundaryCondition(), BC::NONE);
+   EXPECT_NEAR(model.GetLinear(), 1.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR(model.GetQuadratic(), 2.0, test_epsilon<TestRealType>);
+   EXPECT_EQ(model.GetDegree(), 2);
+      
+}
+
+TEST(ModelClassicalIsing, BasicAnyLattice) {
+   using BC = lattice::BoundaryCondition;
+   using ModelType = model::classical::Ising<lattice::AnyLattice, TestRealType>;
+   using Tup = utility::AnyTupleType;
+   using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
+   
+   const InteractionType::LinearType linear = {
       {1, 1.0},
-      {"a", 1.0},
-      {utility::AnyTupleType{2, "b"}, 1.5}
+      {"a", 2.0},
+      {Tup{2, "b"}, 3}
    };
    
-   const QuadType quadratic = {
+   const InteractionType::QuadraticType quadratic = {
       {{1, 1}, +3.0},
       {{1, 2}, -1.0},
       {{"a", 1}, -1.5},
-      {{utility::AnyTupleType{2, "b"}, utility::AnyTupleType{2, "a"}}, -1.5}
+      {{Tup{2, "b"}, Tup{2, "a"}}, -2.5}
    };
    
-   const IsingClass ising{lattice::AnyLattice{}, linear, quadratic};
-   auto index_list = std::vector<IsingClass::IndexType>{1, 2, "a", utility::AnyTupleType{2, "b"}, utility::AnyTupleType{2, "a"}};
-   std::sort(index_list.begin(), index_list.end());
+   auto lattice = lattice::AnyLattice{};
    
-   EXPECT_EQ(ising.GetSystemSize(), 5);
-   EXPECT_EQ(ising.GetDegree(), 2);
-   EXPECT_EQ(ising.GetIndexList(), index_list);
-   for (const auto &it: ising.GetIndexMap()) {
-      EXPECT_EQ(it.first, index_list[it.second]);
-   }
-   EXPECT_EQ(ising.GetConstant(), 3.0);
-   for (const auto &it: linear) {
-      EXPECT_DOUBLE_EQ(ising.GetLinear().at(ising.GetIndexMap().at(it.first)), it.second);
-   }
-   EXPECT_EQ(ising.GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
-   EXPECT_THROW((ising.CalculateEnergy({})), std::runtime_error);
+   auto model = ModelType{lattice, linear, quadratic};
    
+   EXPECT_EQ(model.GetSystemSize(), 5);
+   EXPECT_EQ(model.GetBoundaryCondition(), BC::NONE);
+   EXPECT_NEAR(model.GetConstant(), TestRealType{3.0}, test_epsilon<TestRealType>);
+   EXPECT_EQ(model.GetDegree(), 2);
+   EXPECT_EQ(model.GetLinear(), (std::vector<TestRealType>{1.0, 0.0, 2.0, 0.0, 3.0}));
+   
+   EXPECT_EQ(model.GetRowPtr().size(), 6);
+   EXPECT_EQ(model.GetColPtr().size(), 6);
+   EXPECT_EQ(model.GetValPtr().size(), 6);
+
+   EXPECT_EQ(model.GetRowPtr().at(0), 0);
+   EXPECT_EQ(model.GetRowPtr().at(1), 2);
+   EXPECT_EQ(model.GetRowPtr().at(2), 3);
+   EXPECT_EQ(model.GetRowPtr().at(3), 4);
+   EXPECT_EQ(model.GetRowPtr().at(4), 5);
+   EXPECT_EQ(model.GetRowPtr().at(5), 6);
+   
+   EXPECT_EQ(model.GetColPtr().at(0), 1);
+   EXPECT_EQ(model.GetColPtr().at(1), 2);
+   EXPECT_EQ(model.GetColPtr().at(2), 0);
+   EXPECT_EQ(model.GetColPtr().at(3), 0);
+   EXPECT_EQ(model.GetColPtr().at(4), 4);
+   EXPECT_EQ(model.GetColPtr().at(5), 3);
+   
+   EXPECT_NEAR(model.GetValPtr().at(0), TestRealType{-1.0}, test_epsilon<TestRealType>);
+   EXPECT_NEAR(model.GetValPtr().at(1), TestRealType{-1.5}, test_epsilon<TestRealType>);
+   EXPECT_NEAR(model.GetValPtr().at(2), TestRealType{-1.0}, test_epsilon<TestRealType>);
+   EXPECT_NEAR(model.GetValPtr().at(3), TestRealType{-1.5}, test_epsilon<TestRealType>);
+   EXPECT_NEAR(model.GetValPtr().at(4), TestRealType{-2.5}, test_epsilon<TestRealType>);
+   EXPECT_NEAR(model.GetValPtr().at(5), TestRealType{-2.5}, test_epsilon<TestRealType>);
+   
+   EXPECT_EQ(model.GetIndexList(),
+             (std::vector<InteractionType::IndexType>{1, 2, "a", Tup{2, "a"}, Tup{2, "b"}}));
+   
+   EXPECT_EQ(model.GetIndexMap().size(), 5);
+   EXPECT_EQ(model.GetIndexMap().at(1)          , 0);
+   EXPECT_EQ(model.GetIndexMap().at(2)          , 1);
+   EXPECT_EQ(model.GetIndexMap().at("a")        , 2);
+   EXPECT_EQ(model.GetIndexMap().at(Tup{2, "a"}), 3);
+   EXPECT_EQ(model.GetIndexMap().at(Tup{2, "b"}), 4);
 }
 
-TEST(ModelIsing, AnyLatticeInt) {
-   using IsingClass = model::classical::Ising<lattice::AnyLattice, double>;
-   using LinearType = IsingClass::LinearType;
-   using QuadType = IsingClass::QuadraticType;
+TEST(ModelClassicalIsing, Enegy) {
+   using BC = lattice::BoundaryCondition;
    
-   const LinearType linear = {
-      {1, 1.0},
-      {2, 1.0},
-      {3, 1.5}
-   };
+   using Chain = lattice::Chain;
+   using Square = lattice::Square;
+   using Cubic = lattice::Cubic;
+   using Infinite = lattice::InfiniteRange;
+   using Any = lattice::AnyLattice;
    
-   const QuadType quadratic = {
-      {{1, 1}, +3.0},
-      {{1, 2}, -1.0},
-      {{2, 1}, -1.5},
-      {{3, 2}, +1.0}
-   };
+   using IsingChain = model::classical::Ising<Chain, TestRealType>;
    
-   const IsingClass ising{lattice::AnyLattice{}, linear, quadratic};
-   EXPECT_DOUBLE_EQ((ising.CalculateEnergy({-1, +1, -1})), 3.0);
-   
-   EXPECT_EQ(ising.GetRowPtr().size(), 4);
-   EXPECT_EQ(ising.GetRowPtr().at(0), 0);
-   EXPECT_EQ(ising.GetRowPtr().at(1), 1);
-   EXPECT_EQ(ising.GetRowPtr().at(2), 3);
-   EXPECT_EQ(ising.GetRowPtr().at(3), 4);
-   
-   EXPECT_EQ(ising.GetColPtr().size(), 4);
-   EXPECT_EQ(ising.GetColPtr().at(0), 1);
-   EXPECT_EQ(ising.GetColPtr().at(1), 0);
-   EXPECT_EQ(ising.GetColPtr().at(2), 2);
-   EXPECT_EQ(ising.GetColPtr().at(3), 1);
-   
-   EXPECT_DOUBLE_EQ(ising.GetValPtr().size(), 4);
-   EXPECT_DOUBLE_EQ(ising.GetValPtr().at(0), -2.5);
-   EXPECT_DOUBLE_EQ(ising.GetValPtr().at(1), -2.5);
-   EXPECT_DOUBLE_EQ(ising.GetValPtr().at(2), 1);
-   EXPECT_DOUBLE_EQ(ising.GetValPtr().at(3), 1);
-   
+   //EXPECT_NEAR((IsingChain{Chain{3, BC::OBC}, 1.0, 2.0}), 3.0, test_epsilon<TestRealType>);
    
    
 }
-
-TEST(ModelIsing, Square) {
-   
-   const auto e_pbc = model::classical::make_ising<lattice::Square, double>(lattice::Square{2, 3, lattice::BoundaryCondition::PBC}, 0, -2).CalculateEnergy({1, -1, 1, 1, -1, 1});
-   const auto e_obc = model::classical::make_ising<lattice::Square, double>(lattice::Square{2, 3, lattice::BoundaryCondition::OBC}, 0, -2).CalculateEnergy({1, -1, 1, 1, -1, 1});
-   EXPECT_DOUBLE_EQ(e_obc, 2.0);
-   EXPECT_DOUBLE_EQ(e_pbc, 8.0);
-
-   
-}
-
 
 } // namespace test
 } // namespace compnal

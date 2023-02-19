@@ -187,19 +187,17 @@ private:
          }
       }
       else if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t coo_x = 0; coo_x < x_size - 1; ++coo_x) {
-            energy += linear_*spins[(y_size - 1)*x_size + coo_x];
-            for (std::int32_t coo_y = 0; coo_y < y_size - 1; ++coo_y) {
-               const std::int32_t index    = coo_y*x_size + coo_x;
-               const std::int32_t index_x1 = coo_y*x_size + coo_x + 1;
-               const std::int32_t index_y1 = (coo_y + 1)*x_size + coo_x;
+         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               const std::int32_t index = coo_y*x_size + coo_x;
                energy += linear_*spins[index];
-               energy += quadratic_*spins[index]*spins[index_x1];
-               energy += quadratic_*spins[index]*spins[index_y1];
+               if (coo_x < x_size - 1 && coo_y < y_size - 1) {
+                  const std::int32_t index_x1 = coo_y*x_size + (coo_x + 1);
+                  const std::int32_t index_y1 = (coo_y + 1)*x_size + coo_x;
+                  energy += quadratic_*spins[index]*spins[index_x1];
+                  energy += quadratic_*spins[index]*spins[index_y1];
+               }
             }
-         }
-         for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
-            energy += linear_*spins[coo_y*x_size + x_size - 1];
          }
       }
       else {

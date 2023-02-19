@@ -23,7 +23,7 @@
 #ifndef COMPNAL_TEST_INTERACTION_ALL_HPP_
 #define COMPNAL_TEST_INTERACTION_ALL_HPP_
 
-#include "test_quadratic_any_interaction.hpp"
-#include "test_polynomial_any_interaction.hpp"
+#include "./classical/test_quadratic_any_interaction.hpp"
+#include "./classical/test_polynomial_any_interaction.hpp"
 
 #endif /* COMPNAL_TEST_INTERACTION_ALL_HPP_ */

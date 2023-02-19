@@ -23,15 +23,15 @@
 #ifndef COMPNAL_TEST_INTERACTION_QUADRATIC_ANY_HPP_
 #define COMPNAL_TEST_INTERACTION_QUADRATIC_ANY_HPP_
 
-#include "../../src/interaction/classical/quadratic_any.hpp"
-#include "../test_settings.hpp"
+#include "../../../src/interaction/classical/quadratic_any.hpp"
+#include "../../test_settings.hpp"
 
 #include "gtest/gtest.h"
 
 namespace compnal {
 namespace test {
 
-TEST(InteractionQuadraticAny, LinearOnly) {
+TEST(InteractionClassicalQuadraticAny, LinearOnly) {
    using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
    
    const InteractionType::LinearType linear = {
@@ -61,7 +61,7 @@ TEST(InteractionQuadraticAny, LinearOnly) {
    EXPECT_EQ(interaction.GetIndexMap().at(3), 2);
 }
 
-TEST(InteractionQuadraticAny, QuadOnly) {
+TEST(InteractionClassicalQuadraticAny, QuadOnly) {
    using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
    
    const InteractionType::QuadraticType quadratic = {
@@ -106,7 +106,7 @@ TEST(InteractionQuadraticAny, QuadOnly) {
    
 }
 
-TEST(InteractionQuadraticAny, Mix) {
+TEST(InteractionClassicalQuadraticAny, Mix) {
    using Tup = utility::AnyTupleType;
    using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
    
@@ -168,7 +168,7 @@ TEST(InteractionQuadraticAny, Mix) {
    
 }
 
-TEST(InteractionQuadraticAny, Empty) {
+TEST(InteractionClassicalQuadraticAny, Empty) {
    using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
    const InteractionType interaction = InteractionType{{}, {}};
    

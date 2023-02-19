@@ -23,13 +23,13 @@
 #ifndef COMPNAL_TEST_INTERACTION_POLYNOMIAL_ANY_HPP_
 #define COMPNAL_TEST_INTERACTION_POLYNOMIAL_ANY_HPP_
 
-#include "../../src/interaction/classical/polynomial_any.hpp"
-#include "../test_settings.hpp"
+#include "../../../src/interaction/classical/polynomial_any.hpp"
+#include "../../test_settings.hpp"
 
 namespace compnal {
 namespace test {
 
-TEST(InteractionPolynomialAny, Linear) {
+TEST(InteractionClassicalPolynomialAny, Linear) {
    using InteractionType = interaction::classical::PolynomialAny<TestRealType>;
    
    const InteractionType::PolynomialType poly = {
@@ -71,7 +71,7 @@ TEST(InteractionPolynomialAny, Linear) {
    
 }
 
-TEST(InteractionPolynomialAny, Quadratic) {
+TEST(InteractionClassicalPolynomialAny, Quadratic) {
    using Tup = utility::AnyTupleType;
    using InteractionType = interaction::classical::PolynomialAny<TestRealType>;
    
@@ -114,7 +114,7 @@ TEST(InteractionPolynomialAny, Quadratic) {
    
 }
 
-TEST(InteractionPolynomialAny, Poly) {
+TEST(InteractionClassicalPolynomialAny, Poly) {
    using Tup = utility::AnyTupleType;
    using InteractionType = interaction::classical::PolynomialAny<TestRealType>;
    

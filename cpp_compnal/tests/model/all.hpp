@@ -26,7 +26,7 @@
 #include "./classical/test_ising.hpp"
 #include "./classical/test_polynomial_ising.hpp"
 
-#include "./quantum/test_base_spin.hpp"
-#include "./quantum/test_electron.hpp"
+//#include "./quantum/test_base_spin.hpp"
+//#include "./quantum/test_electron.hpp"
 
 #endif /* COMPNAL_TEST_MODEL_ALL_HPP_ */

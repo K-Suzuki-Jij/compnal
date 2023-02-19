@@ -42,8 +42,8 @@ public:
    CMCSystem(const ModelType &model):
    system_size_(model.GetSystemSize()),
    bc_(model.GetLattice().GetBoundaryCondition()),
-   key_value_list_(model.GetInteraction().GetKeyValueList()),
-   adjacency_list_(model.GetInteraction().GetAdjacencyList()) {}
+   key_value_list_(model.GetKeyValueList()),
+   adjacency_list_(model.GetAdjacencyList()) {}
    
    void InitializeSSF(const uint64_t seed) {
       sample_ = this->GenerateRandomSpin(seed, system_size_);

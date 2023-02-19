@@ -52,7 +52,7 @@ TEST(ModelIsing, AnyLatticeBasic) {
    
    EXPECT_EQ(ising.GetSystemSize(), 5);
    EXPECT_EQ(ising.GetDegree(), 2);
-   EXPECT_EQ(ising.GenerateIndexList(), index_list);
+   EXPECT_EQ(ising.GetIndexList(), index_list);
    for (const auto &it: ising.GetIndexMap()) {
       EXPECT_EQ(it.first, index_list[it.second]);
    }

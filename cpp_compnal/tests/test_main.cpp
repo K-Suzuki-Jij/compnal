@@ -19,8 +19,8 @@
 //#include "blas/all.hpp"
 #include "interaction/all.hpp"
 #include "lattice/all.hpp"
-//#include "model/all.hpp"
-//#include "solver/all.hpp"
+#include "model/all.hpp"
+#include "solver/all.hpp"
 //#include "utility/all.hpp"
 #include "gtest/gtest.h"
 

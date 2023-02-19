@@ -28,22 +28,50 @@ namespace compnal {
 namespace model {
 namespace classical {
 
-//! @brief Polynomial Ising class.
+//! @brief Class for representing PolynomialIsing class.
+//! \f[ J_{0} + J_{1}\sum_{i}s_{i} + J_{2}\sum_{i,j}s_{i}s_{j} +
+//! J_{3}\sum_{i,j,k}s_{i}s_{j}s_{k} + \ldots,\quad s_{i}\in\{-1,+1\} \f]
+//! This class can represents the following models.
+//! - PolynomialIsing model on the one-dimensional chain.
+//! - PolynomialIsing model on the square lattice.
+//! - PolynomialIsing model on the cubic lattice.
+//! - Fully-connected PolynomialIsing model.
+//!
+//! @tparam LatticeType The lattice type, which must the following type.
+//! - compnal::lattice::Chain
+//! - compnal::lattice::Square
+//! - compnal::lattice::Cubic
+//! - compnal::lattice::InfiniteRange
+//!
+//! @tparam RealType The value type, which must be floating point type.
 template<class LatticeType, typename RealType>
 class PolynomialIsing {
    static_assert(std::is_floating_point<RealType>::value, "Template parameter RealType must be floating point type");
    
 public:
-   
+   //! @brief The value type.
    using ValueType = RealType;
-   using IndexType = std::int32_t;
-   using OPType = utility::SpinType;
-   using PolynomialType = std::unordered_map<std::int32_t, RealType>;
    
+   //! @brief Coordinate index type.
+   using IndexType = typename LatticeType::IndexType;
+   
+   //! @brief The operator type, which here represents Ising spins \f$ s_i\in \{-1,+1\} \f$
+   using OPType = std::int8_t;
+   
+   //! @brief The type of polynomial interaction \f$ J_{p}\f$, here \f$ p \f$ is the degree of interactions.
+   //! For example, \f$J_{2}=J_{3}=1.0\f$ can be set by {{2, 1.0}, {3, 1.0}} as std::unordered_map.
+   using PolynomialType = std::unordered_map<std::int32_t, ValueType>;
+   
+   //! @brief Constructor for PolynomialIsing class.
+   //! @param lattice The lattice.
+   //! @param interaction The polynomial interaction.
    PolynomialIsing(const LatticeType &lattice,
                    const PolynomialType &interaction):
    lattice_(lattice) {
       for (const auto &it: interaction) {
+         if (std::abs(it.second) <= std::numeric_limits<ValueType>::epsilon()) {
+            continue;
+         }
          if (interaction_.size() <= it.first) {
             interaction_.resize(it.first + 1);
          }
@@ -51,220 +79,212 @@ public:
       }
    }
    
-   const std::vector<RealType> &GetInteraction() const {
-      return interaction_;
-   }
-   
-   const LatticeType &GetLattice() const {
-      return lattice_;
-   }
-   
+   //! @brief Get the system size \f$ N\f$.
+   //! @return The system size \f$ N\f$.
    std::int32_t GetSystemSize() const {
       return lattice_.GetSystemSize();
    }
-      
+   
+   //! @brief Get boundary condition.
+   //! @return Boundary condition.
+   lattice::BoundaryCondition GetBoundaryCondition() const {
+      return lattice_.GetBoundaryCondition();
+   }
+   
+   //! @brief Get polynomial interaction \f$ J_{p}\f$, here \f$ p \f$ is the degree of interactions.
+   //! @return The polynomial interaction \f$ J_{p}\f$.
+   //! For example, {0.0, 1.0, 1.0} as std::vector means \f$J_{2}=J_{3}=1.0\f$.
+   const std::vector<ValueType> &GetInteraction() const {
+      return interaction_;
+   }
+   
+   //! @brief Get the lattice.
+   //! @return The lattice.
+   const LatticeType &GetLattice() const {
+      return lattice_;
+   }
+
+   //! @brief Get the degree of the interactions.
+   //! @return The degree.
    std::int32_t GetDegree() const {
       return static_cast<std::int32_t>(interaction_.size()) - 1;
    }
    
-   RealType CalculateEnergy(const std::vector<OPType> &sample) const {
-      return CalculateEnergy(lattice_, sample);
+   //! @brief Calculate energy corresponding to the spin configuration.
+   //! @param spins The spin configuration.
+   //! @return The energy.
+   ValueType CalculateEnergy(const std::vector<OPType> &spins) const {
+      return CalculateEnergy(lattice_, spins);
    }
    
-   RealType CalculateMoment(const std::vector<std::vector<OPType>> &samples,
-                            const std::int32_t degree,
-                            const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) const {
-      if (degree <= 0) {
-         throw std::runtime_error("degree must be lager than 0.");
-      }
-      
-      RealType val = 0;
-#pragma omp parallel for schedule(guided) reduction(+: val) num_threads(num_threads)
-      for (std::int32_t i = 0; i < static_cast<std::int32_t>(samples.size()); ++i) {
-         RealType avg = CalculateMagnetization(samples[i]);
-         RealType prod = 1;
-         for (std::int32_t j = 0; j < degree; ++j) {
-            prod = prod*avg;
-         }
-         val += prod;
-      }
-      return val/samples.size();
-   }
-   
-   RealType CalculateOnsiteAverage(const std::vector<std::vector<OPType>> &samples,
-                                   const IndexType index) const {
-      if (index < 0) {
-         throw std::runtime_error("The index is out of range.");
-      }
-      RealType val = 0;
-      for (std::size_t i = 0; i < samples.size(); ++i) {
-         val += samples[i][index];
-      }
-      return val/samples.size();
-   }
-   
-   RealType CalculateCorrelation(const std::vector<std::vector<OPType>> &samples,
-                                 const IndexType ind1,
-                                 const IndexType ind2) const {
-      const std::int32_t size = static_cast<std::int32_t>(samples.size());
-      if (ind1 < 0 || ind2 < 0) {
-         throw std::runtime_error("The index is out of range.");
-      }
-      RealType val = 0;
-      for (std::int32_t i = 0; i < size; ++i) {
-         val += samples[i][ind1]*samples[i][ind2];
-      }
-      return val/size;
-   }
    
 private:
+   //! @brief The lattice.
    LatticeType lattice_;
-   std::vector<RealType> interaction_;
    
-   RealType CalculateEnergy(const lattice::Chain &chain_lattice,
-                            const std::vector<OPType> &sample) const {
-      RealType energy = 0;
+   //! @brief The polynomial interaction.
+   std::vector<ValueType> interaction_;
+   
+   //! @brief Calculate energy corresponding to the spin configuration on the one-dimensional chain.
+   //! @param lattice The one-dimensional chain.
+   //! @param spins The spin configuration.
+   //! @return The energy.
+   ValueType CalculateEnergy(const lattice::Chain &lattice,
+                            const std::vector<OPType> &spins) const {
+      ValueType energy = 0;
       return energy;
    }
    
-   RealType CalculateEnergy(const lattice::Square &square_lattice,
-                            const std::vector<OPType> &sample) const {
-      RealType energy = 0;
+   //! @brief Calculate energy corresponding to the spin configuration on the two-dimensional square lattice.
+   //! @param lattice The two-dimensional square lattice.
+   //! @param spins The spin configuration.
+   //! @return The energy.
+   ValueType CalculateEnergy(const lattice::Square &lattice,
+                            const std::vector<OPType> &spins) const {
+      ValueType energy = 0;
       return energy;
    }
    
-   RealType CalculateEnergy(const lattice::Cubic &cubic_lattice,
-                            const std::vector<OPType> &sample) const {
-      RealType energy = 0;
+   //! @brief Calculate energy corresponding to the spin configuration on the three-dimensional cubic lattice.
+   //! @param lattice The three-dimensional cubic lattice.
+   //! @param spins The spin configuration.
+   //! @return The energy.
+   ValueType CalculateEnergy(const lattice::Cubic &lattice,
+                            const std::vector<OPType> &spins) const {
+      ValueType energy = 0;
       return energy;
    }
    
-   RealType CalculateEnergy(const lattice::InfiniteRange &infinite_range_lattice,
-                            const std::vector<OPType> &sample) const {
-      RealType energy = 0;
+   //! @brief Calculate energy corresponding to the spin configuration on the infinite range lattice.
+   //! @param lattice The infinite range lattice.
+   //! @param spins The spin configuration.
+   //! @return The energy.
+   ValueType CalculateEnergy(const lattice::InfiniteRange &lattice,
+                            const std::vector<OPType> &spins) const {
+      ValueType energy = 0;
       return energy;
-   }
-   
-   RealType CalculateMagnetization(const std::vector<OPType> &sample) const {
-      RealType val = 0;
-      for (std::size_t i = 0; i < sample.size(); ++i) {
-         val += sample[i];
-      }
-      return val/sample.size();
    }
    
 };
 
-
+//! @brief Class for representing the PolynomialIsing models on any lattices.
+//! \f[ J^{(0)} + \sum_{i}J^{(1)}_{i}s_{i} + \sum_{i,j}J^{(2)}_{i,j}s_{i}s_{j} +
+//! \sum_{i,j,k}J^{(3)}_{i,j,k}s_{i}s_{j}s_{k} + \ldots,\quad s_{i}\in\{-1,+1\} \f]
+//! @tparam RealType The value type, which must be floating point type.
 template<typename RealType>
 class PolynomialIsing<lattice::AnyLattice, RealType> {
    static_assert(std::is_floating_point<RealType>::value, "Template parameter RealType must be floating point type");
    
 public:
-   using ValueType = RealType;
-   using OPType = utility::SpinType;
-   using IndexType = typename interaction::classical::PolynomialAny<RealType>::IndexType;
-   using IndexHash = typename interaction::classical::PolynomialAny<RealType>::IndexHash;
-   using PolynomialType = typename interaction::classical::PolynomialAny<RealType>::PolynomialType;
+   //! @brief The value type.
+   using ValueType = RealType
+   ;
+   //! @brief The index type.
+   using IndexType = typename interaction::classical::PolynomialAny<ValueType>::IndexType;
    
+   //! @brief The hash for IndexType.
+   using IndexHash = typename interaction::classical::PolynomialAny<ValueType>::IndexHash;
+   
+   //! @brief The operator type, which here represents Ising spins \f$ s_i\in \{-1,+1\} \f$
+   using OPType = std::int8_t;
+   
+   //! @brief The type of polynomial interaction \f$ J^{p}_{i,j,k,\ldots}\f$,
+   //! here \f$ p \f$ is the degree of interactions.
+   //! For example, \f$J^{2}_{1,2}=J^{3}_{1,2,3}=1.0\f$ can be set by
+   //! {{{1, 2}, 1.0}, {{1, 2, 3}, 1.0}} as std::unordered_map.
+   using PolynomialType = typename interaction::classical::PolynomialAny<ValueType>::PolynomialType;
+   
+   //! @brief Constructor for PolynomialIsing class.
+   //! @param lattice The lattice.
+   //! @param interaction The polynomial interaction.
    PolynomialIsing(const lattice::AnyLattice &lattice,
                    const PolynomialType &interaction):
    lattice_(lattice), interaction_(interaction) {}
    
-   const interaction::classical::PolynomialAny<RealType> &GetInteraction() const {
-      return interaction_;
-   }
-   
-   const lattice::AnyLattice &GetLattice() const {
-      return lattice_;
-   }
-   
+   //! @brief Get the system size \f$ N\f$.
+   //! @return The system size \f$ N\f$.
    std::int32_t GetSystemSize() const {
       return interaction_.GetSystemSize();
    }
    
+   //! @brief Get boundary condition.
+   //! @return Boundary condition.
+   lattice::BoundaryCondition GetBoundaryCondition() const {
+      return lattice_.GetBoundaryCondition();
+   }
+   
+   //! @brief Get the integer key and value list as pair.
+   //! @return The integer key and value list as pair.
+   const std::vector<std::pair<std::vector<std::int32_t>, ValueType>> &GetKeyValueList() const {
+      return interaction_.GetKeyValueList();
+   }
+   
+   //! @brief Get the adjacency list, which stored the integer index of
+   //! the polynomial interaction specified by the site index.
+   //! @return The adjacency list.
+   const std::vector<std::vector<std::size_t>> &GetAdjacencyList() const {
+      return interaction_.GetAdjacencyList();
+   }
+   
+   //! @brief Generate index list.
+   //! @return The index list.
+   const std::vector<IndexType> &GetIndexList() const {
+      return interaction_.GetIndexList();
+   }
+   
+   //! @brief Get the mapping from the index to the integer.
+   //! @return The index map.
+   const std::unordered_map<IndexType, std::int32_t, IndexHash> &GetIndexMap() const {
+      return interaction_.GetIndexMap();
+   }
+
+   //! @brief Get the degree of the interactions.
+   //! @return The degree.
    std::int32_t GetDegree() const {
       return interaction_.GetDegree();
    }
    
-   RealType CalculateEnergy(const std::vector<OPType> &sample) const {
-      if (sample.size() != interaction_.GetSystemSize()) {
+   //! @brief Get the lattice.
+   //! @return The lattice::AnyLattice object.
+   const lattice::AnyLattice &GetLattice() const {
+      return lattice_;
+   }
+   
+   //! @brief Calculate energy corresponding to the spin configuration.
+   //! @param spins The spin configuration.
+   //! @return The energy.
+   ValueType CalculateEnergy(const std::vector<OPType> &spins) const {
+      if (spins.size() != interaction_.GetSystemSize()) {
          throw std::runtime_error("The sample size is not equal to the system size");
       }
       const auto &key_list = interaction_.GetKeyList();
       const auto &value_list = interaction_.GetValueList();
-      RealType val = 0;
+      ValueType val = 0;
       for (std::size_t i = 0; i < key_list.size(); ++i) {
          OPType spin = 1;
          for (const auto &index: key_list[i]) {
-            spin *= sample[index];
+            spin *= spins[index];
          }
          val += spin*value_list[i];
       }
       return val;
    }
    
-   RealType CalculateOnsiteAverage(const std::vector<std::vector<OPType>> &samples,
-                                   const IndexType index) const {
-      const std::unordered_map<IndexType, std::int32_t, IndexHash> &index_map = interaction_.GetIndexMap();
-      if (index_map.count(index) == 0) {
-         throw std::runtime_error("The index is out of range.");
-      }
-      RealType val = 0;
-      for (std::size_t i = 0; i < samples.size(); ++i) {
-         val += samples[i][index_map.at(index)];
-      }
-      return val/samples.size();
-   }
-   
-   RealType CalculateMoment(const std::vector<std::vector<OPType>> &samples,
-                            const std::int32_t degree,
-                            const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) const {
-      if (degree <= 0) {
-         throw std::runtime_error("degree must be lager than 0.");
-      }
-      
-      RealType val = 0;
-#pragma omp parallel for schedule(guided) reduction(+: val) num_threads(num_threads)
-      for (std::int32_t i = 0; i < static_cast<std::int32_t>(samples.size()); ++i) {
-         RealType avg = CalculateMagnetization(samples[i]);
-         RealType prod = 1;
-         for (std::int32_t j = 0; j < degree; ++j) {
-            prod = prod*avg;
-         }
-         val += prod;
-      }
-      return val/samples.size();
-   }
-   
-   RealType CalculateCorrelation(const std::vector<std::vector<OPType>> &samples,
-                                 const IndexType ind1,
-                                 const IndexType ind2) const {
-      const std::unordered_map<IndexType, std::int32_t, IndexHash> &index_map = interaction_.GetIndexMap();
-      if (index_map.count(ind1) == 0 || index_map.count(ind2) == 0) {
-         throw std::runtime_error("The index is out of range.");
-      }
-      RealType val = 0;
-      for (std::size_t i = 0; i < samples.size(); ++i) {
-         val += samples[i][index_map.at(ind1)]*samples[i][index_map.at(ind2)];
-      }
-      return val/samples.size();
-   }
    
 private:
+   //! @brief The interaction.
+   interaction::classical::PolynomialAny<ValueType> interaction_;
+   
+   //! @brief The linear interaction.
    lattice::AnyLattice lattice_;
-   interaction::classical::PolynomialAny<RealType> interaction_;
-   
-   RealType CalculateMagnetization(const std::vector<OPType> &sample) const {
-      RealType val = 0;
-      for (std::size_t i = 0; i < sample.size(); ++i) {
-         val += sample[i];
-      }
-      return val/sample.size();
-   }
-   
+      
 };
 
+//! @brief Helper function to make PolynomialIsing class.
+//! @tparam LatticeType The lattice type.
+//! @tparam RealType The value type, which must be floating point type.
+//! @param lattice The lattice.
+//! @param interaction The polynomial interaction.
 template<class LatticeType, typename RealType>
 auto make_polynomial_ising(const LatticeType &lattice,
                            const typename PolynomialIsing<LatticeType, RealType>::PolynomialType &interaction) {

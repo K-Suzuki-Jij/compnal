@@ -162,7 +162,8 @@ public:
    }
    
    RealType CalculateAverage() const {
-      return model_.CalculateMoment(samples_, 1, num_threads_);
+      //return model_.CalculateMoment(samples_, 1, num_threads_);
+      return 0;
    }
 
    RealType CalculateMoment(const std::int32_t degree) const {

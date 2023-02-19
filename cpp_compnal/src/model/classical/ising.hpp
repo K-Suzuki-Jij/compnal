@@ -100,8 +100,8 @@ public:
       return quadratic_;
    }
    
-   //! @brief Get the lattice \f$ h\f$.
-   //! @return The lattice \f$ h\f$.
+   //! @brief Get the lattice.
+   //! @return The lattice.
    const LatticeType &GetLattice() const {
       return lattice_;
    }
@@ -123,7 +123,7 @@ public:
    //! @brief Calculate energy corresponding to the spin configuration.
    //! @param spins The spin configuration.
    //! @return The energy.
-   ValueType CalculateEnergy(const std::vector<std::int32_t> &spins) const {
+   ValueType CalculateEnergy(const std::vector<OPType> &spins) const {
       return CalculateEnergy(lattice_, spins);
    }
    
@@ -142,7 +142,7 @@ private:
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const lattice::Chain &lattice,
-                             const std::vector<std::int32_t> &spins) const {
+                             const std::vector<OPType> &spins) const {
       ValueType energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       
@@ -169,7 +169,7 @@ private:
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const lattice::Square &lattice,
-                             const std::vector<std::int32_t> &spins) const {
+                             const std::vector<OPType> &spins) const {
       ValueType energy = 0;
       const std::int32_t x_size = lattice.GetXSize();
       const std::int32_t y_size = lattice.GetYSize();
@@ -214,7 +214,7 @@ private:
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const lattice::Cubic &lattice,
-                             const std::vector<std::int32_t> &spins) const {
+                             const std::vector<OPType> &spins) const {
       
       ValueType energy = 0;
       const std::int32_t x_size = lattice.GetXSize();
@@ -267,7 +267,7 @@ private:
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const lattice::InfiniteRange &lattice,
-                             const std::vector<std::int32_t> &spins) const {
+                             const std::vector<OPType> &spins) const {
       ValueType energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       for (std::int32_t i = 0; i < system_size; ++i) {
@@ -282,6 +282,7 @@ private:
 };
 
 //! @brief Class for representing the classical Ising models on any lattices.
+//! \f[ \sum_{i,j}J_{i,j}s_{i}s_{j} + \sum_{i}h_{i}s_{i},\quad s_{i}\in\{-1,+1\} \f]
 //! @tparam RealType The value type, which must be floating point type.
 template<typename RealType>
 class Ising<lattice::AnyLattice, RealType> {
@@ -359,7 +360,7 @@ public:
       
    //! @brief Generate index list.
    //! @return The index list.
-   const std::vector<IndexType> &GenerateIndexList() const {
+   const std::vector<IndexType> &GetIndexList() const {
       return interaction_.GetIndexList();
    }
    
@@ -384,12 +385,12 @@ public:
    //! @brief Calculate energy corresponding to the spin configuration.
    //! @param spins The spin configuration.
    //! @return The energy.
-   ValueType CalculateEnergy(const std::vector<std::int32_t> &spins) const {
+   ValueType CalculateEnergy(const std::vector<OPType> &spins) const {
       if (spins.size() != interaction_.GetSystemSize()) {
          throw std::runtime_error("The size of spin configuration is not equal to the system size.");
       }
       ValueType val = interaction_.GetConstant();
-      const std::int32_t system_size = static_cast<std::int32_t>(spins.size());
+      const std::int32_t system_size = interaction_.GetSystemSize();
       const auto &linear = GetLinear();
       const auto &row_ptr = GetRowPtr();
       const auto &col_ptr = GetColPtr();
@@ -417,6 +418,9 @@ private:
 //! @brief Helper function to make Ising class.
 //! @tparam LatticeType The lattice type.
 //! @tparam RealType The value type, which must be floating point type.
+//! @param lattice The lattice.
+//! @param linear The linear interaction.
+//! @param quadratic The quadratic interaction.
 template<class LatticeType, typename RealType>
 auto make_ising(const LatticeType &lattice,
                 const typename Ising<LatticeType, RealType>::LinearType &linear,

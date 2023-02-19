@@ -29,7 +29,7 @@ TEST(ModelPolynomialIsing, Chain) {
    auto model = model::classical::make_polynomial_ising<lattice::Chain, double>(lattice::Chain{4}, {{1, -1.0}, {3, +2.0}});
    EXPECT_EQ(model.GetInteraction(), (std::vector<double>{0.0, -1.0, 0.0, +2.0}));
    EXPECT_EQ(model.GetSystemSize(), 4);
-   EXPECT_EQ(model.GetBoundaryCondition(), lattice::BoundaryCondition::OBC);
+   EXPECT_EQ(model.GetLattice().GetBoundaryCondition(), lattice::BoundaryCondition::OBC);
    EXPECT_EQ(model.GetDegree(), 3);
    EXPECT_EQ(model.CalculateEnergy(std::vector<OPType>{-1, +1, +1}), 0.0);
    
@@ -39,7 +39,7 @@ TEST(ModelPolynomialIsing, AnyLattice) {
    auto model = model::classical::make_polynomial_ising<lattice::AnyLattice, double>(lattice::AnyLattice{}, {{{1, 2, "a"}, -1.0}, {{1, utility::AnyTupleType{1, 1}}, -2.0}});
       
    EXPECT_EQ(model.GetSystemSize(), 4);
-   EXPECT_EQ(model.GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
+   EXPECT_EQ(model.GetLattice().GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
 }
 
 TEST(ModelPolynomialIsing, InfiniteRange) {

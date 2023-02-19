@@ -32,8 +32,20 @@ namespace compnal {
 namespace model {
 namespace classical {
 
-//! @brief Class for representing the classical Ising models.
-//! @tparam LatticeType The lattice type.
+//! @brief Class for representing typical Ising models.
+//! \f[ J\sum_{i,j}s_{i}s_{j} + h\sum_{i}s_{i},\quad s_{i}\in\{-1,+1\} \f]
+//! This class can represents the following models.
+//! - Ising model on the one-dimensional chain.
+//! - Ising model on the square lattice.
+//! - Ising model on the cubic lattice.
+//! - Fully-connected Ising model.
+//!
+//! @tparam LatticeType The lattice type, which must the following type.
+//! - compnal::lattice::Chain
+//! - compnal::lattice::Square
+//! - compnal::lattice::Cubic
+//! - compnal::lattice::InfiniteRange
+//!
 //! @tparam RealType The value type, which must be floating point type.
 template<class LatticeType, typename RealType>
 class Ising {
@@ -43,20 +55,20 @@ public:
    //! @brief The value type.
    using ValueType = RealType;
    
-   //! @brief The index type.
-   using IndexType = std::int32_t;
+   //! @brief Coordinate index type.
+   using IndexType = typename LatticeType::IndexType;
    
-   //! @brief The operator type, which here is the type of Ising spin -1 or +1.
-   using OPType = utility::SpinType;
+   //! @brief The operator type, which here represents Ising spins \f$ s_i\in \{-1,+1\} \f$
+   using OPType = std::int8_t;
    
-   //! @brief The linear interaction type.
-   using LinearType = RealType;
+   //! @brief The type of linear interaction \f$ h\f$.
+   using LinearType = ValueType;
    
-   //! @brief The quadratic interaction type.
-   using QuadraticType = RealType;
+   //! @brief The type of quadratic interaction \f$ J\f$.
+   using QuadraticType = ValueType;
    
    //! @brief Constructor for Ising class.
-   //! @param lattice The lattice type.
+   //! @param lattice The lattice.
    //! @param linear The linear interaction.
    //! @param quadratic The quadratic interaction.
    Ising(const LatticeType &lattice,
@@ -64,43 +76,43 @@ public:
          const QuadraticType quadratic):
    lattice_(lattice), linear_(linear), quadratic_(quadratic) {}
    
-   //! @brief Get linear interaction.
-   //! @return The linear interaction.
-   LinearType GetLinear() const {
-      return linear_;
-   }
-   
-   //! @brief Get quadratic interaction.
-   //! @return The quadratic interaction.
-   QuadraticType GetQuadratic() const {
-      return quadratic_;
-   }
-   
-   //! @brief Get the system size.
-   //! @return The system size.
+   //! @brief Get the system size \f$ N\f$.
+   //! @return The system size \f$ N\f$.
    std::int32_t GetSystemSize() const {
       return lattice_.GetSystemSize();
    }
    
-   //! @brief Get the boundary condition.
-   //! @return The boundary condition.
+   //! @brief Get boundary condition.
+   //! @return Boundary condition.
    lattice::BoundaryCondition GetBoundaryCondition() const {
       return lattice_.GetBoundaryCondition();
    }
    
-   //! @brief Generate index list.
-   //! @return The index list.
-   auto GenerateIndexList() const {
-      return lattice_.GenerateIndexList();
+   //! @brief Get linear interaction \f$ h\f$.
+   //! @return The linear interaction \f$ h\f$.
+   LinearType GetLinear() const {
+      return linear_;
    }
    
+   //! @brief Get quadratic interaction \f$ J\f$.
+   //! @return The quadratic interaction \f$ J\f$.
+   QuadraticType GetQuadratic() const {
+      return quadratic_;
+   }
+   
+   //! @brief Get the lattice \f$ h\f$.
+   //! @return The lattice \f$ h\f$.
+   const LatticeType &GetLattice() const {
+      return lattice_;
+   }
+      
    //! @brief Get the degree of the interactions.
    //! @return The degree.
    std::int32_t GetDegree() const {
-      if (std::abs(quadratic_) > std::numeric_limits<RealType>::epsilon()) {
+      if (std::abs(quadratic_) > std::numeric_limits<ValueType>::epsilon()) {
          return 2;
       }
-      else if (std::abs(linear_) > std::numeric_limits<RealType>::epsilon()) {
+      else if (std::abs(linear_) > std::numeric_limits<ValueType>::epsilon()) {
          return 1;
       }
       else {
@@ -108,85 +120,15 @@ public:
       }
    }
    
-   //! @brief Get the lattice.
-   //! @return The lattice.
-   const LatticeType &GetLattice() const {
-      return lattice_;
-   }
-   
    //! @brief Calculate energy corresponding to the spin configuration.
-   //! @param spin_configuration The spin configuration.
+   //! @param spins The spin configuration.
    //! @return The energy.
-   RealType CalculateEnergy(const std::vector<OPType> &spin_configuration) const {
-      return CalculateEnergy(lattice_, spin_configuration);
-   }
-   
-   //! @brief Calculate n-th moment for the list of spin configuration.
-   //! @param spin_configurations The list of spin configuration.
-   //! @param degree The degree of the moment.
-   //! @param num_threads The number of threads.
-   //! @return The moment.
-   RealType CalculateMoment(const std::vector<std::vector<OPType>> &spin_configurations,
-                            const std::int32_t degree,
-                            const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) const {
-      if (degree <= 0) {
-         throw std::runtime_error("degree must be lager than 0.");
-      }
-      
-      RealType val = 0;
-#pragma omp parallel for schedule(guided) reduction(+: val) num_threads(num_threads)
-      for (std::int32_t i = 0; i < static_cast<std::int32_t>(spin_configurations.size()); ++i) {
-         RealType avg = 0;
-         for (std::size_t j = 0; j < spin_configurations[i].size(); ++j) {
-            avg += spin_configurations[i][j];
-         }
-         
-         RealType prod = 1;
-         for (std::int32_t j = 0; j < degree; ++j) {
-            prod = prod*avg;
-         }
-         val += prod;
-      }
-      return val/spin_configurations.size();
-   }
-   
-   //! @brief Calculate the on-site expectation value.
-   //! @param spin_configurations The list of spin configuration.
-   //! @param index The index of the spin.
-   //! @return The on-site expectation value.
-   RealType CalculateOnsiteAverage(const std::vector<std::vector<OPType>> &spin_configurations,
-                                   const IndexType index) const {
-      if (index < 0) {
-         throw std::runtime_error("The index is out of range.");
-      }
-      RealType val = 0;
-      for (std::size_t i = 0; i < spin_configurations.size(); ++i) {
-         val += spin_configurations[i][index];
-      }
-      return val/spin_configurations.size();
-   }
-   
-   //! @brief Calculate the spin-spin correlation.
-   //! @param spin_configurations The list of spin configuration.
-   //! @param index1 The index of the spin.
-   //! @param index2 The index of the spin.
-   //! @return The spin-spin correlation.
-   RealType CalculateCorrelation(const std::vector<std::vector<OPType>> &spin_configurations,
-                                 const IndexType index1,
-                                 const IndexType index2) const {
-      const std::int32_t size = static_cast<std::int32_t>(spin_configurations.size());
-      if (index1 < 0 || index2 < 0 || index1 >= size || index2 >= size) {
-         throw std::runtime_error("The index is out of range.");
-      }
-      RealType val = 0;
-      for (std::int32_t i = 0; i < size; ++i) {
-         val += spin_configurations[i][index1]*spin_configurations[i][index2];
-      }
-      return val/size;
+   ValueType CalculateEnergy(const std::vector<std::int32_t> &spins) const {
+      return CalculateEnergy(lattice_, spins);
    }
    
 private:
-   //! @brief The linear interaction.
+   //! @brief The lattice.
    const LatticeType lattice_;
    
    //! @brief The linear interaction.
@@ -197,24 +139,23 @@ private:
    
    //! @brief Calculate energy corresponding to the spin configuration on the one-dimensional chain.
    //! @param lattice The one-dimensional chain.
-   //! @param spin_configuration The spin configuration.
+   //! @param spins The spin configuration.
    //! @return The energy.
-   RealType CalculateEnergy(const lattice::Chain &lattice,
-                            const std::vector<OPType> &spin_configuration) const {
-      RealType energy = 0;
+   ValueType CalculateEnergy(const lattice::Chain &lattice,
+                             const std::vector<std::int32_t> &spins) const {
+      ValueType energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       
+      for (std::int32_t index = 0; index < system_size - 1; ++index) {
+         energy += quadratic_*spins[index]*spins[index + 1] + linear_*spins[index];
+      }
+      energy += linear_*spins[system_size - 1];
+      
       if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
-         for (std::int32_t index = 0; index < system_size - 1; ++index) {
-            energy += quadratic_*spin_configuration[index]*spin_configuration[index + 1] + linear_*spin_configuration[index];
-         }
-         energy += quadratic_*spin_configuration[system_size - 1]*spin_configuration[0] + linear_*spin_configuration[system_size - 1];
+         energy += quadratic_*spins[system_size - 1]*spins[0] + linear_*spins[system_size - 1];
       }
       else if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t index = 0; index < system_size - 1; ++index) {
-            energy += quadratic_*spin_configuration[index]*spin_configuration[index + 1] + linear_*spin_configuration[index];
-         }
-         energy += linear_*spin_configuration[system_size - 1];
+         energy += linear_*spins[system_size - 1];
       }
       else {
          throw std::runtime_error("Unsupported BinaryCondition");
@@ -225,57 +166,44 @@ private:
    
    //! @brief Calculate energy corresponding to the spin configuration on the two-dimensional square lattice.
    //! @param lattice The two-dimensional square lattice.
-   //! @param spin_configuration The spin configuration.
+   //! @param spins The spin configuration.
    //! @return The energy.
-   RealType CalculateEnergy(const lattice::Square &lattice,
-                            const std::vector<OPType> &spin_configuration) const {
-      RealType energy = 0;
+   ValueType CalculateEnergy(const lattice::Square &lattice,
+                             const std::vector<std::int32_t> &spins) const {
+      ValueType energy = 0;
       const std::int32_t x_size = lattice.GetXSize();
       const std::int32_t y_size = lattice.GetYSize();
       
       if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
-         // x-direction
-         for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
-            for (std::int32_t coo_x = 0; coo_x < x_size - 1; ++coo_x) {
-               const std::int32_t index = coo_y*x_size + coo_x;
-               energy += quadratic_*spin_configuration[index]*spin_configuration[index + 1] + linear_*spin_configuration[index];
-            }
-            energy += quadratic_*spin_configuration[coo_y*x_size + x_size - 1]*spin_configuration[coo_y*x_size + 0] + linear_*spin_configuration[coo_y*x_size + x_size - 1];
-         }
-         
-         // y-direction
          for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
-            for (std::int32_t coo_y = 0; coo_y < y_size - 1; ++coo_y) {
-               const std::int32_t index = coo_y*x_size + coo_x;
-               const std::int32_t index_p1 = (coo_y + 1)*x_size + coo_x;
-               energy += quadratic_*spin_configuration[index]*spin_configuration[index_p1] + linear_*spin_configuration[index];
+            for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+               const std::int32_t index    = coo_y*x_size + coo_x;
+               const std::int32_t index_x1 = coo_y*x_size + (coo_x + 1)%x_size;
+               const std::int32_t index_y1 = ((coo_y + 1)%y_size)*x_size + coo_x;
+               energy += linear_*spins[index];
+               energy += quadratic_*spins[index]*spins[index_x1];
+               energy += quadratic_*spins[index]*spins[index_y1];
             }
-            energy += quadratic_*spin_configuration[(y_size - 1)*x_size + coo_x]*spin_configuration[0*x_size + coo_x] + linear_*spin_configuration[(y_size - 1)*x_size + coo_x];
          }
-         
       }
       else if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
-         // x-direction
-         for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
-            for (std::int32_t coo_x = 0; coo_x < x_size - 1; ++coo_x) {
-               const std::int32_t index = coo_y*x_size + coo_x;
-               energy += quadratic_*spin_configuration[index]*spin_configuration[index + 1] + linear_*spin_configuration[index];
-            }
-            energy += linear_*spin_configuration[coo_y*x_size + x_size - 1];
-         }
-         
-         // y-direction
-         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+         for (std::int32_t coo_x = 0; coo_x < x_size - 1; ++coo_x) {
+            energy += linear_*spins[(y_size - 1)*x_size + coo_x];
             for (std::int32_t coo_y = 0; coo_y < y_size - 1; ++coo_y) {
-               const std::int32_t index = coo_y*x_size + coo_x;
-               const std::int32_t index_p1 = (coo_y + 1)*x_size + coo_x;
-               energy += quadratic_*spin_configuration[index]*spin_configuration[index_p1] + linear_*spin_configuration[index];
+               const std::int32_t index    = coo_y*x_size + coo_x;
+               const std::int32_t index_x1 = coo_y*x_size + coo_x + 1;
+               const std::int32_t index_y1 = (coo_y + 1)*x_size + coo_x;
+               energy += linear_*spins[index];
+               energy += quadratic_*spins[index]*spins[index_x1];
+               energy += quadratic_*spins[index]*spins[index_y1];
             }
-            energy += linear_*spin_configuration[(y_size - 1)*x_size + coo_x];
+         }
+         for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+            energy += linear_*spins[coo_y*x_size + x_size - 1];
          }
       }
       else {
-         throw std::runtime_error("Unsupported BinaryCondition");
+         throw std::runtime_error("Unsupported BoundaryCondition");
       }
       
       return energy;
@@ -283,90 +211,47 @@ private:
    
    //! @brief Calculate energy corresponding to the spin configuration on the three-dimensional cubic lattice.
    //! @param lattice The three-dimensional cubic lattice.
-   //! @param spin_configuration The spin configuration.
+   //! @param spins The spin configuration.
    //! @return The energy.
-   RealType CalculateEnergy(const lattice::Cubic &lattice,
-                            const std::vector<OPType> &spin_configuration) const {
+   ValueType CalculateEnergy(const lattice::Cubic &lattice,
+                             const std::vector<std::int32_t> &spins) const {
       
-      RealType energy = 0;
+      ValueType energy = 0;
       const std::int32_t x_size = lattice.GetXSize();
       const std::int32_t y_size = lattice.GetYSize();
       const std::int32_t z_size = lattice.GetZSize();
       
       if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
-         // x-direction
-         for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
-            for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
-               for (std::int32_t coo_x = 0; coo_x < x_size - 1; ++coo_x) {
-                  const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
-                  energy += quadratic_*spin_configuration[index]*spin_configuration[index + 1] + linear_*spin_configuration[index];
-               }
-               energy +=
-               quadratic_*spin_configuration[coo_z*x_size*y_size + coo_y*x_size + x_size - 1]*spin_configuration[coo_z*x_size*y_size + coo_y*x_size + 0] +
-               linear_*spin_configuration[coo_z*x_size*y_size + coo_y*x_size + x_size - 1];
-            }
-         }
-         
-         // y-direction
-         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
-            for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
-               for (std::int32_t coo_y = 0; coo_y < y_size - 1; ++coo_y) {
-                  const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
-                  const std::int32_t index_p1 = coo_z*x_size*y_size + (coo_y + 1)*x_size + coo_x;
-                  energy += quadratic_*spin_configuration[index]*spin_configuration[index_p1] + linear_*spin_configuration[index];
-               }
-               energy +=
-               quadratic_*spin_configuration[coo_z*x_size*y_size + (y_size - 1)*x_size + coo_x]*spin_configuration[coo_z*x_size*y_size + 0*x_size + coo_x] +
-               linear_*spin_configuration[coo_z*x_size*y_size + (y_size - 1)*x_size + coo_x];
-            }
-         }
-         
-         // z-direction
          for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
             for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
-               for (std::int32_t coo_z = 0; coo_z < z_size - 1; ++coo_z) {
-                  const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
-                  const std::int32_t index_p1 = (coo_z + 1)*x_size*y_size + coo_y*x_size + coo_x;
-                  energy += quadratic_*spin_configuration[index]*spin_configuration[index_p1] + linear_*spin_configuration[index];
+               for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                  const std::int32_t index    = coo_z*x_size*y_size + coo_y*x_size + coo_x;
+                  const std::int32_t index_x1 = coo_z*x_size*y_size + coo_y*x_size + (coo_x + 1)%x_size;
+                  const std::int32_t index_y1 = coo_z*x_size*y_size + ((coo_y + 1)%y_size)*x_size + coo_x;
+                  const std::int32_t index_z1 = ((coo_z + 1)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
+                  energy += linear_*spins[index];
+                  energy += quadratic_*spins[index]*spins[index_x1];
+                  energy += quadratic_*spins[index]*spins[index_y1];
+                  energy += quadratic_*spins[index]*spins[index_z1];
                }
-               energy += quadratic_*spin_configuration[(z_size - 1)*x_size*y_size + coo_y*x_size + coo_x]*spin_configuration[0*x_size*y_size + coo_y*x_size + coo_x] +
-               linear_*spin_configuration[(z_size - 1)*x_size*y_size + coo_y*x_size + coo_x];
             }
          }
       }
       else if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
-         // x-direction
-         for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
-            for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
-               for (std::int32_t coo_x = 0; coo_x < x_size - 1; ++coo_x) {
-                  const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
-                  energy += quadratic_*spin_configuration[index]*spin_configuration[index + 1] + linear_*spin_configuration[index];
-               }
-               energy += linear_*spin_configuration[coo_z*x_size*y_size + coo_y*x_size + x_size - 1];
-            }
-         }
-         
-         // y-direction
-         for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
-            for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
-               for (std::int32_t coo_y = 0; coo_y < y_size - 1; ++coo_y) {
-                  const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
-                  const std::int32_t index_p1 = coo_z*x_size*y_size + (coo_y + 1)*x_size + coo_x;
-                  energy += quadratic_*spin_configuration[index]*spin_configuration[index_p1] + linear_*spin_configuration[index];
-               }
-               energy += linear_*spin_configuration[coo_z*x_size*y_size + (y_size - 1)*x_size + coo_x];
-            }
-         }
-         
-         // z-direction
          for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
             for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
-               for (std::int32_t coo_z = 0; coo_z < z_size - 1; ++coo_z) {
+               for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
                   const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
-                  const std::int32_t index_p1 = (coo_z + 1)*x_size*y_size + coo_y*x_size + coo_x;
-                  energy += quadratic_*spin_configuration[index]*spin_configuration[index_p1] + linear_*spin_configuration[index];
+                  energy += linear_*spins[index];
+                  if (coo_x < x_size - 1 && coo_y < y_size - 1 && coo_z < z_size - 1) {
+                     const std::int32_t index_x1 = coo_z*x_size*y_size + coo_y*x_size + (coo_x + 1);
+                     const std::int32_t index_y1 = coo_z*x_size*y_size + (coo_y + 1)*x_size + coo_x;
+                     const std::int32_t index_z1 = (coo_z + 1)*x_size*y_size + coo_y*x_size + coo_x;
+                     energy += quadratic_*spins[index]*spins[index_x1];
+                     energy += quadratic_*spins[index]*spins[index_y1];
+                     energy += quadratic_*spins[index]*spins[index_z1];
+                  }
                }
-               energy += linear_*spin_configuration[(z_size - 1)*x_size*y_size + coo_y*x_size + coo_x];
             }
          }
       }
@@ -379,16 +264,16 @@ private:
    
    //! @brief Calculate energy corresponding to the spin configuration on the infinite range lattice.
    //! @param lattice The infinite range lattice.
-   //! @param spin_configuration The spin configuration.
+   //! @param spins The spin configuration.
    //! @return The energy.
-   RealType CalculateEnergy(const lattice::InfiniteRange &lattice,
-                            const std::vector<OPType> &spin_configuration) const {
-      RealType energy = 0;
+   ValueType CalculateEnergy(const lattice::InfiniteRange &lattice,
+                             const std::vector<std::int32_t> &spins) const {
+      ValueType energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       for (std::int32_t i = 0; i < system_size; ++i) {
-         energy += linear_*spin_configuration[i];
+         energy += linear_*spins[i];
          for (std::int32_t j = i + 1; j < system_size; ++j) {
-            energy += quadratic_*spin_configuration[i]*spin_configuration[j];
+            energy += quadratic_*spins[i]*spins[j];
          }
       }
       return energy;
@@ -407,21 +292,22 @@ public:
    using ValueType = RealType;
    
    //! @brief The index type.
-   using IndexType = typename interaction::classical::QuadraticAny<RealType>::IndexType;
-   
-   //! @brief The operator type, which here is the type of Ising spin -1 or +1.
-   using OPType = utility::SpinType;
+   using IndexType = typename interaction::classical::QuadraticAny<ValueType>::IndexType;
    
    //! @brief The hash for IndexType.
-   using IndexHash = typename interaction::classical::QuadraticAny<RealType>::IndexHash;
+   using IndexHash = typename interaction::classical::QuadraticAny<ValueType>::IndexHash;
+   
+   //! @brief The operator type, which here represents Ising spins \f$ s_i\in \{-1,+1\} \f$
+   using OPType = std::int8_t;
    
    //! @brief The linear interaction type.
-   using LinearType = typename interaction::classical::QuadraticAny<RealType>::LinearType;
+   using LinearType = typename interaction::classical::QuadraticAny<ValueType>::LinearType;
    
    //! @brief The quadratic interaction type.
-   using QuadraticType = typename interaction::classical::QuadraticAny<RealType>::QuadraticType;
+   using QuadraticType = typename interaction::classical::QuadraticAny<ValueType>::QuadraticType;
    
    //! @brief Constructor for Ising class.
+   //! @param lattice The lattice, which must be compnal::lattice::AnyLattice.
    //! @param linear The linear interaction.
    //! @param quadratic The quadratic interaction.
    Ising(const lattice::AnyLattice &lattice,
@@ -429,16 +315,27 @@ public:
          const QuadraticType &quadratic):
    lattice_(lattice), interaction_(linear, quadratic) {}
    
-   //! @brief Get the constant value of the interactions,
-   //! which appears when the interactions with the same index are set.
+   //! @brief Get the system size \f$ N\f$.
+   //! @return The system size \f$ N\f$.
+   std::int32_t GetSystemSize() const {
+      return interaction_.GetSystemSize();
+   }
+   
+   //! @brief Get boundary condition.
+   //! @return Boundary condition.
+   lattice::BoundaryCondition GetBoundaryCondition() const {
+      return lattice_.GetBoundaryCondition();
+   }
+   
+   //! @brief Get the constant value of the interactions.
    //! @return The constant value.
-   RealType GetConstant() const {
+   ValueType GetConstant() const {
       return interaction_.GetConstant();
    }
    
    //! @brief Get linear interaction.
    //! @return The linear interaction.
-   const std::vector<RealType> &GetLinear() const {
+   const std::vector<ValueType> &GetLinear() const {
       return interaction_.GetLinear();
    }
    
@@ -456,22 +353,10 @@ public:
    
    //! @brief Get values of the quadratic interaction as CRS format.
    //! @return The values.
-   const std::vector<RealType> &GetValPtr() const {
+   const std::vector<ValueType> &GetValPtr() const {
       return interaction_.GetValPtr();
    }
-   
-   //! @brief Get the system size.
-   //! @return The system size.
-   std::int32_t GetSystemSize() const {
-      return interaction_.GetSystemSize();
-   }
-   
-   //! @brief Get the boundary condition.
-   //! @return The boundary condition.
-   lattice::BoundaryCondition GetBoundaryCondition() const {
-      return lattice_.GetBoundaryCondition();
-   }
-   
+      
    //! @brief Generate index list.
    //! @return The index list.
    const std::vector<IndexType> &GenerateIndexList() const {
@@ -497,14 +382,14 @@ public:
    }
    
    //! @brief Calculate energy corresponding to the spin configuration.
-   //! @param spin_configuration The spin configuration.
+   //! @param spins The spin configuration.
    //! @return The energy.
-   RealType CalculateEnergy(const std::vector<OPType> &spin_configuration) const {
-      if (spin_configuration.size() != interaction_.GetSystemSize()) {
+   ValueType CalculateEnergy(const std::vector<std::int32_t> &spins) const {
+      if (spins.size() != interaction_.GetSystemSize()) {
          throw std::runtime_error("The size of spin configuration is not equal to the system size.");
       }
-      RealType val = interaction_.GetConstant();
-      const std::int32_t system_size = static_cast<std::int32_t>(spin_configuration.size());
+      ValueType val = interaction_.GetConstant();
+      const std::int32_t system_size = static_cast<std::int32_t>(spins.size());
       const auto &linear = GetLinear();
       const auto &row_ptr = GetRowPtr();
       const auto &col_ptr = GetColPtr();
@@ -512,78 +397,17 @@ public:
       for (std::int32_t i = 0; i < system_size; ++i) {
          for (std::int64_t j = row_ptr[i]; j < row_ptr[i + 1]; ++j) {
             if (i < col_ptr[j]) {
-               val += val_ptr[j]*spin_configuration[col_ptr[j]]*spin_configuration[i];
+               val += val_ptr[j]*spins[col_ptr[j]]*spins[i];
             }
          }
-         val += linear[i]*spin_configuration[i];
+         val += linear[i]*spins[i];
       }
       return val;
    }
    
-   //! @brief Calculate n-th moment for the list of spin configuration.
-   //! @param spin_configurations The list of spin configuration.
-   //! @param degree The degree of the moment.
-   //! @param num_threads The number of threads.
-   //! @return The moment.
-   RealType CalculateMoment(const std::vector<std::vector<OPType>> &spin_configurations,
-                            const std::int32_t degree,
-                            const std::int32_t num_threads = utility::DEFAULT_NUM_THREADS) const {
-      if (degree <= 0) {
-         throw std::runtime_error("degree must be lager than 0.");
-      }
-      
-      RealType val = 0;
-#pragma omp parallel for schedule(guided) reduction(+: val) num_threads(num_threads)
-      for (std::int32_t i = 0; i < static_cast<std::int32_t>(spin_configurations.size()); ++i) {
-         RealType avg = 0;
-         for (std::size_t j = 0; j < spin_configurations[i].size(); ++j) {
-            avg += spin_configurations[i][j];
-         }
-         
-         RealType prod = 1;
-         for (std::int32_t j = 0; j < degree; ++j) {
-            prod = prod*avg;
-         }
-         val += prod;
-      }
-      return val/spin_configurations.size();
-   }
-   
-   //! @brief Calculate the on-site expectation value.
-   //! @param spin_configurations The list of spin configuration.
-   //! @param index The index of the spin.
-   //! @return The on-site expectation value.
-   RealType CalculateOnsiteAverage(const std::vector<std::vector<OPType>> &spin_configurations,
-                                   const IndexType index) const {
-      const auto index_int = GetIndexMap().at(index);
-      RealType val = 0;
-      for (std::size_t i = 0; i < spin_configurations.size(); ++i) {
-         val += spin_configurations[i][index_int];
-      }
-      return val/spin_configurations.size();
-   }
-   
-   //! @brief Calculate the spin-spin correlation.
-   //! @param spin_configurations The list of spin configuration.
-   //! @param index1 The index of the spin.
-   //! @param index2 The index of the spin.
-   //! @return The spin-spin correlation.
-   RealType CalculateCorrelation(const std::vector<std::vector<OPType>> &spin_configurations,
-                                 const IndexType index1,
-                                 const IndexType index2) const {
-      const auto index_int1 = GetIndexMap().at(index1);
-      const auto index_int2 = GetIndexMap().at(index2);
-      const std::int32_t size = static_cast<std::int32_t>(spin_configurations.size());
-      RealType val = 0;
-      for (std::int32_t i = 0; i < size; ++i) {
-         val += spin_configurations[i][index_int1]*spin_configurations[i][index_int2];
-      }
-      return val/size;
-   }
-   
 private:
    //! @brief The interaction.
-   const interaction::classical::QuadraticAny<RealType> interaction_;
+   const interaction::classical::QuadraticAny<ValueType> interaction_;
    
    //! @brief The linear interaction.
    const lattice::AnyLattice lattice_;

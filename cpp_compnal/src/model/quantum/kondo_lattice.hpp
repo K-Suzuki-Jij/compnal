@@ -34,7 +34,7 @@ template<class LatticeType, typename RealType>
 class KondoLattice: public BaseSpinElectron<LatticeType, RealType> {
    
 public:
-   using COOIndexType = typename LatticeType::COOIndexType;
+   using IndexType = typename LatticeType::IndexType;
    
    KondoLattice(const LatticeType &lattice): BaseSpinElectron<LatticeType, RealType>(lattice) {}
    

@@ -34,7 +34,7 @@ template<class LatticeType, typename RealType>
 class Hubbard: public BaseElectron<LatticeType, RealType> {
    
 public:
-   using COOIndexType = typename LatticeType::COOIndexType;
+   using IndexType = typename LatticeType::IndexType;
    
    Hubbard(const LatticeType &lattice): BaseElectron<LatticeType, RealType>(lattice) {}
       

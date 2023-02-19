@@ -32,9 +32,9 @@ class ClassicalMonteCarlo {
    
 public:
 
-   using RealType  = typename ModelType::ValueType;
+   using RealType = typename ModelType::ValueType;
    using IndexType = typename ModelType::IndexType;
-   using OPType    = typename ModelType::OPType;
+   using OPType = typename ModelType::OPType;
    
    ClassicalMonteCarlo(const ModelType &model): model_(model) {}
    
@@ -166,7 +166,24 @@ public:
    }
 
    RealType CalculateMoment(const std::int32_t degree) const {
-      return model_.CalculateMoment(samples_, degree, num_threads_);
+      if (degree <= 0) {
+         throw std::runtime_error("degree must be lager than 0.");
+      }
+      RealType val = 0;
+#pragma omp parallel for schedule(guided) reduction(+: val) num_threads(num_threads_)
+      for (std::int32_t i = 0; i < static_cast<std::int32_t>(samples_.size()); ++i) {
+         RealType avg = 0;
+         for (std::size_t j = 0; j < samples_[i].size(); ++j) {
+            avg += samples_[i][j];
+         }
+         
+         RealType prod = 1;
+         for (std::int32_t j = 0; j < degree; ++j) {
+            prod = prod*avg;
+         }
+         val += prod;
+      }
+      return val/samples_.size();
    }
    
    std::vector<RealType> CalculateOnsiteAverage() const {
@@ -189,7 +206,7 @@ public:
       std::vector<RealType> value_list(size);
 #pragma omp parallel for schedule(guided) num_threads(num_threads_)
       for (std::int32_t i = 0; i < size; ++i) {
-         value_list[i] = model_.CalculateCorrelation(samples_, origin, index_list[i]);
+         //value_list[i] = model_.CalculateCorrelation(samples_, origin, index_list[i]);
       }
       return value_list;
    }

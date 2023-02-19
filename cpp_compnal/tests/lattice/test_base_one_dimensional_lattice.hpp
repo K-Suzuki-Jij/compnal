@@ -56,7 +56,7 @@ TEST(Lattice, BaseOneDimensional) {
 
 TEST(Lattice, Chain) {
    using Lat = lattice::Chain;
-   std::vector<typename Lat::COOIndexType> index_list{0,1,2,3,4,5,6,7};
+   std::vector<typename Lat::IndexType> index_list{0,1,2,3,4,5,6,7};
    EXPECT_EQ((Lat{8}.GenerateIndexList()), index_list);
 }
 

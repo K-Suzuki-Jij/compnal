@@ -43,7 +43,7 @@ public:
    system_size_(model.GetSystemSize()),
    x_size_(model.GetLattice().GetXSize()),
    y_size_(model.GetLattice().GetYSize()),
-   bc_(model.GetBoundaryCondition()),
+   bc_(model.GetLattice().GetBoundaryCondition()),
    interaction_(model.GetInteraction()) {}
    
    void InitializeSSF(const uint64_t seed) {

@@ -34,8 +34,8 @@ namespace lattice {
 class BaseOneDimensionalLattice {
    
 public:
-   //! @brief Cordinate index type.
-   using COOIndexType = std::int32_t;
+   //! @brief Coordinate index type.
+   using IndexType = std::int32_t;
       
    //! @brief Constructor of BaseOneDimensionalLattice class.
    //! @param system_size System size.
@@ -68,7 +68,7 @@ public:
    //! @brief Check if the value of the coordinate is in the system.
    //! @param site_index Value of the coordinate.
    //! @return True or False.
-   bool ValidateCOOIndex(const COOIndexType site_index) const {
+   bool ValidateCOOIndex(const IndexType site_index) const {
       if (site_index  >= system_size_ || site_index < 0) {
          return false;
       }
@@ -81,7 +81,7 @@ public:
    //! This function return the same value of the input.
    //! @param site_index Value of the coordinate.
    //! @return Site index as integer.
-   std::int32_t CalculateIntegerSiteIndex(const COOIndexType site_index) const {
+   std::int32_t CalculateIntegerSiteIndex(const IndexType site_index) const {
       return site_index;
    }
    

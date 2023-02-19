@@ -173,7 +173,7 @@ public:
    }
    
    RealType CalculateExpectationValue(const CRS &m,
-                                      const typename ModelType::COOIndexType site_index,
+                                      const typename ModelType::IndexType site_index,
                                       const std::int32_t level = 0) const {
       if (eigenvectors_.size() <= level) {
          std::stringstream ss;
@@ -232,9 +232,9 @@ public:
    }
    
    RealType CalculateCorrelationFunction(const CRS &m_1,
-                                         const typename ModelType::COOIndexType site_index_1,
+                                         const typename ModelType::IndexType site_index_1,
                                          const CRS &m_2,
-                                         const typename ModelType::COOIndexType site_index_2,
+                                         const typename ModelType::IndexType site_index_2,
                                          const std::int32_t level = 0) {
       
       if (eigenvectors_.size() <= level) {

@@ -25,7 +25,6 @@
 
 #include "../../utility/hash.hpp"
 #include "../../utility/type.hpp"
-#include "../../utility/sort.hpp"
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -41,6 +40,9 @@ class PolynomialAny {
    static_assert(std::is_floating_point<RealType>::value, "Template parameter RealType must be floating point type");
    
 public:
+   //! @brief The value type.
+   using ValueType = RealType;
+   
    //! @brief The index type.
    using IndexType = utility::AnyIndexType;
    
@@ -48,7 +50,7 @@ public:
    using IndexHash = utility::AnyIndexHash;
    
    //! @brief The polynomial interaction type.
-   using PolynomialType = std::unordered_map<std::vector<IndexType>, RealType, utility::AnyIndexVectorHash>;
+   using PolynomialType = std::unordered_map<std::vector<IndexType>, ValueType, utility::AnyIndexVectorHash>;
    
    
    //! @brief Constructor for PolynomialAny class.
@@ -68,7 +70,7 @@ public:
          count++;
       }
       
-      std::unordered_map<std::vector<std::int32_t>, RealType, utility::VectorHash> poly;
+      std::unordered_map<std::vector<std::int32_t>, ValueType, utility::VectorHash> poly;
       poly.reserve(interaction.size());
       for (const auto &it: interaction) {
          std::vector<std::int32_t> keys(it.first.size());
@@ -122,7 +124,7 @@ public:
    
    //! @brief Get the integer key and value list as pair.
    //! @return The integer key and value list as pair.
-   const std::vector<std::pair<std::vector<std::int32_t>, RealType>> &GetKeyValueList() const {
+   const std::vector<std::pair<std::vector<std::int32_t>, ValueType>> &GetKeyValueList() const {
       return key_value_list_;
    }
    
@@ -153,7 +155,7 @@ private:
    std::unordered_map<IndexType, std::int32_t, IndexHash> index_map_;
    
    //! @brief The integer key and value list as pair.
-   std::vector<std::pair<std::vector<std::int32_t>, RealType>> key_value_list_;
+   std::vector<std::pair<std::vector<std::int32_t>, ValueType>> key_value_list_;
    
    //! @brief The index list of the polynomial interactions.
    std::vector<IndexType> index_list_;

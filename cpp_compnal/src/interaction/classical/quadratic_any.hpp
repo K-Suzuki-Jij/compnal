@@ -40,6 +40,9 @@ class QuadraticAny {
    static_assert(std::is_floating_point<RealType>::value, "Template parameter RealType must be floating point type");
    
 public:
+   //! @brief The value type.
+   using ValueType = RealType;
+   
    //! @brief The index type.
    using IndexType = utility::AnyIndexType;
    
@@ -47,10 +50,10 @@ public:
    using IndexHash = utility::AnyIndexHash;
    
    //! @brief The linear interaction type.
-   using LinearType = std::unordered_map<IndexType, RealType, IndexHash>;
+   using LinearType = std::unordered_map<IndexType, ValueType, IndexHash>;
    
    //! @brief The quadratic interaction type.
-   using QuadraticType = std::unordered_map<std::pair<IndexType, IndexType>, RealType, utility::AnyIndexPairHash>;
+   using QuadraticType = std::unordered_map<std::pair<IndexType, IndexType>, ValueType, utility::AnyIndexPairHash>;
    
    //! @brief Constructor for QuadraticAny class.
    //! @param linear The linear interaction.
@@ -60,12 +63,12 @@ public:
       
       std::unordered_set<IndexType, IndexHash> index_set;
       for (const auto &it: linear) {
-         if (std::abs(it.second) > std::numeric_limits<RealType>::epsilon()) {
+         if (std::abs(it.second) > std::numeric_limits<ValueType>::epsilon()) {
             index_set.emplace(it.first);
          }
       }
       for (const auto &it: quadratic) {
-         if (std::abs(it.second) > std::numeric_limits<RealType>::epsilon()) {
+         if (std::abs(it.second) > std::numeric_limits<ValueType>::epsilon()) {
             index_set.emplace(it.first.first);
             index_set.emplace(it.first.second);
          }
@@ -82,15 +85,15 @@ public:
       
       linear_.resize(index_list_.size());
       for (const auto &it: linear) {
-         if (std::abs(it.second) > std::numeric_limits<RealType>::epsilon()) {
+         if (std::abs(it.second) > std::numeric_limits<ValueType>::epsilon()) {
             linear_[index_map_.at(it.first)] = it.second;
             degree_ = 1;
          }
       }
       
-      std::unordered_map<std::pair<std::int32_t, std::int32_t>, RealType, utility::AnyIndexPairHash> new_quadratic;
+      std::unordered_map<std::pair<std::int32_t, std::int32_t>, ValueType, utility::AnyIndexPairHash> new_quadratic;
       for (const auto &it: quadratic) {
-         if (std::abs(it.second) > std::numeric_limits<RealType>::epsilon()) {
+         if (std::abs(it.second) > std::numeric_limits<ValueType>::epsilon()) {
             const std::int32_t key_1 = index_map_.at(it.first.first);
             const std::int32_t key_2 = index_map_.at(it.first.second);
             if (key_1 < key_2) {
@@ -107,7 +110,7 @@ public:
          }
       }
       
-      std::vector<std::vector<std::pair<std::int32_t, RealType>>> adjacency_list(index_list_.size());
+      std::vector<std::vector<std::pair<std::int32_t, ValueType>>> adjacency_list(index_list_.size());
       for (const auto &it: new_quadratic) {
          adjacency_list[it.first.first].push_back({it.first.second, it.second});
          adjacency_list[it.first.second].push_back({it.first.first, it.second});
@@ -145,13 +148,13 @@ public:
    //! @brief Get the constant value of the interactions,
    //! which appears when the interactions with the same index are set.
    //! @return The constant value.
-   RealType GetConstant() const {
+   ValueType GetConstant() const {
       return constant_;
    }
    
    //! @brief Get the linear interaction.
    //! @return The linear interaction.
-   const std::vector<RealType> &GetLinear() const {
+   const std::vector<ValueType> &GetLinear() const {
       return linear_;
    }
    
@@ -169,7 +172,7 @@ public:
    
    //! @brief Get values of the quadratic interaction as CRS format.
    //! @return The values.
-   const std::vector<RealType> &GetValPtr() const {
+   const std::vector<ValueType> &GetValPtr() const {
       return val_ptr_;
    }
    
@@ -195,10 +198,10 @@ private:
    
    //! @brief The the constant value of the interactions,
    //! which appears when the interactions with the same index are set.
-   RealType constant_ = 0;
+   ValueType constant_ = 0;
    
    //! @brief The linear interaction.
-   std::vector<RealType> linear_;
+   std::vector<ValueType> linear_;
    
    //! @brief The index list of the interactions.
    std::vector<IndexType> index_list_;
@@ -210,7 +213,7 @@ private:
    std::vector<std::int32_t> col_ptr_;
    
    //! @brief The values of the quadratic interaction as CRS format.
-   std::vector<RealType> val_ptr_;
+   std::vector<ValueType> val_ptr_;
    
 };
 

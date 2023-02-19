@@ -35,7 +35,7 @@ class Heisenberg: public BaseSpin<LatticeType, RealType> {
    
 public:
    
-   using COOIndexType = typename LatticeType::COOIndexType;
+   using IndexType = typename LatticeType::IndexType;
    
    Heisenberg(const LatticeType &lattice): BaseSpin<LatticeType, RealType>(lattice) {}
    

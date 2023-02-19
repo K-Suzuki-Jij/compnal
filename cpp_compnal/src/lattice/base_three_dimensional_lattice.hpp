@@ -36,8 +36,8 @@ namespace lattice {
 class BaseThreeDimensionalLattice {
   
 public:
-   //! @brief Cordinate index type.
-   using COOIndexType = std::tuple<std::int32_t, std::int32_t, std::int32_t>;
+   //! @brief Coordinate index type.
+   using IndexType = std::tuple<std::int32_t, std::int32_t, std::int32_t>;
       
    //! @brief Constructor of BaseThreeDimensionalLattice.
    //! @param x_size The size of the x-direction.
@@ -99,7 +99,7 @@ public:
    //! @brief Check if the value of the coordinate is in the system.
    //! @param site_index Value of the coordinate.
    //! @return True or False.
-   bool ValidateCOOIndex(const COOIndexType site_index) const {
+   bool ValidateCOOIndex(const IndexType site_index) const {
       if (std::get<0>(site_index)  >= x_size_ ||
           std::get<0>(site_index)  <  0       ||
           std::get<1>(site_index) >= y_size_  ||
@@ -116,7 +116,7 @@ public:
    //! @brief Calculate site index as integer from the value of the coordinate.
    //! @param site_index Value of the coordinate.
    //! @return Site index as integer.
-   std::int32_t CalculateIntegerSiteIndex(const COOIndexType site_index) const {
+   std::int32_t CalculateIntegerSiteIndex(const IndexType site_index) const {
       return std::get<2>(site_index)*x_size_*y_size_ + std::get<1>(site_index)*x_size_ + std::get<0>(site_index);
    }
    

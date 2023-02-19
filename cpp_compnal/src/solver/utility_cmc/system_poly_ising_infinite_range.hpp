@@ -41,7 +41,7 @@ public:
    
    CMCSystem(const ModelType &model):
    system_size_(model.GetSystemSize()),
-   bc_(model.GetBoundaryCondition()),
+   bc_(model.GetLattice().GetBoundaryCondition()),
    interaction_(model.GetInteraction()),
    degree_(model.GetDegree()){}
    

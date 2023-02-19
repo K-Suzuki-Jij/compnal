@@ -46,7 +46,7 @@ TEST(Lattice, InfiniteRange) {
    EXPECT_EQ(Lat{3}.CalculateIntegerSiteIndex(0), 0);
    EXPECT_EQ(Lat{3}.CalculateIntegerSiteIndex(2), 2);
    
-   std::vector<Lat::COOIndexType> index_list{0, 1, 2, 3};
+   std::vector<Lat::IndexType> index_list{0, 1, 2, 3};
    EXPECT_EQ(Lat{4}.GenerateIndexList(), index_list);
 }
 

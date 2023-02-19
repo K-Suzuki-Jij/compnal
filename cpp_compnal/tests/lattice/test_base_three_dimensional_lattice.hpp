@@ -60,7 +60,7 @@ TEST(Lattice, BaseThreeDimensional) {
 
 TEST(Lattice, Cubic) {
    using Lat = lattice::Cubic;
-   std::vector<typename Lat::COOIndexType> index_list{
+   std::vector<typename Lat::IndexType> index_list{
       {0, 0, 0}, {0, 0, 1},
       {0, 1, 0}, {0, 1, 1},
       {0, 2, 0}, {0, 2, 1},

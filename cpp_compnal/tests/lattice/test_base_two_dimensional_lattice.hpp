@@ -56,7 +56,7 @@ TEST(Lattice, BaseTwoDimensionalLattice) {
 
 TEST(Lattice, Square) {
    using Lat = lattice::Square;
-   std::vector<typename Lat::COOIndexType> index_list{{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}};
+   std::vector<typename Lat::IndexType> index_list{{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}};
    EXPECT_EQ((Lat{2, 3}.GenerateIndexList()), index_list);
 }
 

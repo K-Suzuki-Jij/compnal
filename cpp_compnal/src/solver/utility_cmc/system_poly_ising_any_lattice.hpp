@@ -41,10 +41,9 @@ public:
    
    CMCSystem(const ModelType &model):
    system_size_(model.GetSystemSize()),
-   bc_(model.GetBoundaryCondition()),
-   key_list_(model.GetKeyList()),
-   value_list_(model.GetValueList()),
-   adjacency_list_(model.GetAdjacencyList()) {}
+   bc_(model.GetLattice().GetBoundaryCondition()),
+   key_value_list_(model.GetInteraction().GetKeyValueList()),
+   adjacency_list_(model.GetInteraction().GetAdjacencyList()) {}
    
    void InitializeSSF(const uint64_t seed) {
       sample_ = this->GenerateRandomSpin(seed, system_size_);
@@ -54,9 +53,10 @@ public:
    
    void Flip(const std::int32_t index) {
       for (const auto &interaction_index: adjacency_list_[index]) {
-         const typename ModelType::ValueType value = 4*value_list_[interaction_index]*sign_list_[interaction_index];
+         const std::vector<std::int32_t> &key_list = key_value_list_[interaction_index].first;
+         const ValueType value = 4*sign_list_[interaction_index]*key_value_list_[interaction_index].second;
          sign_list_[interaction_index] *= -1;
-         for (const auto &update_index: key_list_[interaction_index]) {
+         for (const auto &update_index: key_list) {
             if (update_index == index) continue;
             energy_difference_[update_index] += value;
          }
@@ -80,8 +80,7 @@ public:
 private:
    const std::int32_t system_size_;
    const lattice::BoundaryCondition bc_;
-   const std::vector<std::vector<std::int32_t>> &key_list_;
-   const std::vector<typename ModelType::ValueType> &value_list_;
+   const std::vector<std::pair<std::vector<std::int32_t>, ValueType>> &key_value_list_;
    const std::vector<std::vector<std::size_t>> &adjacency_list_;
 
    std::vector<typename ModelType::OPType> sample_;
@@ -90,19 +89,21 @@ private:
    
    std::vector<typename ModelType::ValueType> GenerateEnergyDifference(const std::vector<typename ModelType::OPType> &sample) const {
       std::vector<typename ModelType::ValueType> energy_difference(system_size_);
-      for (std::size_t i = 0; i < key_list_.size(); ++i) {
-         for (const auto &index: key_list_[i]) {
-            energy_difference[index] += -2*value_list_[i]*sign_list_[i];
+      for (std::size_t i = 0; i < key_value_list_.size(); ++i) {
+         const std::vector<std::int32_t> &key_list = key_value_list_[i].first;
+         const ValueType value = -2*key_value_list_[i].second*sign_list_[i];
+         for (const auto &index: key_list) {
+            energy_difference[index] += value;
          }
       }
       return energy_difference;
    }
    
    std::vector<std::int8_t> GenerateSignList(const std::vector<typename ModelType::OPType> &sample) const {
-      std::vector<std::int8_t> sign_list(key_list_.size());
-      for (std::size_t i = 0; i < key_list_.size(); ++i) {
+      std::vector<std::int8_t> sign_list(key_value_list_.size());
+      for (std::size_t i = 0; i < key_value_list_.size(); ++i) {
          std::int8_t sign = 1;
-         for (const auto &index: key_list_[i]) {
+         for (const auto &index: key_value_list_[i].first) {
             sign *= sample[index];
          }
          sign_list[i] = sign;

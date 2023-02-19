@@ -34,8 +34,8 @@ namespace lattice {
 class BaseTwoDimensionalLattice {
    
 public:
-   //! @brief Cordinate index type.
-   using COOIndexType = std::pair<std::int32_t, std::int32_t>;
+   //! @brief Coordinate index type.
+   using IndexType = std::pair<std::int32_t, std::int32_t>;
       
    //! @brief Constructor of BaseTwoDimensionalLattice class.
    //! @param x_size The size of the x-direction.
@@ -85,7 +85,7 @@ public:
    //! @brief Check if the value of the coordinate is in the system.
    //! @param site_index Value of the coordinate.
    //! @return True or False.
-   bool ValidateCOOIndex(const COOIndexType site_index) const {
+   bool ValidateCOOIndex(const IndexType site_index) const {
       if (site_index.first  >= x_size_ ||
           site_index.first  <  0       ||
           site_index.second >= y_size_ ||
@@ -100,7 +100,7 @@ public:
    //! @brief Calculate site index as integer from the value of the coordinate.
    //! @param site_index Value of the coordinate.
    //! @return Site index as integer.
-   std::int32_t CalculateIntegerSiteIndex(const COOIndexType site_index) const {
+   std::int32_t CalculateIntegerSiteIndex(const IndexType site_index) const {
       return site_index.second*x_size_ + site_index.first;
    }
    

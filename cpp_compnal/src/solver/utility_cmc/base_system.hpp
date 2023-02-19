@@ -35,9 +35,9 @@ class CMCSystem;
 class CMCBaseIsingSystem {
    
 protected:
-   std::vector<utility::SpinType> GenerateRandomSpin(const std::uint64_t seed, const std::int32_t system_size) const {
-      std::vector<utility::SpinType> sample(system_size);
-      std::uniform_int_distribution<utility::SpinType> dist(0, 1);
+   std::vector<std::int8_t> GenerateRandomSpin(const std::uint64_t seed, const std::int32_t system_size) const {
+      std::vector<std::int8_t> sample(system_size);
+      std::uniform_int_distribution<std::int8_t> dist(0, 1);
       utility::RandType random_number_engine(seed);
       for (std::size_t i = 0; i < sample.size(); i++) {
          sample[i] = 2*dist(random_number_engine) - 1;

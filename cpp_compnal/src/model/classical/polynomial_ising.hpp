@@ -55,24 +55,16 @@ public:
       return interaction_;
    }
    
+   const LatticeType &GetLattice() const {
+      return lattice_;
+   }
+   
    std::int32_t GetSystemSize() const {
       return lattice_.GetSystemSize();
    }
-   
-   lattice::BoundaryCondition GetBoundaryCondition() const {
-      return lattice_.GetBoundaryCondition();
-   }
-   
-   auto GenerateIndexList() const {
-      return lattice_.GenerateIndexList();
-   }
-   
+      
    std::int32_t GetDegree() const {
       return static_cast<std::int32_t>(interaction_.size()) - 1;
-   }
-   
-   const LatticeType &GetLattice() const {
-      return lattice_;
    }
    
    RealType CalculateEnergy(const std::vector<OPType> &sample) const {
@@ -129,7 +121,6 @@ private:
    LatticeType lattice_;
    std::vector<RealType> interaction_;
    
-   
    RealType CalculateEnergy(const lattice::Chain &chain_lattice,
                             const std::vector<OPType> &sample) const {
       RealType energy = 0;
@@ -180,28 +171,12 @@ public:
                    const PolynomialType &interaction):
    lattice_(lattice), interaction_(interaction) {}
    
-   std::pair<std::vector<std::vector<IndexType>>, std::vector<RealType>> GenerateInteractionAsPair() const {
-      return interaction_.GenerateInteractionAsPair();
+   const interaction::classical::PolynomialAny<RealType> &GetInteraction() const {
+      return interaction_;
    }
    
-   const std::vector<std::vector<std::int32_t>> &GetKeyList() const {
-      return interaction_.GetKeyList();
-   }
-   
-   const std::vector<RealType> &GetValueList() const {
-      return interaction_.GetValueList();
-   }
-   
-   const std::vector<IndexType> &GenerateIndexList() const {
-      return interaction_.GetIndexList();
-   }
-   
-   const std::unordered_map<IndexType, std::int32_t, IndexHash> &GetIndexMap() const {
-      return interaction_.GetIndexMap();
-   }
-   
-   const std::vector<std::vector<std::size_t>> &GetAdjacencyList() const {
-      return interaction_.GetAdjacencyList();
+   const lattice::AnyLattice &GetLattice() const {
+      return lattice_;
    }
    
    std::int32_t GetSystemSize() const {
@@ -210,10 +185,6 @@ public:
    
    std::int32_t GetDegree() const {
       return interaction_.GetDegree();
-   }
-   
-   lattice::BoundaryCondition GetBoundaryCondition() const {
-      return lattice_.GetBoundaryCondition();
    }
    
    RealType CalculateEnergy(const std::vector<OPType> &sample) const {
@@ -281,8 +252,8 @@ public:
    }
    
 private:
-   interaction::classical::PolynomialAny<RealType> interaction_;
    lattice::AnyLattice lattice_;
+   interaction::classical::PolynomialAny<RealType> interaction_;
    
    RealType CalculateMagnetization(const std::vector<OPType> &sample) const {
       RealType val = 0;

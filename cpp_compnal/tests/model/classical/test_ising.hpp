@@ -62,8 +62,7 @@ TEST(ModelIsing, AnyLatticeBasic) {
    }
    EXPECT_EQ(ising.GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
    EXPECT_THROW((ising.CalculateEnergy({})), std::runtime_error);
-   EXPECT_THROW((ising.CalculateMoment({{}}, 0)), std::runtime_error);
-   EXPECT_THROW((ising.CalculateOnsiteAverage({{}}, -1)), std::out_of_range);
+   
 }
 
 TEST(ModelIsing, AnyLatticeInt) {
@@ -105,24 +104,8 @@ TEST(ModelIsing, AnyLatticeInt) {
    EXPECT_DOUBLE_EQ(ising.GetValPtr().at(2), 1);
    EXPECT_DOUBLE_EQ(ising.GetValPtr().at(3), 1);
    
-   EXPECT_DOUBLE_EQ((ising.CalculateMoment({{-1, +1, -1}, {+1, +1, +1}}, 1)), 1);
-   EXPECT_DOUBLE_EQ((ising.CalculateMoment({{-1, +1, -1}, {+1, +1, +1}}, 2)), 5);
    
-   EXPECT_DOUBLE_EQ((ising.CalculateOnsiteAverage({{-1, +1, -1}, {+1, +1, +1}}, 1)), 0);
-   EXPECT_DOUBLE_EQ((ising.CalculateOnsiteAverage({{-1, +1, -1}, {+1, +1, +1}}, 2)), 1);
-   EXPECT_DOUBLE_EQ((ising.CalculateOnsiteAverage({{-1, +1, -1}, {+1, +1, +1}}, 3)), 0);
    
-   EXPECT_DOUBLE_EQ((ising.CalculateCorrelation({{-1, +1, -1}, {+1, +1, +1}}, 1, 1)), 1);
-   EXPECT_DOUBLE_EQ((ising.CalculateCorrelation({{-1, +1, -1}, {+1, +1, +1}}, 1, 2)), 0);
-   EXPECT_DOUBLE_EQ((ising.CalculateCorrelation({{-1, +1, -1}, {+1, +1, +1}}, 1, 3)), 1);
-   
-   EXPECT_DOUBLE_EQ((ising.CalculateCorrelation({{-1, +1, -1}, {+1, +1, +1}}, 2, 1)), 0);
-   EXPECT_DOUBLE_EQ((ising.CalculateCorrelation({{-1, +1, -1}, {+1, +1, +1}}, 2, 2)), 1);
-   EXPECT_DOUBLE_EQ((ising.CalculateCorrelation({{-1, +1, -1}, {+1, +1, +1}}, 2, 3)), 0);
-   
-   EXPECT_DOUBLE_EQ((ising.CalculateCorrelation({{-1, +1, -1}, {+1, +1, +1}}, 3, 1)), 1);
-   EXPECT_DOUBLE_EQ((ising.CalculateCorrelation({{-1, +1, -1}, {+1, +1, +1}}, 3, 2)), 0);
-   EXPECT_DOUBLE_EQ((ising.CalculateCorrelation({{-1, +1, -1}, {+1, +1, +1}}, 3, 3)), 1);
 }
 
 TEST(ModelIsing, Square) {

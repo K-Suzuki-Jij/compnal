@@ -29,7 +29,7 @@
 namespace compnal {
 namespace test {
 
-TEST(InteractionClassicalPolynomialAny, Linear) {
+TEST(Interaction, ClassicalPolynomialAnyLinear) {
    using InteractionType = interaction::classical::PolynomialAny<TestRealType>;
    
    const InteractionType::PolynomialType poly = {
@@ -71,7 +71,7 @@ TEST(InteractionClassicalPolynomialAny, Linear) {
    
 }
 
-TEST(InteractionClassicalPolynomialAny, Quadratic) {
+TEST(Interaction, ClassicalPolynomialAnyQuadratic) {
    using Tup = utility::AnyTupleType;
    using InteractionType = interaction::classical::PolynomialAny<TestRealType>;
    
@@ -114,7 +114,7 @@ TEST(InteractionClassicalPolynomialAny, Quadratic) {
    
 }
 
-TEST(InteractionClassicalPolynomialAny, Poly) {
+TEST(Interaction, ClassicalPolynomialAnyPoly) {
    using Tup = utility::AnyTupleType;
    using InteractionType = interaction::classical::PolynomialAny<TestRealType>;
    

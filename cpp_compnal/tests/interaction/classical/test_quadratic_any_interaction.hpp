@@ -31,7 +31,7 @@
 namespace compnal {
 namespace test {
 
-TEST(InteractionClassicalQuadraticAny, LinearOnly) {
+TEST(Interaction, ClassicalQuadraticAnyLinearOnly) {
    using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
    
    const InteractionType::LinearType linear = {
@@ -61,7 +61,7 @@ TEST(InteractionClassicalQuadraticAny, LinearOnly) {
    EXPECT_EQ(interaction.GetIndexMap().at(3), 2);
 }
 
-TEST(InteractionClassicalQuadraticAny, QuadOnly) {
+TEST(Interaction, ClassicalQuadraticAnyQuadOnly) {
    using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
    
    const InteractionType::QuadraticType quadratic = {
@@ -106,7 +106,7 @@ TEST(InteractionClassicalQuadraticAny, QuadOnly) {
    
 }
 
-TEST(InteractionClassicalQuadraticAny, Mix) {
+TEST(Interaction, ClassicalQuadraticAnyMix) {
    using Tup = utility::AnyTupleType;
    using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
    
@@ -168,7 +168,7 @@ TEST(InteractionClassicalQuadraticAny, Mix) {
    
 }
 
-TEST(InteractionClassicalQuadraticAny, Empty) {
+TEST(Interaction, ClassicalQuadraticAnyEmpty) {
    using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
    const InteractionType interaction = InteractionType{{}, {}};
    

@@ -124,6 +124,9 @@ public:
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const std::vector<OPType> &spins) const {
+      if (spins.size() != lattice_.GetSystemSize()) {
+         throw std::runtime_error("The system size is not equal to the size of spins");
+      }
       return CalculateEnergy(lattice_, spins);
    }
    
@@ -149,7 +152,6 @@ private:
       for (std::int32_t index = 0; index < system_size - 1; ++index) {
          energy += quadratic_*spins[index]*spins[index + 1] + linear_*spins[index];
       }
-      energy += linear_*spins[system_size - 1];
       
       if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
          energy += quadratic_*spins[system_size - 1]*spins[0] + linear_*spins[system_size - 1];
@@ -191,10 +193,12 @@ private:
             for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
                const std::int32_t index = coo_y*x_size + coo_x;
                energy += linear_*spins[index];
-               if (coo_x < x_size - 1 && coo_y < y_size - 1) {
+               if (coo_x < x_size - 1) {
                   const std::int32_t index_x1 = coo_y*x_size + (coo_x + 1);
-                  const std::int32_t index_y1 = (coo_y + 1)*x_size + coo_x;
                   energy += quadratic_*spins[index]*spins[index_x1];
+               }
+               if (coo_y < y_size - 1) {
+                  const std::int32_t index_y1 = (coo_y + 1)*x_size + coo_x;
                   energy += quadratic_*spins[index]*spins[index_y1];
                }
             }
@@ -241,12 +245,16 @@ private:
                for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
                   const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
                   energy += linear_*spins[index];
-                  if (coo_x < x_size - 1 && coo_y < y_size - 1 && coo_z < z_size - 1) {
+                  if (coo_x < x_size - 1) {
                      const std::int32_t index_x1 = coo_z*x_size*y_size + coo_y*x_size + (coo_x + 1);
-                     const std::int32_t index_y1 = coo_z*x_size*y_size + (coo_y + 1)*x_size + coo_x;
-                     const std::int32_t index_z1 = (coo_z + 1)*x_size*y_size + coo_y*x_size + coo_x;
                      energy += quadratic_*spins[index]*spins[index_x1];
+                  }
+                  if (coo_y < y_size - 1) {
+                     const std::int32_t index_y1 = coo_z*x_size*y_size + (coo_y + 1)*x_size + coo_x;
                      energy += quadratic_*spins[index]*spins[index_y1];
+                  }
+                  if (coo_z < z_size - 1) {
+                     const std::int32_t index_z1 = (coo_z + 1)*x_size*y_size + coo_y*x_size + coo_x;
                      energy += quadratic_*spins[index]*spins[index_z1];
                   }
                }

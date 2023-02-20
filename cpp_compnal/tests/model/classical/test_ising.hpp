@@ -28,7 +28,7 @@
 namespace compnal {
 namespace test {
 
-TEST(ModelClassicalIsing, BasicChain) {
+TEST(Model, ClassicalIsingBasicChain) {
    using BC = lattice::BoundaryCondition;
    using ModelType = model::classical::Ising<lattice::Chain, TestRealType>;
    
@@ -43,7 +43,7 @@ TEST(ModelClassicalIsing, BasicChain) {
       
 }
 
-TEST(ModelClassicalIsing, BasicSquare) {
+TEST(Model, ClassicalIsingBasicSquare) {
    using BC = lattice::BoundaryCondition;
    using ModelType = model::classical::Ising<lattice::Square, TestRealType>;
    
@@ -58,7 +58,7 @@ TEST(ModelClassicalIsing, BasicSquare) {
       
 }
 
-TEST(ModelClassicalIsing, BasicCubic) {
+TEST(Model, ClassicalIsingBasicCubic) {
    using BC = lattice::BoundaryCondition;
    using ModelType = model::classical::Ising<lattice::Cubic, TestRealType>;
    
@@ -73,7 +73,7 @@ TEST(ModelClassicalIsing, BasicCubic) {
       
 }
 
-TEST(ModelClassicalIsing, BasicInfiniteRange) {
+TEST(Model, ClassicalIsingBasicInfiniteRange) {
    using BC = lattice::BoundaryCondition;
    using ModelType = model::classical::Ising<lattice::InfiniteRange, TestRealType>;
    
@@ -88,7 +88,7 @@ TEST(ModelClassicalIsing, BasicInfiniteRange) {
       
 }
 
-TEST(ModelClassicalIsing, BasicAnyLattice) {
+TEST(Model, ClassicalIsingBasicAnyLattice) {
    using BC = lattice::BoundaryCondition;
    using ModelType = model::classical::Ising<lattice::AnyLattice, TestRealType>;
    using Tup = utility::AnyTupleType;
@@ -153,20 +153,104 @@ TEST(ModelClassicalIsing, BasicAnyLattice) {
    EXPECT_EQ(model.GetIndexMap().at(Tup{2, "b"}), 4);
 }
 
-TEST(ModelClassicalIsing, Enegy) {
+TEST(Model, ClassicalIsingEnegyChain) {
    using BC = lattice::BoundaryCondition;
    
    using Chain = lattice::Chain;
+   using Ising = model::classical::Ising<Chain, TestRealType>;
+   
+   EXPECT_NEAR((Ising{Chain{3, BC::OBC}, 0.0, 0.0}.CalculateEnergy({-1,+1,-1})), +0.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Chain{3, BC::OBC}, 1.0, 0.0}.CalculateEnergy({-1,+1,-1})), -1.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Chain{3, BC::OBC}, 0.0, 2.0}.CalculateEnergy({-1,+1,-1})), -4.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Chain{3, BC::OBC}, 1.0, 2.0}.CalculateEnergy({-1,+1,-1})), -5.0, test_epsilon<TestRealType>);
+   
+   EXPECT_NEAR((Ising{Chain{3, BC::PBC}, 0.0, 0.0}.CalculateEnergy({-1,+1,-1})), +0.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Chain{3, BC::PBC}, 1.0, 0.0}.CalculateEnergy({-1,+1,-1})), -1.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Chain{3, BC::PBC}, 0.0, 2.0}.CalculateEnergy({-1,+1,-1})), -2.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Chain{3, BC::PBC}, 1.0, 2.0}.CalculateEnergy({-1,+1,-1})), -3.0, test_epsilon<TestRealType>);
+   
+   EXPECT_THROW((Ising{Chain{3, BC::PBC}, 1.0, 2.0}.CalculateEnergy({-1,+1}))      , std::runtime_error);
+   EXPECT_THROW((Ising{Chain{3, BC::PBC}, 1.0, 2.0}.CalculateEnergy({-1,+1,+1,+1})), std::runtime_error);
+}
+
+TEST(Model, ClassicalIsingEnegySquare) {
+   using BC = lattice::BoundaryCondition;
    using Square = lattice::Square;
+   using Ising = model::classical::Ising<Square, TestRealType>;
+   const std::vector<typename Ising::OPType> spins = {
+      -1,+1,-1,+1,+1,+1
+   };
+   
+   EXPECT_NEAR((Ising{Square{3, 2, BC::OBC}, 0.0, 0.0}.CalculateEnergy(spins)), +0.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Square{3, 2, BC::OBC}, 1.0, 0.0}.CalculateEnergy(spins)), +2.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Square{3, 2, BC::OBC}, 0.0, 2.0}.CalculateEnergy(spins)), -2.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Square{3, 2, BC::OBC}, 1.0, 2.0}.CalculateEnergy(spins)), +0.0, test_epsilon<TestRealType>);
+   
+   EXPECT_NEAR((Ising{Square{3, 2, BC::PBC}, 0.0, 0.0}.CalculateEnergy(spins)), +0.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Square{3, 2, BC::PBC}, 1.0, 0.0}.CalculateEnergy(spins)), +2.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Square{3, 2, BC::PBC}, 0.0, 2.0}.CalculateEnergy(spins)), +0.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Square{3, 2, BC::PBC}, 1.0, 2.0}.CalculateEnergy(spins)), +2.0, test_epsilon<TestRealType>);
+   
+   EXPECT_THROW((Ising{Square{3, 2, BC::PBC}, 1.0, 2.0}.CalculateEnergy({-1,+1}))      , std::runtime_error);
+   EXPECT_THROW((Ising{Square{3, 2, BC::PBC}, 1.0, 2.0}.CalculateEnergy({-1,+1,+1,+1})), std::runtime_error);
+   
+}
+
+TEST(Model, ClassicalIsingEnegyCubic) {
+   using BC = lattice::BoundaryCondition;
    using Cubic = lattice::Cubic;
+   using Ising = model::classical::Ising<Cubic, TestRealType>;
+   const std::vector<typename Ising::OPType> spins = {
+      -1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1
+   };
+   
+   EXPECT_NEAR((Ising{Cubic{3, 2, 2, BC::OBC}, 0.0, 0.0}.CalculateEnergy(spins)), +0.0 , test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Cubic{3, 2, 2, BC::OBC}, 1.0, 0.0}.CalculateEnergy(spins)), +4.0 , test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Cubic{3, 2, 2, BC::OBC}, 0.0, 2.0}.CalculateEnergy(spins)), +8.0 , test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Cubic{3, 2, 2, BC::OBC}, 1.0, 2.0}.CalculateEnergy(spins)), +12.0, test_epsilon<TestRealType>);
+   
+   EXPECT_NEAR((Ising{Cubic{3, 2, 2, BC::PBC}, 0.0, 0.0}.CalculateEnergy(spins)), +0.0 , test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Cubic{3, 2, 2, BC::PBC}, 1.0, 0.0}.CalculateEnergy(spins)), +4.0 , test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Cubic{3, 2, 2, BC::PBC}, 0.0, 2.0}.CalculateEnergy(spins)), +24.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Cubic{3, 2, 2, BC::PBC}, 1.0, 2.0}.CalculateEnergy(spins)), +28.0, test_epsilon<TestRealType>);
+   
+   EXPECT_THROW((Ising{Cubic{3, 2, 2, BC::PBC}, 1.0, 2.0}.CalculateEnergy({-1,+1}))      , std::runtime_error);
+   EXPECT_THROW((Ising{Cubic{3, 2, 2, BC::PBC}, 1.0, 2.0}.CalculateEnergy({-1,+1,+1,+1})), std::runtime_error);
+}
+
+TEST(Model, ClassicalIsingEnegyInfiniteRange) {
    using Infinite = lattice::InfiniteRange;
-   using Any = lattice::AnyLattice;
+   using Ising = model::classical::Ising<Infinite, TestRealType>;
    
-   using IsingChain = model::classical::Ising<Chain, TestRealType>;
+   EXPECT_NEAR((Ising{Infinite{3}, 0.0, 0.0}.CalculateEnergy({-1,+1,-1})), +0.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Infinite{3}, 1.0, 0.0}.CalculateEnergy({-1,+1,-1})), -1.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Infinite{3}, 0.0, 2.0}.CalculateEnergy({-1,+1,-1})), -2.0, test_epsilon<TestRealType>);
+   EXPECT_NEAR((Ising{Infinite{3}, 1.0, 2.0}.CalculateEnergy({-1,+1,-1})), -3.0, test_epsilon<TestRealType>);
    
-   //EXPECT_NEAR((IsingChain{Chain{3, BC::OBC}, 1.0, 2.0}), 3.0, test_epsilon<TestRealType>);
+   EXPECT_THROW((Ising{Infinite{3}, 1.0, 2.0}.CalculateEnergy({-1,+1}))      , std::runtime_error);
+   EXPECT_THROW((Ising{Infinite{3}, 1.0, 2.0}.CalculateEnergy({-1,+1,+1,+1})), std::runtime_error);
    
+}
+
+TEST(Model, ClassicalIsingEnegyAnyLattice) {
+   using AnyLattice = lattice::AnyLattice;
+   using Ising = model::classical::Ising<AnyLattice, TestRealType>;
+   using InteractionType = interaction::classical::QuadraticAny<TestRealType>;
    
+   const InteractionType::LinearType linear = {
+      {1, -1.0},
+      {2, +2.0},
+   };
+   
+   const InteractionType::QuadraticType quadratic = {
+      {{1, 1}, +3.0},
+      {{2, 3}, -2.0},
+   };
+      
+   EXPECT_NEAR((Ising{AnyLattice{}, linear, quadratic}.CalculateEnergy({-1,+1,-1})), +8.0, test_epsilon<TestRealType>);
+   
+   EXPECT_THROW((Ising{AnyLattice{}, linear, quadratic}.CalculateEnergy({-1,+1}))      , std::runtime_error);
+   EXPECT_THROW((Ising{AnyLattice{}, linear, quadratic}.CalculateEnergy({-1,+1,+1,+1})), std::runtime_error);
 }
 
 } // namespace test

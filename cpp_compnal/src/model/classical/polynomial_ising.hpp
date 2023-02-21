@@ -69,11 +69,14 @@ public:
                    const PolynomialType &interaction):
    lattice_(lattice) {
       for (const auto &it: interaction) {
+         if (it.first < 0) {
+            throw std::runtime_error("The degree of interactions must be positive.");
+         }
          if (std::abs(it.second) <= std::numeric_limits<ValueType>::epsilon()) {
             continue;
          }
-         if (interaction_.size() <= it.first) {
-            interaction_.resize(it.first + 1);
+         if (degree_ < it.first) {
+            degree_ = it.first;
          }
          interaction_[it.first] = it.second;
       }
@@ -93,8 +96,8 @@ public:
    
    //! @brief Get polynomial interaction \f$ J_{p}\f$, here \f$ p \f$ is the degree of interactions.
    //! @return The polynomial interaction \f$ J_{p}\f$.
-   //! For example, {0.0, 1.0, 1.0} as std::vector means \f$J_{2}=J_{3}=1.0\f$.
-   const std::vector<ValueType> &GetInteraction() const {
+   //! For example, {{2, 1.0}, {3, 1.0}} as std::unordered_map means \f$J_{2}=J_{3}=1.0\f$.
+   const PolynomialType &GetInteraction() const {
       return interaction_;
    }
    
@@ -103,17 +106,20 @@ public:
    const LatticeType &GetLattice() const {
       return lattice_;
    }
-
+   
    //! @brief Get the degree of the interactions.
    //! @return The degree.
    std::int32_t GetDegree() const {
-      return static_cast<std::int32_t>(interaction_.size()) - 1;
+      return degree_;
    }
    
    //! @brief Calculate energy corresponding to the spin configuration.
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const std::vector<OPType> &spins) const {
+      if (spins.size() != lattice_.GetSystemSize()) {
+         throw std::runtime_error("The system size is not equal to the size of spins");
+      }
       return CalculateEnergy(lattice_, spins);
    }
    
@@ -123,15 +129,59 @@ private:
    LatticeType lattice_;
    
    //! @brief The polynomial interaction.
-   std::vector<ValueType> interaction_;
+   PolynomialType interaction_;
+   
+   //! @brief The degree of the interactions.
+   std::int32_t degree_ = 0;
    
    //! @brief Calculate energy corresponding to the spin configuration on the one-dimensional chain.
    //! @param lattice The one-dimensional chain.
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const lattice::Chain &lattice,
-                            const std::vector<OPType> &spins) const {
+                             const std::vector<OPType> &spins) const {
       ValueType energy = 0;
+      const std::int32_t system_size = lattice.GetSystemSize();
+      
+      if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
+         for (const auto &it: interaction_) {
+            if (it.first == 0) {
+               energy += it.second;
+            }
+            else {
+               for (std::int32_t index = 0; index < system_size; ++index) {
+                  OPType spin_prod = spins[index];
+                  for (std::int32_t p = 1; p < it.first; ++p) {
+                     spin_prod *= spins[(index + p)%system_size];
+                  }
+                  energy += it.second*spin_prod;
+               }
+            }
+         }
+      }
+      else if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
+         for (const auto &it: interaction_) {
+            if (it.first == 0) {
+               energy += it.second;
+            }
+            else {
+               for (std::int32_t index = 0; index < system_size; ++index) {
+                  if (index + it.first - 1 >= system_size) {
+                     break;
+                  }
+                  OPType spin_prod = spins[index];
+                  for (std::int32_t p = 1; p < it.first; ++p) {
+                     spin_prod *= spins[index + p];
+                  }
+                  energy += it.second*spin_prod;
+               }
+            }
+         }
+      }
+      else {
+         throw std::runtime_error("Unsupported BoundaryCondition");
+      }
+      
       return energy;
    }
    
@@ -140,8 +190,78 @@ private:
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const lattice::Square &lattice,
-                            const std::vector<OPType> &spins) const {
+                             const std::vector<OPType> &spins) const {
       ValueType energy = 0;
+      const std::int32_t x_size = lattice.GetXSize();
+      const std::int32_t y_size = lattice.GetYSize();
+      
+      if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
+         for (const auto &it: interaction_) {
+            if (it.first == 0) {
+               energy += it.second;
+            }
+            else if (it.first == 1) {
+               for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+                  for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+                     energy += it.second*spins[coo_y*x_size + coo_x];
+                  }
+               }
+            }
+            else {
+               for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+                  for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+                     const std::int32_t index = coo_y*x_size + coo_x;
+                     OPType spin_prod_x = spins[index];
+                     OPType spin_prod_y = spins[index];
+                     for (std::int32_t p = 1; p < it.first; ++p) {
+                        spin_prod_x *= spins[coo_y*x_size + (coo_x + p)%x_size];
+                        spin_prod_y *= spins[((coo_y + p)%y_size)*x_size + coo_x];
+                     }
+                     energy += it.second*(spin_prod_x + spin_prod_y);
+                  }
+               }
+            }
+         }
+      }
+      else if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
+         for (const auto &it: interaction_) {
+            if (it.first == 0) {
+               energy += it.second;
+            }
+            else if (it.first == 1) {
+               for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+                  for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+                     energy += it.second*spins[coo_y*x_size + coo_x];
+                  }
+               }
+            }
+            else {
+               for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+                  for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+                     const std::int32_t index = coo_y*x_size + coo_x;
+                     if (coo_x + it.first - 1 < x_size) {
+                        OPType spin_prod_x = spins[index];
+                        for (std::int32_t p = 1; p < it.first; ++p) {
+                           spin_prod_x *= spins[coo_y*x_size + coo_x + p];
+                        }
+                        energy += it.second*spin_prod_x;
+                     }
+                     if (coo_y + it.first - 1 < y_size) {
+                        OPType spin_prod_y = spins[index];
+                        for (std::int32_t p = 1; p < it.first; ++p) {
+                           spin_prod_y *= spins[(coo_y + p)*x_size + coo_x];
+                        }
+                        energy += it.second*spin_prod_y;
+                     }
+                  }
+               }
+            }
+         }
+      }
+      else {
+         throw std::runtime_error("Unsupported BoundaryCondition");
+      }
+      
       return energy;
    }
    
@@ -150,8 +270,94 @@ private:
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const lattice::Cubic &lattice,
-                            const std::vector<OPType> &spins) const {
+                             const std::vector<OPType> &spins) const {
       ValueType energy = 0;
+      const std::int32_t x_size = lattice.GetXSize();
+      const std::int32_t y_size = lattice.GetYSize();
+      const std::int32_t z_size = lattice.GetZSize();
+      
+      if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
+         for (const auto &it: interaction_) {
+            if (it.first == 0) {
+               energy += it.second;
+            }
+            else if (it.first == 1) {
+               for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+                  for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+                     for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                        energy += it.second*spins[coo_z*x_size*y_size + coo_y*x_size + coo_x];
+                     }
+                  }
+               }
+            }
+            for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+               for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+                  for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                     const std::int32_t index = coo_y*x_size + coo_x;
+                     OPType spin_prod_x = spins[index];
+                     OPType spin_prod_y = spins[index];
+                     OPType spin_prod_z = spins[index];
+                     for (std::int32_t p = 1; p < it.first; ++p) {
+                        spin_prod_x *= spins[coo_z*x_size*y_size + coo_y*x_size + (coo_x + p)%x_size];
+                        spin_prod_y *= spins[coo_z*x_size*y_size + ((coo_y + p)%y_size)*x_size + coo_x];
+                        spin_prod_z *= spins[((coo_z + p)%z_size)*x_size*y_size + coo_y*x_size + coo_x];
+                     }
+                     energy += it.second*(spin_prod_x + spin_prod_y + spin_prod_z);
+                  }
+               }
+            }
+         }
+      }
+      else if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
+         for (const auto &it: interaction_) {
+            if (it.first == 0) {
+               energy += it.second;
+            }
+            else if (it.first == 1) {
+               for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+                  for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+                     for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                        energy += it.second*spins[coo_z*x_size*y_size + coo_y*x_size + coo_x];
+                     }
+                  }
+               }
+            }
+            else {
+               for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+                  for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+                     for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                        const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
+                        if (coo_x + it.first - 1 < x_size) {
+                           OPType spin_prod_x = spins[index];
+                           for (std::int32_t p = 1; p < it.first; ++p) {
+                              spin_prod_x *= spins[coo_z*x_size*y_size + coo_y*x_size + coo_x + p];
+                           }
+                           energy += it.second*spin_prod_x;
+                        }
+                        if (coo_y + it.first - 1 < y_size) {
+                           OPType spin_prod_y = spins[index];
+                           for (std::int32_t p = 1; p < it.first; ++p) {
+                              spin_prod_y *= spins[coo_z*x_size*y_size + (coo_y + p)*x_size + coo_x];
+                           }
+                           energy += it.second*spin_prod_y;
+                        }
+                        if (coo_z + it.first - 1 < z_size) {
+                           OPType spin_prod_z = spins[index];
+                           for (std::int32_t p = 1; p < it.first; ++p) {
+                              spin_prod_z *= spins[(coo_z + p)*x_size*y_size + coo_y*x_size + coo_x];
+                           }
+                           energy += it.second*spin_prod_z;
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+      else {
+         throw std::runtime_error("Unsupported BoundaryCondition");
+      }
+      
       return energy;
    }
    
@@ -160,8 +366,42 @@ private:
    //! @param spins The spin configuration.
    //! @return The energy.
    ValueType CalculateEnergy(const lattice::InfiniteRange &lattice,
-                            const std::vector<OPType> &spins) const {
+                             const std::vector<OPType> &spins) const {
       ValueType energy = 0;
+      const std::int32_t system_size = lattice.GetSystemSize();
+      
+      for (std::int32_t index = 0; index < system_size; ++index) {
+         const OPType target_spin = spins[index];
+         for (const auto &it: interaction_) {
+            std::vector<std::int32_t> indices(it.first);
+            std::int32_t start_index = 0;
+            std::int32_t size = 0;
+            
+            while (true) {
+               for (std::int32_t i = start_index; i < system_size; ++i) {
+                  indices[size++] = i;
+                  if (size == it.first) {
+                     OPType sign = 1;
+                     for (std::int32_t j = 0; j < it.first; ++j) {
+                        if (indices[j] >= index) {
+                           sign *= spins[indices[j] + 1];
+                        }
+                        else {
+                           sign *= spins[indices[j]];
+                        }
+                     }
+                     energy += it.second*sign*target_spin;
+                     break;
+                  }
+               }
+               --size;
+               if (size < 0) {
+                  break;
+               }
+               start_index = indices[size] + 1;
+            }
+         }
+      }
       return energy;
    }
    
@@ -237,7 +477,7 @@ public:
    const std::unordered_map<IndexType, std::int32_t, IndexHash> &GetIndexMap() const {
       return interaction_.GetIndexMap();
    }
-
+   
    //! @brief Get the degree of the interactions.
    //! @return The degree.
    std::int32_t GetDegree() const {
@@ -277,7 +517,7 @@ private:
    
    //! @brief The linear interaction.
    lattice::AnyLattice lattice_;
-      
+   
 };
 
 //! @brief Helper function to make PolynomialIsing class.

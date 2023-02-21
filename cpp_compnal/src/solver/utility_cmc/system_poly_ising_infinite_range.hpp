@@ -38,6 +38,7 @@ class CMCSystem<model::classical::PolynomialIsing<lattice::InfiniteRange, RealTy
    
 public:
    using ValueType = typename ModelType::ValueType;
+   using OPType = typename ModelType::OPType;
    
    CMCSystem(const ModelType &model):
    system_size_(model.GetSystemSize()),
@@ -51,30 +52,30 @@ public:
    }
    
    void Flip(const std::int32_t index) {
-      const typename ModelType::OPType target_spin = sample_[index];
+      const OPType target_spin = sample_[index];
       if (degree_ == 2) {
-         const typename ModelType::ValueType target_ineraction_deg2 = interaction_[2];
+         const ValueType target_ineraction_deg2 = interaction_[2];
          for (std::int32_t i2 = 0; i2 < system_size_; ++i2) {
             if (i2 == index) {continue;}
             energy_difference_[i2] += 4*target_ineraction_deg2*target_spin*sample_[i2];
          }
       }
       else if (degree_ == 3) {
-         const typename ModelType::ValueType target_ineraction_deg2 = interaction_[2];
-         const typename ModelType::ValueType target_ineraction_deg3 = interaction_[3];
-         const typename ModelType::OPType spin_prod1 = target_spin;
+         const ValueType target_ineraction_deg2 = interaction_[2];
+         const ValueType target_ineraction_deg3 = interaction_[3];
+         const OPType spin_prod1 = target_spin;
          for (std::int32_t i2 = 0; i2 < system_size_; ++i2) {
             if (i2 == index) {continue;}
-            const typename ModelType::OPType spin_prod2 = spin_prod1*sample_[i2];
-            const typename ModelType::ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
-            typename ModelType::ValueType sum_val_i2 = 0;
+            const OPType spin_prod2 = spin_prod1*sample_[i2];
+            const ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
+            ValueType sum_val_i2 = 0;
             for (std::int32_t i3 = i2 + 1; i3 < index; ++i3) {
-               const typename ModelType::ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod2*sample_[i3];
+               const ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod2*sample_[i3];
                energy_difference_[i3] += diff_val_i3;
                sum_val_i2 += diff_val_i3;
             }
             for (std::int32_t i3 = std::max(index + 1, i2 + 1); i3 < system_size_; ++i3) {
-               const typename ModelType::ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod2*sample_[i3];
+               const ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod2*sample_[i3];
                energy_difference_[i3] += diff_val_i3;
                sum_val_i2 += diff_val_i3;
             }
@@ -82,27 +83,27 @@ public:
          }
       }
       else if (degree_ == 4) {
-         const typename ModelType::ValueType target_ineraction_deg2 = interaction_[2];
-         const typename ModelType::ValueType target_ineraction_deg3 = interaction_[3];
-         const typename ModelType::ValueType target_ineraction_deg4 = interaction_[4];
-         const typename ModelType::OPType spin_prod1 = target_spin;
+         const ValueType target_ineraction_deg2 = interaction_[2];
+         const ValueType target_ineraction_deg3 = interaction_[3];
+         const ValueType target_ineraction_deg4 = interaction_[4];
+         const OPType spin_prod1 = target_spin;
          for (std::int32_t i2 = 0; i2 < system_size_; ++i2) {
             if (i2 == index) {continue;}
-            const typename ModelType::OPType spin_prod2 = spin_prod1*sample_[i2];
-            const typename ModelType::ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
-            typename ModelType::ValueType sum_val_i2 = 0;
+            const OPType spin_prod2 = spin_prod1*sample_[i2];
+            const ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
+            ValueType sum_val_i2 = 0;
             for (std::int32_t i3 = i2 + 1; i3 < system_size_; ++i3) {
                if (i3 == index) {continue;}
-               const typename ModelType::OPType spin_prod3 = spin_prod2*sample_[i3];
-               const typename ModelType::ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod3;
-               typename ModelType::ValueType sum_val_i3 = 0;
+               const OPType spin_prod3 = spin_prod2*sample_[i3];
+               const ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod3;
+               ValueType sum_val_i3 = 0;
                for (std::int32_t i4 = i3 + 1; i4 < index; ++i4) {
-                  const typename ModelType::ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod3*sample_[i4];
+                  const ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod3*sample_[i4];
                   energy_difference_[i4] += diff_val_i4;
                   sum_val_i3 += diff_val_i4;
                }
                for (std::int32_t i4 = std::max(index + 1, i3 + 1); i4 < system_size_; ++i4) {
-                  const typename ModelType::ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod3*sample_[i4];
+                  const ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod3*sample_[i4];
                   energy_difference_[i4] += diff_val_i4;
                   sum_val_i3 += diff_val_i4;
                }
@@ -113,33 +114,33 @@ public:
          }
       }
       else if (degree_ == 5) {
-         const typename ModelType::ValueType target_ineraction_deg2 = interaction_[2];
-         const typename ModelType::ValueType target_ineraction_deg3 = interaction_[3];
-         const typename ModelType::ValueType target_ineraction_deg4 = interaction_[4];
-         const typename ModelType::ValueType target_ineraction_deg5 = interaction_[5];
-         const typename ModelType::OPType spin_prod1 = target_spin;
+         const ValueType target_ineraction_deg2 = interaction_[2];
+         const ValueType target_ineraction_deg3 = interaction_[3];
+         const ValueType target_ineraction_deg4 = interaction_[4];
+         const ValueType target_ineraction_deg5 = interaction_[5];
+         const OPType spin_prod1 = target_spin;
          for (std::int32_t i2 = 0; i2 < system_size_; ++i2) {
             if (i2 == index) {continue;}
-            const typename ModelType::OPType spin_prod2 = spin_prod1*sample_[i2];
-            const typename ModelType::ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
-            typename ModelType::ValueType sum_val_i2 = 0;
+            const OPType spin_prod2 = spin_prod1*sample_[i2];
+            const ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
+            ValueType sum_val_i2 = 0;
             for (std::int32_t i3 = i2 + 1; i3 < system_size_; ++i3) {
                if (i3 == index) {continue;}
-               const typename ModelType::OPType spin_prod3 = spin_prod2*sample_[i3];
-               const typename ModelType::ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod3;
-               typename ModelType::ValueType sum_val_i3 = 0;
+               const OPType spin_prod3 = spin_prod2*sample_[i3];
+               const ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod3;
+               ValueType sum_val_i3 = 0;
                for (std::int32_t i4 = i3 + 1; i4 < system_size_; ++i4) {
                   if (i4 == index) {continue;}
-                  const typename ModelType::OPType spin_prod4 = spin_prod3*sample_[i4];
-                  const typename ModelType::ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod4;
-                  typename ModelType::ValueType sum_val_i4 = 0;
+                  const OPType spin_prod4 = spin_prod3*sample_[i4];
+                  const ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod4;
+                  ValueType sum_val_i4 = 0;
                   for (std::int32_t i5 = i4 + 1; i5 < index; ++i5) {
-                     const typename ModelType::ValueType diff_val_i5 = 4*target_ineraction_deg5*spin_prod4*sample_[i5];
+                     const ValueType diff_val_i5 = 4*target_ineraction_deg5*spin_prod4*sample_[i5];
                      energy_difference_[i5] += diff_val_i5;
                      sum_val_i4 += diff_val_i5;
                   }
                   for (std::int32_t i5 = std::max(index + 1, i4 + 1); i5 < system_size_; ++i5) {
-                     const typename ModelType::ValueType diff_val_i5 = 4*target_ineraction_deg5*spin_prod4*sample_[i5];
+                     const ValueType diff_val_i5 = 4*target_ineraction_deg5*spin_prod4*sample_[i5];
                      energy_difference_[i5] += diff_val_i5;
                      sum_val_i4 += diff_val_i5;
                   }
@@ -153,39 +154,39 @@ public:
          }
       }
       else if (degree_ == 6) {
-         const typename ModelType::ValueType target_ineraction_deg2 = interaction_[2];
-         const typename ModelType::ValueType target_ineraction_deg3 = interaction_[3];
-         const typename ModelType::ValueType target_ineraction_deg4 = interaction_[4];
-         const typename ModelType::ValueType target_ineraction_deg5 = interaction_[5];
-         const typename ModelType::ValueType target_ineraction_deg6 = interaction_[6];
-         const typename ModelType::OPType spin_prod1 = target_spin;
+         const ValueType target_ineraction_deg2 = interaction_[2];
+         const ValueType target_ineraction_deg3 = interaction_[3];
+         const ValueType target_ineraction_deg4 = interaction_[4];
+         const ValueType target_ineraction_deg5 = interaction_[5];
+         const ValueType target_ineraction_deg6 = interaction_[6];
+         const OPType spin_prod1 = target_spin;
          for (std::int32_t i2 = 0; i2 < system_size_; ++i2) {
             if (i2 == index) {continue;}
-            const typename ModelType::OPType spin_prod2 = spin_prod1*sample_[i2];
-            const typename ModelType::ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
-            typename ModelType::ValueType sum_val_i2 = 0;
+            const OPType spin_prod2 = spin_prod1*sample_[i2];
+            const ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
+            ValueType sum_val_i2 = 0;
             for (std::int32_t i3 = i2 + 1; i3 < system_size_; ++i3) {
                if (i3 == index) {continue;}
-               const typename ModelType::OPType spin_prod3 = spin_prod2*sample_[i3];
-               const typename ModelType::ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod3;
-               typename ModelType::ValueType sum_val_i3 = 0;
+               const OPType spin_prod3 = spin_prod2*sample_[i3];
+               const ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod3;
+               ValueType sum_val_i3 = 0;
                for (std::int32_t i4 = i3 + 1; i4 < system_size_; ++i4) {
                   if (i4 == index) {continue;}
-                  const typename ModelType::OPType spin_prod4 = spin_prod3*sample_[i4];
-                  const typename ModelType::ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod4;
-                  typename ModelType::ValueType sum_val_i4 = 0;
+                  const OPType spin_prod4 = spin_prod3*sample_[i4];
+                  const ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod4;
+                  ValueType sum_val_i4 = 0;
                   for (std::int32_t i5 = i4 + 1; i5 < system_size_; ++i5) {
                      if (i5 == index) {continue;}
-                     const typename ModelType::OPType spin_prod5 = spin_prod4*sample_[i5];
-                     const typename ModelType::ValueType diff_val_i5 = 4*target_ineraction_deg5*spin_prod5;
-                     typename ModelType::ValueType sum_val_i5 = 0;
+                     const OPType spin_prod5 = spin_prod4*sample_[i5];
+                     const ValueType diff_val_i5 = 4*target_ineraction_deg5*spin_prod5;
+                     ValueType sum_val_i5 = 0;
                      for (std::int32_t i6 = i5 + 1; i6 < index; ++i6) {
-                        const typename ModelType::ValueType diff_val_i6 = 4*target_ineraction_deg6*spin_prod5*sample_[i6];
+                        const ValueType diff_val_i6 = 4*target_ineraction_deg6*spin_prod5*sample_[i6];
                         energy_difference_[i6] += diff_val_i6;
                         sum_val_i5 += diff_val_i6;
                      }
                      for (std::int32_t i6 = std::max(index + 1, i5 + 1); i6 < system_size_; ++i6) {
-                        const typename ModelType::ValueType diff_val_i6 = 4*target_ineraction_deg6*spin_prod5*sample_[i6];
+                        const ValueType diff_val_i6 = 4*target_ineraction_deg6*spin_prod5*sample_[i6];
                         energy_difference_[i6] += diff_val_i6;
                         sum_val_i5 += diff_val_i6;
                      }
@@ -202,45 +203,45 @@ public:
          }
       }
       else if (degree_ == 7) {
-         const typename ModelType::ValueType target_ineraction_deg2 = interaction_[2];
-         const typename ModelType::ValueType target_ineraction_deg3 = interaction_[3];
-         const typename ModelType::ValueType target_ineraction_deg4 = interaction_[4];
-         const typename ModelType::ValueType target_ineraction_deg5 = interaction_[5];
-         const typename ModelType::ValueType target_ineraction_deg6 = interaction_[6];
-         const typename ModelType::ValueType target_ineraction_deg7 = interaction_[7];
-         const typename ModelType::OPType spin_prod1 = target_spin;
+         const ValueType target_ineraction_deg2 = interaction_[2];
+         const ValueType target_ineraction_deg3 = interaction_[3];
+         const ValueType target_ineraction_deg4 = interaction_[4];
+         const ValueType target_ineraction_deg5 = interaction_[5];
+         const ValueType target_ineraction_deg6 = interaction_[6];
+         const ValueType target_ineraction_deg7 = interaction_[7];
+         const OPType spin_prod1 = target_spin;
          for (std::int32_t i2 = 0; i2 < system_size_; ++i2) {
             if (i2 == index) {continue;}
-            const typename ModelType::OPType spin_prod2 = spin_prod1*sample_[i2];
-            const typename ModelType::ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
-            typename ModelType::ValueType sum_val_i2 = 0;
+            const OPType spin_prod2 = spin_prod1*sample_[i2];
+            const ValueType diff_val_i2 = 4*target_ineraction_deg2*spin_prod2;
+            ValueType sum_val_i2 = 0;
             for (std::int32_t i3 = i2 + 1; i3 < system_size_; ++i3) {
                if (i3 == index) {continue;}
-               const typename ModelType::OPType spin_prod3 = spin_prod2*sample_[i3];
-               const typename ModelType::ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod3;
-               typename ModelType::ValueType sum_val_i3 = 0;
+               const OPType spin_prod3 = spin_prod2*sample_[i3];
+               const ValueType diff_val_i3 = 4*target_ineraction_deg3*spin_prod3;
+               ValueType sum_val_i3 = 0;
                for (std::int32_t i4 = i3 + 1; i4 < system_size_; ++i4) {
                   if (i4 == index) {continue;}
-                  const typename ModelType::OPType spin_prod4 = spin_prod3*sample_[i4];
-                  const typename ModelType::ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod4;
-                  typename ModelType::ValueType sum_val_i4 = 0;
+                  const OPType spin_prod4 = spin_prod3*sample_[i4];
+                  const ValueType diff_val_i4 = 4*target_ineraction_deg4*spin_prod4;
+                  ValueType sum_val_i4 = 0;
                   for (std::int32_t i5 = i4 + 1; i5 < system_size_; ++i5) {
                      if (i5 == index) {continue;}
-                     const typename ModelType::OPType spin_prod5 = spin_prod4*sample_[i5];
-                     const typename ModelType::ValueType diff_val_i5 = 4*target_ineraction_deg5*spin_prod5;
-                     typename ModelType::ValueType sum_val_i5 = 0;
+                     const OPType spin_prod5 = spin_prod4*sample_[i5];
+                     const ValueType diff_val_i5 = 4*target_ineraction_deg5*spin_prod5;
+                     ValueType sum_val_i5 = 0;
                      for (std::int32_t i6 = i5 + 1; i6 < system_size_; ++i6) {
                         if (i6 == index) {continue;}
-                        const typename ModelType::OPType spin_prod6 = spin_prod5*sample_[i6];
-                        const typename ModelType::ValueType diff_val_i6 = 4*target_ineraction_deg6*spin_prod6;
-                        typename ModelType::ValueType sum_val_i6 = 0;
+                        const OPType spin_prod6 = spin_prod5*sample_[i6];
+                        const ValueType diff_val_i6 = 4*target_ineraction_deg6*spin_prod6;
+                        ValueType sum_val_i6 = 0;
                         for (std::int32_t i7 = i6 + 1; i7 < index; ++i7) {
-                           const typename ModelType::ValueType diff_val_i7 = 4*target_ineraction_deg7*spin_prod6*sample_[i7];
+                           const ValueType diff_val_i7 = 4*target_ineraction_deg7*spin_prod6*sample_[i7];
                            energy_difference_[i7] += diff_val_i7;
                            sum_val_i6 += diff_val_i7;
                         }
                         for (std::int32_t i7 = std::max(index + 1, i6 + 1); i7 < system_size_; ++i7) {
-                           const typename ModelType::ValueType diff_val_i7 = 4*target_ineraction_deg7*spin_prod6*sample_[i7];
+                           const ValueType diff_val_i7 = 4*target_ineraction_deg7*spin_prod6*sample_[i7];
                            energy_difference_[i7] += diff_val_i7;
                            sum_val_i6 += diff_val_i7;
                         }
@@ -261,8 +262,8 @@ public:
       }
       else {
          for (std::int32_t p = 2; p < static_cast<std::int32_t>(interaction_.size()); ++p) {
-            if (std::abs(interaction_[p]) > std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               const typename ModelType::ValueType target_ineraction = interaction_[p];
+            if (std::abs(interaction_[p]) > std::numeric_limits<ValueType>::epsilon()) {
+               const ValueType target_ineraction = interaction_[p];
                std::vector<std::int32_t> indices(p);
                std::int32_t start_index = 0;
                std::int32_t size = 0;
@@ -271,7 +272,7 @@ public:
                   for (std::int32_t i = start_index; i < system_size_ - 1; ++i) {
                      indices[size++] = i;
                      if (size == p) {
-                        typename ModelType::OPType sign = 1;
+                        OPType sign = 1;
                         for (std::int32_t j = 0; j < p; ++j) {
                            if (indices[j] >= index) {
                               sign *= sample_[indices[j] + 1];
@@ -280,7 +281,7 @@ public:
                               sign *= sample_[indices[j]];
                            }
                         }
-                        const typename ModelType::ValueType val = 4*target_spin*sign*target_ineraction;
+                        const ValueType val = 4*target_spin*sign*target_ineraction;
                         for (std::int32_t j = 0; j < p; ++j) {
                            if (indices[j] >= index) {
                               energy_difference_[indices[j] + 1] += val;
@@ -306,11 +307,11 @@ public:
       sample_[index] *= -1;
    }
    
-   const std::vector<typename ModelType::OPType> &GetSample() const {
+   const std::vector<OPType> &GetSample() const {
       return sample_;
    }
    
-   typename ModelType::ValueType GetEnergyDifference(const std::int32_t index) const {
+   ValueType GetEnergyDifference(const std::int32_t index) const {
       return energy_difference_[index];
    }
    
@@ -321,24 +322,24 @@ public:
 private:
    const std::int32_t system_size_;
    const lattice::BoundaryCondition bc_;
-   const std::vector<typename ModelType::ValueType> interaction_;
+   const std::vector<ValueType> interaction_;
    const std::int32_t degree_;
    
-   std::vector<typename ModelType::OPType> sample_;
-   std::vector<typename ModelType::ValueType> energy_difference_;
+   std::vector<OPType> sample_;
+   std::vector<ValueType> energy_difference_;
    
-   std::vector<typename ModelType::ValueType> GenerateEnergyDifference(const std::vector<typename ModelType::OPType> &sample) const {
-      std::vector<typename ModelType::ValueType> energy_difference(system_size_);
+   std::vector<ValueType> GenerateEnergyDifference(const std::vector<OPType> &sample) const {
+      std::vector<ValueType> energy_difference(system_size_);
       for (std::int32_t index = 0; index < system_size_; ++index) {
-         typename ModelType::ValueType val = 0.0;
-         const typename ModelType::OPType target_spin = sample[index];
+         ValueType val = 0.0;
+         const OPType target_spin = sample[index];
       
          if (interaction_.size() >= 2) {
             val += interaction_[1]*target_spin;
          }
          for (std::int32_t p = 2; p < static_cast<std::int32_t>(interaction_.size()); ++p) {
-            if (std::abs(interaction_[p]) > std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               const typename ModelType::ValueType target_ineraction = interaction_[p];
+            if (std::abs(interaction_[p]) > std::numeric_limits<ValueType>::epsilon()) {
+               const ValueType target_ineraction = interaction_[p];
                std::vector<std::int32_t> indices(p - 1);
                std::int32_t start_index = 0;
                std::int32_t size = 0;
@@ -347,7 +348,7 @@ private:
                   for (std::int32_t i = start_index; i < system_size_ - 1; ++i) {
                      indices[size++] = i;
                      if (size == p - 1) {
-                        typename ModelType::OPType sign = 1;
+                        OPType sign = 1;
                         for (std::int32_t j = 0; j < p - 1; ++j) {
                            if (indices[j] >= index) {
                               sign *= sample[indices[j] + 1];

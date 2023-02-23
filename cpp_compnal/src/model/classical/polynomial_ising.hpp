@@ -290,19 +290,21 @@ private:
                   }
                }
             }
-            for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
-               for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
-                  for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
-                     const std::int32_t index = coo_y*x_size + coo_x;
-                     OPType spin_prod_x = spins[index];
-                     OPType spin_prod_y = spins[index];
-                     OPType spin_prod_z = spins[index];
-                     for (std::int32_t p = 1; p < it.first; ++p) {
-                        spin_prod_x *= spins[coo_z*x_size*y_size + coo_y*x_size + (coo_x + p)%x_size];
-                        spin_prod_y *= spins[coo_z*x_size*y_size + ((coo_y + p)%y_size)*x_size + coo_x];
-                        spin_prod_z *= spins[((coo_z + p)%z_size)*x_size*y_size + coo_y*x_size + coo_x];
+            else {
+               for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
+                  for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
+                     for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
+                        const std::int32_t index = coo_y*x_size + coo_x;
+                        OPType spin_prod_x = spins[index];
+                        OPType spin_prod_y = spins[index];
+                        OPType spin_prod_z = spins[index];
+                        for (std::int32_t p = 1; p < it.first; ++p) {
+                           spin_prod_x *= spins[coo_z*x_size*y_size + coo_y*x_size + (coo_x + p)%x_size];
+                           spin_prod_y *= spins[coo_z*x_size*y_size + ((coo_y + p)%y_size)*x_size + coo_x];
+                           spin_prod_z *= spins[((coo_z + p)%z_size)*x_size*y_size + coo_y*x_size + coo_x];
+                        }
+                        energy += it.second*(spin_prod_x + spin_prod_y + spin_prod_z);
                      }
-                     energy += it.second*(spin_prod_x + spin_prod_y + spin_prod_z);
                   }
                }
             }
@@ -370,36 +372,32 @@ private:
       ValueType energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       
-      for (std::int32_t index = 0; index < system_size; ++index) {
-         const OPType target_spin = spins[index];
-         for (const auto &it: interaction_) {
-            std::vector<std::int32_t> indices(it.first);
-            std::int32_t start_index = 0;
-            std::int32_t size = 0;
-            
-            while (true) {
-               for (std::int32_t i = start_index; i < system_size; ++i) {
-                  indices[size++] = i;
-                  if (size == it.first) {
-                     OPType sign = 1;
-                     for (std::int32_t j = 0; j < it.first; ++j) {
-                        if (indices[j] >= index) {
-                           sign *= spins[indices[j] + 1];
-                        }
-                        else {
-                           sign *= spins[indices[j]];
-                        }
-                     }
-                     energy += it.second*sign*target_spin;
-                     break;
+      for (const auto &it: interaction_) {
+         if (it.first == 0) {
+            energy += it.second;
+            continue;
+         }
+         std::vector<std::int32_t> indices(it.first);
+         std::int32_t start_index = 0;
+         std::int32_t size = 0;
+         
+         while (true) {
+            for (std::int32_t i = start_index; i < system_size; ++i) {
+               indices[size++] = i;
+               if (size == it.first) {
+                  OPType sign = 1;
+                  for (std::int32_t j = 0; j < it.first; ++j) {
+                     sign *= spins[indices[j]];
                   }
-               }
-               --size;
-               if (size < 0) {
+                  energy += it.second*sign;
                   break;
                }
-               start_index = indices[size] + 1;
             }
+            --size;
+            if (size < 0) {
+               break;
+            }
+            start_index = indices[size] + 1;
          }
       }
       return energy;
@@ -497,15 +495,14 @@ public:
       if (spins.size() != interaction_.GetSystemSize()) {
          throw std::runtime_error("The sample size is not equal to the system size");
       }
-      const auto &key_list = interaction_.GetKeyList();
-      const auto &value_list = interaction_.GetValueList();
+      const auto &key_value_list = interaction_.GetKeyValueList();
       ValueType val = 0;
-      for (std::size_t i = 0; i < key_list.size(); ++i) {
+      for (std::size_t i = 0; i < key_value_list.size(); ++i) {
          OPType spin = 1;
-         for (const auto &index: key_list[i]) {
+         for (const auto &index: key_value_list[i].first) {
             spin *= spins[index];
          }
-         val += spin*value_list[i];
+         val += spin*key_value_list[i].second;
       }
       return val;
    }

@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_MODEL_ISING_HPP_
-#define COMPNAL_TEST_MODEL_ISING_HPP_
+#ifndef COMPNAL_TEST_MODEL_CLASSICAL_ISING_HPP_
+#define COMPNAL_TEST_MODEL_CLASSICAL_ISING_HPP_
 
 #include "../../../src/model/classical/ising.hpp"
 
@@ -108,7 +108,6 @@ TEST(Model, ClassicalIsingBasicAnyLattice) {
    };
    
    auto lattice = lattice::AnyLattice{};
-   
    auto model = ModelType{lattice, linear, quadratic};
    
    EXPECT_EQ(model.GetSystemSize(), 5);
@@ -155,7 +154,6 @@ TEST(Model, ClassicalIsingBasicAnyLattice) {
 
 TEST(Model, ClassicalIsingEnegyChain) {
    using BC = lattice::BoundaryCondition;
-   
    using Chain = lattice::Chain;
    using Ising = model::classical::Ising<Chain, TestRealType>;
    
@@ -256,4 +254,4 @@ TEST(Model, ClassicalIsingEnegyAnyLattice) {
 } // namespace test
 } // namespace compnal
 
-#endif /* COMPNAL_TEST_MODEL_POLYNOMIAL_ISING_HPP_ */
+#endif /* COMPNAL_TEST_MODEL_CLASSICAL_ISING_HPP_ */

@@ -37,6 +37,10 @@ class CMCSystem<model::classical::PolynomialIsing<lattice::Chain, RealType>>: pu
    
    using ModelType = model::classical::PolynomialIsing<lattice::Chain, RealType>;
    
+   using PolynomialType = typename ModelType::PolynomialType;
+   
+   using OPType = typename ModelType::OPType;
+
 public:
    using ValueType = typename ModelType::ValueType;
    
@@ -52,15 +56,12 @@ public:
    
    void Flip(const std::int32_t index) {
       if (bc_ == lattice::BoundaryCondition::PBC) {
-         for (std::int32_t degree = 1; degree < interaction_.size(); ++degree) {
-            if (std::abs(interaction_[degree]) <= std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               continue;
-            }
-            const typename ModelType::ValueType target_ineraction = interaction_[degree];
-            for (std::int32_t i = 0; i < degree; ++i) {
-               typename ModelType::OPType sign = 1;
-               for (std::int32_t j = 0; j < degree; ++j) {
-                  std::int32_t connected_index = index - degree + 1 + i + j;
+         for (const auto &it: interaction_) {
+            const ValueType target_ineraction = it.second;
+            for (std::int32_t i = 0; i < it.first; ++i) {
+               OPType sign = 1;
+               for (std::int32_t j = 0; j < it.first; ++j) {
+                  std::int32_t connected_index = index - it.first + 1 + i + j;
                   if (connected_index < 0) {
                      connected_index += system_size_;
                   }
@@ -69,8 +70,8 @@ public:
                   }
                   sign *= sample_[connected_index];
                }
-               for (std::int32_t j = 0; j < degree; ++j) {
-                  std::int32_t connected_index = index - degree + 1 + i + j;
+               for (std::int32_t j = 0; j < it.first; ++j) {
+                  std::int32_t connected_index = index - it.first + 1 + i + j;
                   if (connected_index < 0) {
                      connected_index += system_size_;
                   }
@@ -85,24 +86,21 @@ public:
          }
       }
       else if (bc_ == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t degree = 1; degree < interaction_.size(); ++degree) {
-            if (std::abs(interaction_[degree]) <= std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               continue;
-            }
-            const typename ModelType::ValueType target_ineraction = interaction_[degree];
+         for (const auto &it: interaction_) {
+            const ValueType target_ineraction = it.second;
             
-            for (std::int32_t i = std::max(index - degree + 1, 0); i <= index; ++i) {
-               if (i > system_size_ - degree) {
+            for (std::int32_t i = std::max(index - it.first + 1, 0); i <= index; ++i) {
+               if (i > system_size_ - it.first) {
                   break;
                }
-               typename ModelType::OPType sign = 1;
-               for (std::int32_t j = i; j < i + degree; ++j) {
+               OPType sign = 1;
+               for (std::int32_t j = i; j < i + it.first; ++j) {
                   sign *= sample_[j];
                }
-               for (std::int32_t j = i; j < index; ++j) {
+               for (std::int32_t j = i; j < it.first; ++j) {
                   energy_difference_[j] += 4*target_ineraction*sign;
                }
-               for (std::int32_t j = index + 1; j < i + degree; ++j) {
+               for (std::int32_t j = index + 1; j < i + it.first; ++j) {
                   energy_difference_[j] += 4*target_ineraction*sign;
                }
             }
@@ -115,11 +113,11 @@ public:
       sample_[index] *= -1;
    }
    
-   const std::vector<typename ModelType::OPType> &GetSample() const {
+   const std::vector<OPType> &GetSample() const {
       return sample_;
    }
    
-   typename ModelType::ValueType GetEnergyDifference(const std::int32_t index) const {
+   ValueType GetEnergyDifference(const std::int32_t index) const {
       return energy_difference_[index];
    }
    
@@ -130,25 +128,22 @@ public:
 private:
    const std::int32_t system_size_;
    const lattice::BoundaryCondition bc_;
-   const std::vector<typename ModelType::ValueType> interaction_;
+   const PolynomialType interaction_;
    
-   std::vector<typename ModelType::OPType> sample_;
-   std::vector<typename ModelType::ValueType> energy_difference_;
+   std::vector<OPType> sample_;
+   std::vector<ValueType> energy_difference_;
    
-   std::vector<typename ModelType::ValueType> GenerateEnergyDifference(const std::vector<typename ModelType::OPType> &sample) const {
-      std::vector<typename ModelType::ValueType> energy_difference(system_size_);
+   std::vector<ValueType> GenerateEnergyDifference(const std::vector<OPType> &sample) const {
+      std::vector<ValueType> energy_difference(system_size_);
       if (bc_ == lattice::BoundaryCondition::PBC) {
-         for (std::int32_t degree = 1; degree < interaction_.size(); ++degree) {
-            if (std::abs(interaction_[degree]) <= std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               continue;
-            }
-            const typename ModelType::ValueType target_ineraction = interaction_[degree];
+         for (const auto &it: interaction_) {
+            const ValueType target_ineraction = it.second;
             for (std::int32_t index = 0; index < system_size_; ++index) {
-               typename ModelType::ValueType val = 0;
-               for (std::int32_t i = 0; i < degree; ++i) {
-                  typename ModelType::OPType sign = 1;
-                  for (std::int32_t j = 0; j < degree; ++j) {
-                     std::int32_t connected_index = index - degree + 1 + i + j;
+               ValueType val = 0;
+               for (std::int32_t i = 0; i < it.first; ++i) {
+                  OPType sign = 1;
+                  for (std::int32_t j = 0; j < it.first; ++j) {
+                     std::int32_t connected_index = index - it.first + 1 + i + j;
                      if (connected_index < 0) {
                         connected_index += system_size_;
                      }
@@ -164,20 +159,17 @@ private:
          }
       }
       else if (bc_ == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t degree = 1; degree < interaction_.size(); ++degree) {
-            if (std::abs(interaction_[degree]) <= std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               continue;
-            }
-            const typename ModelType::ValueType target_ineraction = interaction_[degree];
+         for (const auto &it: interaction_) {
+            const ValueType target_ineraction = it.second;
             for (std::int32_t index = 0; index < system_size_; ++index) {
-               typename ModelType::ValueType val = 0;
-               for (std::int32_t i = 0; i < degree; ++i) {
-                  if (index - degree + 1 + i < 0 || index + i >= system_size_) {
+               ValueType val = 0;
+               for (std::int32_t i = 0; i < it.first; ++i) {
+                  if (index - it.first + 1 + i < 0 || index + i >= system_size_) {
                      continue;
                   }
-                  typename ModelType::OPType sign = 1;
-                  for (std::int32_t j = 0; j < degree; ++j) {
-                     std::int32_t connected_index = index - degree + 1 + i + j;
+                  OPType sign = 1;
+                  for (std::int32_t j = 0; j < it.first; ++j) {
+                     std::int32_t connected_index = index - it.first + 1 + i + j;
                      sign *= (sample)[connected_index];
                   }
                   val += sign*target_ineraction;

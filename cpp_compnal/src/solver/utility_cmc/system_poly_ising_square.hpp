@@ -35,10 +35,14 @@ template<typename RealType>
 class CMCSystem<model::classical::PolynomialIsing<lattice::Square, RealType>>: public CMCBaseIsingSystem {
    
    using ModelType = model::classical::PolynomialIsing<lattice::Square, RealType>;
-
+   
+   using PolynomialType = typename ModelType::PolynomialType;
+   
+   using OPType = typename ModelType::OPType;
+   
 public:
    using ValueType = typename ModelType::ValueType;
-   
+
    CMCSystem(const ModelType &model):
    system_size_(model.GetSystemSize()),
    x_size_(model.GetLattice().GetXSize()),
@@ -55,18 +59,15 @@ public:
       const std::int32_t coo_x = index%x_size_;
       const std::int32_t coo_y = index/x_size_;
       if (bc_ == lattice::BoundaryCondition::PBC) {
-         for (std::int32_t degree = 1; degree < interaction_.size(); ++degree) {
-            if (std::abs(interaction_[degree]) <= std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               continue;
-            }
-            const typename ModelType::ValueType target_ineraction = interaction_[degree];
+         for (const auto &it: interaction_) {
+            const ValueType target_ineraction = it.second;
             
-            for (std::int32_t i = 0; i < degree; ++i) {
-               typename ModelType::OPType sign_x = 1;
-               typename ModelType::OPType sign_y = 1;
-               for (std::int32_t j = 0; j < degree; ++j) {
+            for (std::int32_t i = 0; i < it.first; ++i) {
+               OPType sign_x = 1;
+               OPType sign_y = 1;
+               for (std::int32_t j = 0; j < it.first; ++j) {
                   // x-direction
-                  std::int32_t connected_index_x = coo_x - degree + 1 + i + j;
+                  std::int32_t connected_index_x = coo_x - it.first + 1 + i + j;
                   if (connected_index_x < 0) {
                      connected_index_x += x_size_;
                   }
@@ -76,7 +77,7 @@ public:
                   sign_x *= sample_[coo_y*x_size_ + connected_index_x];
                   
                   // y-direction
-                  std::int32_t connected_index_y = coo_y - degree + 1 + i + j;
+                  std::int32_t connected_index_y = coo_y - it.first + 1 + i + j;
                   if (connected_index_y < 0) {
                      connected_index_y += y_size_;
                   }
@@ -85,9 +86,9 @@ public:
                   }
                   sign_y *= sample_[connected_index_y*x_size_ + coo_x];
                }
-               for (std::int32_t j = 0; j < degree; ++j) {
+               for (std::int32_t j = 0; j < it.first; ++j) {
                   // x-direction
-                  std::int32_t connected_index_x = coo_x - degree + 1 + i + j;
+                  std::int32_t connected_index_x = coo_x - it.first + 1 + i + j;
                   if (connected_index_x < 0) {
                      connected_index_x += x_size_;
                   }
@@ -99,7 +100,7 @@ public:
                   }
                   
                   // y-direction
-                  std::int32_t connected_index_y = coo_y - degree + 1 + i + j;
+                  std::int32_t connected_index_y = coo_y - it.first + 1 + i + j;
                   if (connected_index_y < 0) {
                      connected_index_y += y_size_;
                   }
@@ -114,37 +115,34 @@ public:
          }
       }
       else if (bc_ == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t degree = 1; degree < interaction_.size(); ++degree) {
-            if (std::abs(interaction_[degree]) <= std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               continue;
-            }
-            const typename ModelType::ValueType target_ineraction = interaction_[degree];
+         for (const auto &it: interaction_) {
+            const ValueType target_ineraction = it.second;
             
             // x-direction
-            for (std::int32_t i = std::max(coo_x - degree + 1, 0); i <= coo_x; ++i) {
-               if (i > x_size_ - degree) {
+            for (std::int32_t i = std::max(coo_x - it.first + 1, 0); i <= coo_x; ++i) {
+               if (i > x_size_ - it.first) {
                   break;
                }
-               typename ModelType::OPType sign = 1;
-               for (std::int32_t j = i; j < i + degree; ++j) {
+               OPType sign = 1;
+               for (std::int32_t j = i; j < i + it.first; ++j) {
                   sign *= sample_[coo_y*x_size_ + j];
                }
-               for (std::int32_t j = i; j < i + degree; ++j) {
+               for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j == coo_x) {continue;}
                   energy_difference_[coo_y*x_size_ + j] += 4*target_ineraction*sign;
                }
             }
             
             // y-direction
-            for (std::int32_t i = std::max(coo_y - degree + 1, 0); i <= coo_y; ++i) {
-               if (i > y_size_ - degree) {
+            for (std::int32_t i = std::max(coo_y - it.first + 1, 0); i <= coo_y; ++i) {
+               if (i > y_size_ - it.first) {
                   break;
                }
-               typename ModelType::OPType sign = 1;
-               for (std::int32_t j = i; j < i + degree; ++j) {
+               OPType sign = 1;
+               for (std::int32_t j = i; j < i + it.first; ++j) {
                   sign *= sample_[j*x_size_ + coo_x];
                }
-               for (std::int32_t j = i; j < i + degree; ++j) {
+               for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j == coo_y) {continue;}
                   energy_difference_[j*x_size_ + coo_x] += 4*target_ineraction*sign;
                }
@@ -158,11 +156,11 @@ public:
       sample_[index] *= -1;
    }
    
-   const std::vector<typename ModelType::OPType> &GetSample() const {
+   const std::vector<OPType> &GetSample() const {
       return sample_;
    }
    
-   typename ModelType::ValueType GetEnergyDifference(const std::int32_t index) const {
+   ValueType GetEnergyDifference(const std::int32_t index) const {
       return energy_difference_[index];
    }
    
@@ -175,29 +173,26 @@ private:
    const std::int32_t x_size_;
    const std::int32_t y_size_;
    const lattice::BoundaryCondition bc_;
-   const std::vector<typename ModelType::ValueType> interaction_;
+   const PolynomialType interaction_;
    
-   std::vector<typename ModelType::OPType> sample_;
-   std::vector<typename ModelType::ValueType> energy_difference_;
+   std::vector<OPType> sample_;
+   std::vector<ValueType> energy_difference_;
    
-   std::vector<typename ModelType::ValueType> GenerateEnergyDifference(const std::vector<typename ModelType::OPType> &sample) const {
-      std::vector<typename ModelType::ValueType> energy_difference(system_size_);
+   std::vector<ValueType> GenerateEnergyDifference(const std::vector<OPType> &sample) const {
+      std::vector<ValueType> energy_difference(system_size_);
       if (bc_ == lattice::BoundaryCondition::PBC) {
-         for (std::int32_t degree = 1; degree < interaction_.size(); ++degree) {
-            if (std::abs(interaction_[degree]) <= std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               continue;
-            }
-            const typename ModelType::ValueType target_ineraction = interaction_[degree];
+         for (const auto &it: interaction_) {
+            const ValueType target_ineraction = it.second;
 
             for (std::int32_t coo_x = 0; coo_x < x_size_; ++coo_x) {
                for (std::int32_t coo_y = 0; coo_y < y_size_; ++coo_y) {
-                  typename ModelType::ValueType val = 0;
-                  for (std::int32_t i = 0; i < degree; ++i) {
-                     typename ModelType::OPType sign_x = 1;
-                     typename ModelType::OPType sign_y = 1;
-                     for (std::int32_t j = 0; j < degree; ++j) {
+                  ValueType val = 0;
+                  for (std::int32_t i = 0; i < it.first; ++i) {
+                     OPType sign_x = 1;
+                     OPType sign_y = 1;
+                     for (std::int32_t j = 0; j < it.first; ++j) {
                         // x-direction
-                        std::int32_t connected_index_x = coo_x - degree + 1 + i + j;
+                        std::int32_t connected_index_x = coo_x - it.first + 1 + i + j;
                         if (connected_index_x < 0) {
                            connected_index_x += x_size_;
                         }
@@ -207,7 +202,7 @@ private:
                         sign_x *= sample[coo_y*x_size_ + connected_index_x];
                         
                         // y-direction
-                        std::int32_t connected_index_y = coo_y - degree + 1 + i + j;
+                        std::int32_t connected_index_y = coo_y - it.first + 1 + i + j;
                         if (connected_index_y < 0) {
                            connected_index_y += y_size_;
                         }
@@ -224,36 +219,33 @@ private:
          }
       }
       else if (bc_ == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t degree = 1; degree < interaction_.size(); ++degree) {
-            if (std::abs(interaction_[degree]) <= std::numeric_limits<typename ModelType::ValueType>::epsilon()) {
-               continue;
-            }
-            const typename ModelType::ValueType target_ineraction = interaction_[degree];
+         for (const auto &it: interaction_) {
+            const ValueType target_ineraction = it.second;
 
             for (std::int32_t coo_x = 0; coo_x < x_size_; ++coo_x) {
                for (std::int32_t coo_y = 0; coo_y < y_size_; ++coo_y) {
                   // x-direction
-                  typename ModelType::ValueType val = 0;
-                  for (std::int32_t i = 0; i < degree; ++i) {
-                     if (coo_x - degree + 1 + i < 0 || coo_x + i >= x_size_) {
+                  ValueType val = 0;
+                  for (std::int32_t i = 0; i < it.first; ++i) {
+                     if (coo_x - it.first + 1 + i < 0 || coo_x + i >= x_size_) {
                         continue;
                      }
-                     typename ModelType::OPType sign = 1;
-                     for (std::int32_t j = 0; j < degree; ++j) {
-                        std::int32_t connected_index = coo_x - degree + 1 + i + j;
+                     OPType sign = 1;
+                     for (std::int32_t j = 0; j < it.first; ++j) {
+                        std::int32_t connected_index = coo_x - it.first + 1 + i + j;
                         sign *= (sample)[coo_y*x_size_ + connected_index];
                      }
                      val += sign*target_ineraction;
                   }
                   
                   // y-direction
-                  for (std::int32_t i = 0; i < degree; ++i) {
-                     if (coo_y - degree + 1 + i < 0 || coo_y + i >= y_size_) {
+                  for (std::int32_t i = 0; i < it.first; ++i) {
+                     if (coo_y - it.first + 1 + i < 0 || coo_y + i >= y_size_) {
                         continue;
                      }
-                     typename ModelType::OPType sign = 1;
-                     for (std::int32_t j = 0; j < degree; ++j) {
-                        std::int32_t connected_index = coo_y - degree + 1 + i + j;
+                     OPType sign = 1;
+                     for (std::int32_t j = 0; j < it.first; ++j) {
+                        std::int32_t connected_index = coo_y - it.first + 1 + i + j;
                         sign *= (sample)[connected_index*x_size_ + coo_x];
                      }
                      val += sign*target_ineraction;

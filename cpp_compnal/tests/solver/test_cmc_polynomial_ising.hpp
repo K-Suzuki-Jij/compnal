@@ -45,7 +45,7 @@ TEST(SolverClassicalMonteCarlo, PolyIsingAnyLattice) {
    solver.SetTemperature(0.15);
    solver.Run(seed);
 
-   EXPECT_EQ(solver.CalculateAverage(), 1);
+   EXPECT_EQ(solver.CalculateSampleAverage(), 1);
 }
 
 TEST(SolverClassicalMonteCarlo, PolyIsingChain) {
@@ -85,7 +85,7 @@ TEST(SolverClassicalMonteCarlo, PolyIsingCubicPBC) {
       printf("\n");
    }
    
-   printf("%lf\n", solver.CalculateAverage());
+   printf("%lf\n", solver.CalculateSampleAverage());
 }
 
 TEST(SolverClassicalMonteCarlo, PolyIsingCubicOBC) {
@@ -107,7 +107,7 @@ TEST(SolverClassicalMonteCarlo, PolyIsingCubicOBC) {
       printf("\n");
    }
    
-   printf("%lf\n", solver.CalculateAverage());
+   printf("%lf\n", solver.CalculateSampleAverage());
 }
 
 
@@ -166,7 +166,7 @@ TEST(SolverClassicalMonteCarlo, PolyIsingInfinitRange) {
    solver.SetTemperature(0.15);
    solver.Run(seed);
    
-   EXPECT_EQ(solver.CalculateAverage(), 1);
+   EXPECT_EQ(solver.CalculateSampleAverage(), 1);
 }
 
 

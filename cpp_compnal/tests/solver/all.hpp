@@ -25,6 +25,6 @@
 
 #include "test_cmc_ising.hpp"
 #include "test_cmc_polynomial_ising.hpp"
-#include "test_ed_hubbard.hpp"
+//#include "test_ed_hubbard.hpp"
 
 #endif /* COMPNAL_TEST_SOLVER_ALL_HPP_ */

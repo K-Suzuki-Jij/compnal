@@ -123,6 +123,13 @@ public:
       return CalculateEnergy(lattice_, spins);
    }
    
+   //! @brief Calculate site index as integer from the value of the coordinate.
+   //! @param site_index Value of the coordinate.
+   //! @return Site index as integer.
+   std::int32_t CalculateIntegerSiteIndex(const IndexType site_index) const {
+      return lattice_.CalculateIntegerSiteIndex(site_index);
+   }
+   
    
 private:
    //! @brief The lattice.
@@ -507,6 +514,12 @@ public:
       return val;
    }
    
+   //! @brief Calculate site index as integer from the index.
+   //! @param site_index Value of the index.
+   //! @return Site index as integer.
+   std::int32_t CalculateIntegerSiteIndex(const IndexType site_index) const {
+      return interaction_.GetIndexMap().at(site_index);
+   }
    
 private:
    //! @brief The interaction.

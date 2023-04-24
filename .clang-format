@@ -1,0 +1,4 @@
+BasedOnStyle: Google
+IndentWidth: 3
+AccessModifierOffset: -3
+AlignAfterOpenBracket: Align

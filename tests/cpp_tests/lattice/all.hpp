@@ -25,5 +25,6 @@
 
 #include "test_chain.hpp"
 #include "test_square.hpp"
+#include "test_cubic.hpp"
 
 #endif /* COMPNAL_TEST_LATTICE_ALL_HPP_ */

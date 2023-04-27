@@ -25,6 +25,7 @@
 
 #include <numeric>
 #include <stdexcept>
+#include <vector>
 
 #include "boundary_condition.hpp"
 
@@ -59,9 +60,9 @@ public:
    //! @brief Generate coordinate list in the chain.
    //! @return The coordinate list.
    std::vector<std::int32_t> GenerateCoordinateList() const {
-      std::vector<std::int32_t> index_list(system_size_);
-      std::iota(index_list.begin(), index_list.end(), 0);
-      return index_list;
+      std::vector<std::int32_t> coo_list(system_size_);
+      std::iota(coo_list.begin(), coo_list.end(), 0);
+      return coo_list;
    }
 
 private:

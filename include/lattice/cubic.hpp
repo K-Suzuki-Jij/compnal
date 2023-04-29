@@ -31,6 +31,7 @@
 namespace compnal {
 namespace lattice {
 
+//! @brief Class to represent the cubic lattice.
 class Cubic {
    
 public:

@@ -23,7 +23,7 @@
 #ifndef COMPNAL_TEST_LATTICE_INFINITE_RANGE_HPP_
 #define COMPNAL_TEST_LATTICE_INFINITE_RANGE_HPP_
 
-#include "../../../include/lattice/infinte_range.hpp"
+#include "../../../include/lattice/infinite_range.hpp"
 
 namespace compnal {
 namespace test {

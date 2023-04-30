@@ -25,6 +25,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include <tuple>
 
 #include "boundary_condition.hpp"
 

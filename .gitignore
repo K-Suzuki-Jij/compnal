@@ -163,3 +163,17 @@ cython_debug/
 *.xcodeproj
 *.DS_Store
 *.entitlements
+
+# Reference site
+docs
+
+*.pyc
+
+_skbuild*
+_skbuild/*
+_cmake_test_compile
+
+.coverage
+.pytest_cache
+
+_version.py

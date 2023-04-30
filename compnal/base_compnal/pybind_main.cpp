@@ -31,5 +31,5 @@ PYBIND11_MODULE(base_compnal, m) {
    compnal::wrapper::PyBindLatticeSquare(m_lattice);
    compnal::wrapper::PyBindLatticeCubic(m_lattice);
    compnal::wrapper::PyBindLatticeInfiniteRange(m_lattice);
-   
+
 };

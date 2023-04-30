@@ -14,17 +14,22 @@
 
 
 import pytest
-from compnal.lattice.chain import Chain
+from compnal.lattice.square import Square
 from compnal.lattice.boundary_condition import BoundaryCondition
 
-def test_chain():
-    chain = Chain(system_size=3, boundary_condition="OBC")
-    assert chain.system_size == 3
-    assert chain.boundary_condition == BoundaryCondition.OBC
-    assert chain.generate_coordinate_list() == [0, 1, 2]
+def test_square():
+    square = Square(x_size=2, y_size=3, boundary_condition="OBC")
+    assert square.x_size == 2
+    assert square.y_size == 3
+    assert square.system_size == 6
+    assert square.boundary_condition == BoundaryCondition.OBC
+    assert square.generate_coordinate_list() == [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)]
 
     with pytest.raises(ValueError):
-        Chain(system_size=3, boundary_condition="ABC")
+        Square(x_size=2, y_size=3, boundary_condition="ABC")
     
     with pytest.raises(ValueError):
-        Chain(system_size=0, boundary_condition="OBC")
+        Square(x_size=0, y_size=2, boundary_condition="OBC")
+
+    with pytest.raises(ValueError):
+        Square(x_size=3, y_size=-1, boundary_condition="OBC")

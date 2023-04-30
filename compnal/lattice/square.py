@@ -23,45 +23,60 @@ from compnal.lattice.boundary_condition import (
 )
 
 
-class Chain:
-    """The class to represent the one-dimensional chain.
+class Square:
+    """The class to represent the two-dimensional square lattice.
 
     Attributes:
+        x_size (int): The length of the x-direction.
+        y_size (int): The length of the y-direction.
         system_size (int): System size.
         boundary_condition (BoundaryCondition): Boundary condition.
     """
 
-    def __init__(self, system_size: int, boundary_condition: Union[str, BoundaryCondition]) -> None:
-        """Initialize chain class.
+    def __init__(
+            self, 
+            x_size: int, 
+            y_size: int, 
+            boundary_condition: Union[str, BoundaryCondition]
+        ) -> None:
+        """Initialize square lattice class.
 
         Args:
-            system_size (int): System size. This must be larger than zero.
+            x_size (int): The length of the x-direction. This must be larger than zero.
+            y_size (int): The length of the y-direction. This must be larger than zero.
             boundary_condition (Union[str, BoundaryCondition]): Boundary condition.
 
         Raises:
-            ValueError: When the system size is smaller than or equal to zero.
+            ValueError: When x/y size is smaller than or equal to zero.
         """
-
-        if system_size <= 0:
-            raise ValueError("System size must be larger than zero.")
-
-        self._base_chain = base_lattice.Chain(
-            system_size=system_size, 
+        if x_size <= 0 or y_size <= 0:
+            raise ValueError("x/y size must be larger than zero.")
+        
+        self._base_square = base_lattice.Square(
+            x_size=x_size, y_size=y_size, 
             boundary_condition=_cast_boundary_condition(boundary_condition)
         )
-    
-    def generate_coordinate_list(self) -> list[int]:
+
+    def generate_coordinate_list(self) -> list[tuple[int, int]]:
         """Generate coordinate list.
 
         Returns:
-            list[int]: Coordinate list.
+            list[tuple[int, int]]: Coordinate list.
         """
-        return self._base_chain.generate_coordinate_list()
+        return self._base_square.generate_coordinate_list()
+    
+    @property
+    def x_size(self) -> int:
+        return self._base_square.get_x_size()
+    
+    @property
+    def y_size(self) -> int:
+        return self._base_square.get_y_size()
     
     @property
     def system_size(self) -> int:
-        return self._base_chain.get_system_size()
+        return self._base_square.get_system_size()
     
     @property
     def boundary_condition(self) -> BoundaryCondition:
-        return _cast_base_boundary_condition(self._base_chain.get_boundary_condition())
+        return _cast_base_boundary_condition(self._base_square.get_boundary_condition())

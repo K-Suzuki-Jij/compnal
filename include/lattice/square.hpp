@@ -92,10 +92,10 @@ public:
    
 private:
    //! @brief Size of the x-direction.
-   std::int32_t x_size_ = -1;
+   std::int32_t x_size_ = 0;
    
    //! @brief Size of the y-direction.
-   std::int32_t y_size_ = -1;
+   std::int32_t y_size_ = 0;
    
    //! @brief Boundary condition.
    BoundaryCondition bc_ = BoundaryCondition::NONE;

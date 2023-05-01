@@ -13,18 +13,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  test_main.cpp
+//  all.hpp
 //  compnal
 //
-//  Created by kohei on 2023/04/24.
-//
+//  Created by kohei on 2023/05/01.
+//  
 //
 
-#include "gtest/gtest.h"
-#include "lattice/all.hpp"
-#include "model/all.hpp"
+#ifndef COMPNAL_TEST_MODEL_ALL_HPP_
+#define COMPNAL_TEST_MODEL_ALL_HPP_
 
-int main(std::int32_t argc, char **argv) {
-   testing::InitGoogleTest(&argc, argv);
-   return RUN_ALL_TESTS();
-}
+#include "./classical/test_ising.hpp"
+
+
+#endif /* COMPNAL_TEST_MODEL_ALL_HPP_ */

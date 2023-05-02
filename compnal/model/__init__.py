@@ -1,1 +1,1 @@
-from compnal.model import classical
+import compnal.model.classical

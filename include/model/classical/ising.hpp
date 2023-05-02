@@ -23,6 +23,8 @@
 #ifndef COMPNAL_MODEL_CLASSICAL_ISING_HPP_
 #define COMPNAL_MODEL_CLASSICAL_ISING_HPP_
 
+#include "../../lattice/all.hpp"
+
 namespace compnal {
 namespace model {
 namespace classical {
@@ -75,13 +77,13 @@ public:
    }
    
    //! @brief Calculate energy corresponding to the spin configuration.
-   //! @param spins The spin configuration.
+   //! @param state The spin configuration.
    //! @return The energy.
-   double CalculateEnergy(const std::vector<PHQType> &spins) const {
-      if (spins.size() != lattice_.GetSystemSize()) {
-         throw std::runtime_error("The system size is not equal to the size of spins");
+   double CalculateEnergy(const std::vector<PHQType> &state) const {
+      if (state.size() != lattice_.GetSystemSize()) {
+         throw std::range_error("The system size is not equal to the size of spins");
       }
-      return CalculateEnergy(lattice_, spins);
+      return CalculateEnergy(lattice_, state);
    }
    
 private:
@@ -96,22 +98,22 @@ private:
    
    //! @brief Calculate energy corresponding to the spin configuration on the one-dimensional chain.
    //! @param lattice The one-dimensional chain.
-   //! @param spins The spin configuration.
+   //! @param state The spin configuration.
    //! @return The energy.
    double CalculateEnergy(const lattice::Chain &lattice,
-                          const std::vector<PHQType> &spins) const {
+                          const std::vector<PHQType> &state) const {
       double energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       
       for (std::int32_t index = 0; index < system_size - 1; ++index) {
-         energy += quadratic_*spins[index]*spins[index + 1] + linear_*spins[index];
+         energy += quadratic_*state[index]*state[index + 1] + linear_*state[index];
       }
       
       if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::PBC) {
-         energy += quadratic_*spins[system_size - 1]*spins[0] + linear_*spins[system_size - 1];
+         energy += quadratic_*state[system_size - 1]*state[0] + linear_*state[system_size - 1];
       }
       else if (lattice.GetBoundaryCondition() == lattice::BoundaryCondition::OBC) {
-         energy += linear_*spins[system_size - 1];
+         energy += linear_*state[system_size - 1];
       }
       else {
          throw std::runtime_error("Unsupported BinaryCondition");
@@ -122,10 +124,10 @@ private:
    
    //! @brief Calculate energy corresponding to the spin configuration on the two-dimensional square lattice.
    //! @param lattice The two-dimensional square lattice.
-   //! @param spins The spin configuration.
+   //! @param state The spin configuration.
    //! @return The energy.
    double CalculateEnergy(const lattice::Square &lattice,
-                          const std::vector<PHQType> &spins) const {
+                          const std::vector<PHQType> &state) const {
       double energy = 0;
       const std::int32_t x_size = lattice.GetXSize();
       const std::int32_t y_size = lattice.GetYSize();
@@ -136,9 +138,9 @@ private:
                const std::int32_t index    = coo_y*x_size + coo_x;
                const std::int32_t index_x1 = coo_y*x_size + (coo_x + 1)%x_size;
                const std::int32_t index_y1 = ((coo_y + 1)%y_size)*x_size + coo_x;
-               energy += linear_*spins[index];
-               energy += quadratic_*spins[index]*spins[index_x1];
-               energy += quadratic_*spins[index]*spins[index_y1];
+               energy += linear_*state[index];
+               energy += quadratic_*state[index]*state[index_x1];
+               energy += quadratic_*state[index]*state[index_y1];
             }
          }
       }
@@ -146,20 +148,20 @@ private:
          for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
             for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
                const std::int32_t index = coo_y*x_size + coo_x;
-               energy += linear_*spins[index];
+               energy += linear_*state[index];
                if (coo_x < x_size - 1) {
                   const std::int32_t index_x1 = coo_y*x_size + (coo_x + 1);
-                  energy += quadratic_*spins[index]*spins[index_x1];
+                  energy += quadratic_*state[index]*state[index_x1];
                }
                if (coo_y < y_size - 1) {
                   const std::int32_t index_y1 = (coo_y + 1)*x_size + coo_x;
-                  energy += quadratic_*spins[index]*spins[index_y1];
+                  energy += quadratic_*state[index]*state[index_y1];
                }
             }
          }
       }
       else {
-         throw std::runtime_error("Unsupported BoundaryCondition");
+         throw std::invalid_argument("Unsupported BoundaryCondition");
       }
       
       return energy;
@@ -167,10 +169,10 @@ private:
    
    //! @brief Calculate energy corresponding to the spin configuration on the three-dimensional cubic lattice.
    //! @param lattice The three-dimensional cubic lattice.
-   //! @param spins The spin configuration.
+   //! @param state The spin configuration.
    //! @return The energy.
    double CalculateEnergy(const lattice::Cubic &lattice,
-                          const std::vector<PHQType> &spins) const {
+                          const std::vector<PHQType> &state) const {
       
       double energy = 0;
       const std::int32_t x_size = lattice.GetXSize();
@@ -185,10 +187,10 @@ private:
                   const std::int32_t index_x1 = coo_z*x_size*y_size + coo_y*x_size + (coo_x + 1)%x_size;
                   const std::int32_t index_y1 = coo_z*x_size*y_size + ((coo_y + 1)%y_size)*x_size + coo_x;
                   const std::int32_t index_z1 = ((coo_z + 1)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
-                  energy += linear_*spins[index];
-                  energy += quadratic_*spins[index]*spins[index_x1];
-                  energy += quadratic_*spins[index]*spins[index_y1];
-                  energy += quadratic_*spins[index]*spins[index_z1];
+                  energy += linear_*state[index];
+                  energy += quadratic_*state[index]*state[index_x1];
+                  energy += quadratic_*state[index]*state[index_y1];
+                  energy += quadratic_*state[index]*state[index_z1];
                }
             }
          }
@@ -198,25 +200,25 @@ private:
             for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
                for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
                   const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
-                  energy += linear_*spins[index];
+                  energy += linear_*state[index];
                   if (coo_x < x_size - 1) {
                      const std::int32_t index_x1 = coo_z*x_size*y_size + coo_y*x_size + (coo_x + 1);
-                     energy += quadratic_*spins[index]*spins[index_x1];
+                     energy += quadratic_*state[index]*state[index_x1];
                   }
                   if (coo_y < y_size - 1) {
                      const std::int32_t index_y1 = coo_z*x_size*y_size + (coo_y + 1)*x_size + coo_x;
-                     energy += quadratic_*spins[index]*spins[index_y1];
+                     energy += quadratic_*state[index]*state[index_y1];
                   }
                   if (coo_z < z_size - 1) {
                      const std::int32_t index_z1 = (coo_z + 1)*x_size*y_size + coo_y*x_size + coo_x;
-                     energy += quadratic_*spins[index]*spins[index_z1];
+                     energy += quadratic_*state[index]*state[index_z1];
                   }
                }
             }
          }
       }
       else {
-         throw std::runtime_error("Unsupported BoundaryCondition");
+         throw std::invalid_argument("Unsupported BoundaryCondition");
       }
       
       return energy;
@@ -224,16 +226,16 @@ private:
    
    //! @brief Calculate energy corresponding to the spin configuration on the infinite range lattice.
    //! @param lattice The infinite range lattice.
-   //! @param spins The spin configuration.
+   //! @param state The spin configuration.
    //! @return The energy.
    double CalculateEnergy(const lattice::InfiniteRange &lattice,
-                          const std::vector<PHQType> &spins) const {
+                          const std::vector<PHQType> &state) const {
       double energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       for (std::int32_t i = 0; i < system_size; ++i) {
-         energy += linear_*spins[i];
+         energy += linear_*state[i];
          for (std::int32_t j = i + 1; j < system_size; ++j) {
-            energy += quadratic_*spins[i]*spins[j];
+            energy += quadratic_*state[i]*state[j];
          }
       }
       return energy;
@@ -241,7 +243,15 @@ private:
    
 };
 
-
+//! @brief Helper function to make Ising class.
+//! @tparam LatticeType The lattice type.
+//! @param lattice The lattice.
+//! @param linear The linear interaction.
+//! @param quadratic The quadratic interaction.
+template<class LatticeType>
+auto make_ising(const LatticeType &lattice, const double linear, const double quadratic) {
+   return Ising<LatticeType>{lattice, linear, quadratic};
+}
 
 } // namespace classical
 } // namespace model

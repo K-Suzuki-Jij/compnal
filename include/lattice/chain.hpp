@@ -40,10 +40,10 @@ public:
    //! @param bc Boundary condtion. BoundaryCondition::NONE cannot be used here.
    Chain(const std::int32_t system_size, const BoundaryCondition bc) {
       if (system_size <= 0) {
-         throw std::runtime_error("system_size must be larger than 0.");
+         throw std::invalid_argument("system_size must be larger than 0.");
       }
       if (bc == BoundaryCondition::NONE) {
-         throw std::runtime_error("BoundaryCondition::NONE cannot be set.");
+         throw std::invalid_argument("BoundaryCondition::NONE cannot be set.");
       }
       system_size_ = system_size;
       bc_ = bc;

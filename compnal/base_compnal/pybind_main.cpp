@@ -20,7 +20,12 @@
 //  
 //
 
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/iostream.h>
+
 #include "include/pybind_lattice.hpp"
+#include "include/pybind_classical_model.hpp"
 
 PYBIND11_MODULE(base_compnal, m) {
    namespace py = pybind11;
@@ -31,5 +36,13 @@ PYBIND11_MODULE(base_compnal, m) {
    compnal::wrapper::PyBindLatticeSquare(m_lattice);
    compnal::wrapper::PyBindLatticeCubic(m_lattice);
    compnal::wrapper::PyBindLatticeInfiniteRange(m_lattice);
-
+   
+   // classical models
+   py::module_ m_c_model = m.def_submodule("base_classical_model");
+   
+   compnal::wrapper::PyBindClassicalIsing<compnal::lattice::Chain>(m_c_model, "Chain");
+   compnal::wrapper::PyBindClassicalIsing<compnal::lattice::Square>(m_c_model, "Square");
+   compnal::wrapper::PyBindClassicalIsing<compnal::lattice::Cubic>(m_c_model, "Cubic");
+   compnal::wrapper::PyBindClassicalIsing<compnal::lattice::InfiniteRange>(m_c_model, "InfiniteRange");
+   
 };

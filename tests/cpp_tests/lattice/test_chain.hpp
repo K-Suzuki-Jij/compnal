@@ -36,9 +36,9 @@ TEST(Lattice, Chain) {
              (std::vector<std::int32_t>{0, 1, 2}));
 
    EXPECT_THROW((lattice::Chain{-1, lattice::BoundaryCondition::OBC}),
-                std::runtime_error);
+                std::invalid_argument);
    EXPECT_THROW((lattice::Chain{+2, lattice::BoundaryCondition::NONE}),
-                std::runtime_error);
+                std::invalid_argument);
 }
 
 }  // namespace test

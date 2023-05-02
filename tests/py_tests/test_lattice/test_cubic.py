@@ -14,8 +14,7 @@
 
 
 import pytest
-from compnal.lattice.cubic import Cubic
-from compnal.lattice.boundary_condition import BoundaryCondition
+from compnal.lattice import Cubic, BoundaryCondition
 
 def test_cubic():
     cubic = Cubic(x_size=2, y_size=3, z_size=2, boundary_condition="OBC")

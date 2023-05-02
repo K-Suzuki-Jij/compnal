@@ -14,8 +14,7 @@
 
 
 import pytest
-from compnal.lattice.chain import Chain
-from compnal.lattice.boundary_condition import BoundaryCondition
+from compnal.lattice import Chain, BoundaryCondition
 
 def test_chain():
     chain = Chain(system_size=3, boundary_condition="OBC")

@@ -36,10 +36,7 @@ class InfiniteRange:
 
         Raises:
             ValueError: When the system size is smaller than or equal to zero.
-        """
-        if system_size <= 0:
-            raise ValueError("System size must be larger than zero.")
-        
+        """        
         self._base_infinite_range = base_lattice.InfiniteRange(system_size=system_size)
 
     def generate_coordinate_list(self) -> list[int]:
@@ -57,3 +54,7 @@ class InfiniteRange:
     @property
     def boundary_condition(self) -> BoundaryCondition:
         return _cast_base_boundary_condition(self._base_infinite_range.get_boundary_condition())
+    
+    @property
+    def _base_lattice(self) -> base_lattice.InfiniteRange:
+        return self._base_infinite_range

@@ -46,10 +46,10 @@ TEST(Lattice, Cubic) {
    };
    
    EXPECT_EQ(cubic.GenerateCoordinateList(), coo_list);
-   EXPECT_THROW((lattice::Cubic{0, 2, 1, lattice::BoundaryCondition::PBC}), std::runtime_error);
-   EXPECT_THROW((lattice::Cubic{2, -1, 2, lattice::BoundaryCondition::PBC}), std::runtime_error);
-   EXPECT_THROW((lattice::Cubic{2, 3, 0, lattice::BoundaryCondition::PBC}), std::runtime_error);
-   EXPECT_THROW((lattice::Cubic{2, 3, 2, lattice::BoundaryCondition::NONE}), std::runtime_error);
+   EXPECT_THROW((lattice::Cubic{0, 2, 1, lattice::BoundaryCondition::PBC}), std::invalid_argument);
+   EXPECT_THROW((lattice::Cubic{2, -1, 2, lattice::BoundaryCondition::PBC}), std::invalid_argument);
+   EXPECT_THROW((lattice::Cubic{2, 3, 0, lattice::BoundaryCondition::PBC}), std::invalid_argument);
+   EXPECT_THROW((lattice::Cubic{2, 3, 2, lattice::BoundaryCondition::NONE}), std::invalid_argument);
 }
 
 }  // namespace test

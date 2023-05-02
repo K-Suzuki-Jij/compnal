@@ -14,8 +14,7 @@
 
 
 import pytest
-from compnal.lattice.infinite_range import InfiniteRange
-from compnal.lattice.boundary_condition import BoundaryCondition
+from compnal.lattice import InfiniteRange, BoundaryCondition
 
 
 def test_infinite_range():

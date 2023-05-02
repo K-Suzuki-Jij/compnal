@@ -33,6 +33,8 @@ setup(
     packages=[  
         'compnal',
         'compnal.lattice',
+        'compnal.model',
+        'compnal.model.classical',
         ],
     cmake_install_dir="compnal",
     include_package_data=False,

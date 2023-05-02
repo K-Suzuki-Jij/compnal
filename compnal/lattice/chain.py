@@ -41,10 +41,6 @@ class Chain:
         Raises:
             ValueError: When the system size is smaller than or equal to zero.
         """
-
-        if system_size <= 0:
-            raise ValueError("System size must be larger than zero.")
-
         self._base_chain = base_lattice.Chain(
             system_size=system_size, 
             boundary_condition=_cast_boundary_condition(boundary_condition)
@@ -65,3 +61,7 @@ class Chain:
     @property
     def boundary_condition(self) -> BoundaryCondition:
         return _cast_base_boundary_condition(self._base_chain.get_boundary_condition())
+    
+    @property
+    def _base_lattice(self) -> base_lattice.Chain:
+        return self._base_chain

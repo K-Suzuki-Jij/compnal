@@ -37,9 +37,9 @@ TEST(Lattice, Square) {
    EXPECT_EQ(square.GenerateCoordinateList(),
              (std::vector<std::pair<std::int32_t, std::int32_t>>{{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}}));
    
-   EXPECT_THROW((lattice::Square{0, 2, lattice::BoundaryCondition::PBC}), std::runtime_error);
-   EXPECT_THROW((lattice::Square{2, -1, lattice::BoundaryCondition::PBC}), std::runtime_error);
-   EXPECT_THROW((lattice::Square{2, 3, lattice::BoundaryCondition::NONE}), std::runtime_error);
+   EXPECT_THROW((lattice::Square{0, 2, lattice::BoundaryCondition::PBC}), std::invalid_argument);
+   EXPECT_THROW((lattice::Square{2, -1, lattice::BoundaryCondition::PBC}), std::invalid_argument);
+   EXPECT_THROW((lattice::Square{2, 3, lattice::BoundaryCondition::NONE}), std::invalid_argument);
    
 }
 

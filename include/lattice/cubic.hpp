@@ -44,16 +44,16 @@ public:
    Cubic(const std::int32_t x_size, const std::int32_t y_size, const std::int32_t z_size,
          const BoundaryCondition bc = BoundaryCondition::OBC) {
       if (x_size <= 0) {
-         throw std::runtime_error("x_size must be larger than 0.");
+         throw std::invalid_argument("x_size must be larger than 0.");
       }
       if (y_size <= 0) {
-         throw std::runtime_error("y_size must be larger than 0.");
+         throw std::invalid_argument("y_size must be larger than 0.");
       }
       if (z_size <= 0) {
-         throw std::runtime_error("z_size must be larger than 0.");
+         throw std::invalid_argument("z_size must be larger than 0.");
       }
       if (bc == BoundaryCondition::NONE) {
-         throw std::runtime_error("BoundaryCondition::NONE cannot be set.");
+         throw std::invalid_argument("BoundaryCondition::NONE cannot be set.");
       }
       x_size_ = x_size;
       y_size_ = y_size;

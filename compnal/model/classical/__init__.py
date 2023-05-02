@@ -1,0 +1,1 @@
+from compnal.model.classical.ising import Ising

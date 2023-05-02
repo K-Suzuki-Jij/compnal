@@ -49,9 +49,6 @@ class Square:
         Raises:
             ValueError: When x/y size is smaller than or equal to zero.
         """
-        if x_size <= 0 or y_size <= 0:
-            raise ValueError("x/y size must be larger than zero.")
-        
         self._base_square = base_lattice.Square(
             x_size=x_size, y_size=y_size, 
             boundary_condition=_cast_boundary_condition(boundary_condition)
@@ -80,3 +77,7 @@ class Square:
     @property
     def boundary_condition(self) -> BoundaryCondition:
         return _cast_base_boundary_condition(self._base_square.get_boundary_condition())
+    
+    @property
+    def _base_lattice(self) -> base_lattice.Square:
+        return self._base_square

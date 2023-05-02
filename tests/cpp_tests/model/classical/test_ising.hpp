@@ -40,8 +40,8 @@ TEST(ModelClassical, IsingOnChain) {
    EXPECT_DOUBLE_EQ(ising_obc.GetQuadratic(), -4.0);
    EXPECT_NO_THROW(ising_obc.GetLattice());
    EXPECT_DOUBLE_EQ(ising_obc.CalculateEnergy({-1, +1, -1}), 7.0);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1}), std::runtime_error);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1, +1, +1}), std::runtime_error);
+   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1}), std::range_error);
+   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1, +1, +1}), std::range_error);
    
    Chain chain_pbc{3, BC::PBC};
    Ising ising_pbc{chain_pbc, 1.0, -4.0};
@@ -49,8 +49,8 @@ TEST(ModelClassical, IsingOnChain) {
    EXPECT_DOUBLE_EQ(ising_pbc.GetQuadratic(), -4.0);
    EXPECT_NO_THROW(ising_pbc.GetLattice());
    EXPECT_DOUBLE_EQ(ising_pbc.CalculateEnergy({-1, +1, -1}), 3.0);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1}), std::runtime_error);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1, +1, +1}), std::runtime_error);
+   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1}), std::range_error);
+   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1, +1, +1}), std::range_error);
 }
 
 TEST(ModelClassical, IsingOnSquare) {
@@ -67,8 +67,8 @@ TEST(ModelClassical, IsingOnSquare) {
    EXPECT_DOUBLE_EQ(ising_obc.GetQuadratic(), 2.0);
    EXPECT_NO_THROW(ising_obc.GetLattice());
    EXPECT_DOUBLE_EQ(ising_obc.CalculateEnergy(spins), 0.0);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1}), std::runtime_error);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1,+1,-1,+1,+1,+1,+1}), std::runtime_error);
+   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1}), std::range_error);
+   EXPECT_THROW(ising_obc.CalculateEnergy({-1,+1,-1,+1,+1,+1,+1}), std::range_error);
    
    Square square_pbc{3, 2, BC::PBC};
    Ising ising_pbc{square_pbc, 1.0, 2.0};
@@ -76,8 +76,8 @@ TEST(ModelClassical, IsingOnSquare) {
    EXPECT_DOUBLE_EQ(ising_pbc.GetQuadratic(), 2.0);
    EXPECT_NO_THROW(ising_pbc.GetLattice());
    EXPECT_DOUBLE_EQ(ising_pbc.CalculateEnergy(spins), 2.0);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1}), std::runtime_error);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1,+1,-1,+1,+1,+1,+1}), std::runtime_error);
+   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1}), std::range_error);
+   EXPECT_THROW(ising_pbc.CalculateEnergy({-1,+1,-1,+1,+1,+1,+1}), std::range_error);
 }
 
 TEST(ModelClassical, IsingOnCubic) {
@@ -94,8 +94,8 @@ TEST(ModelClassical, IsingOnCubic) {
    EXPECT_DOUBLE_EQ(ising_obc.GetQuadratic(), 2.0);
    EXPECT_NO_THROW(ising_obc.GetLattice());
    EXPECT_DOUBLE_EQ(ising_obc.CalculateEnergy(spins), 12.0);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1}), std::runtime_error);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1}), std::runtime_error);
+   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1}), std::range_error);
+   EXPECT_THROW(ising_obc.CalculateEnergy({-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1}), std::range_error);
    
    Cubic cubic_pbc{3, 2, 2, BC::PBC};
    Ising ising_pbc{cubic_pbc, 1.0, 2.0};
@@ -103,8 +103,8 @@ TEST(ModelClassical, IsingOnCubic) {
    EXPECT_DOUBLE_EQ(ising_pbc.GetQuadratic(), 2.0);
    EXPECT_NO_THROW(ising_pbc.GetLattice());
    EXPECT_DOUBLE_EQ(ising_pbc.CalculateEnergy(spins), 28.0);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1}), std::runtime_error);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1}), std::runtime_error);
+   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1}), std::range_error);
+   EXPECT_THROW(ising_pbc.CalculateEnergy({-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1}), std::range_error);
 }
 
 TEST(ModelClassical, IsingOnInfiniteRange) {
@@ -117,8 +117,8 @@ TEST(ModelClassical, IsingOnInfiniteRange) {
    EXPECT_DOUBLE_EQ(ising.GetQuadratic(), 2.0);
    EXPECT_NO_THROW(ising.GetLattice());
    EXPECT_DOUBLE_EQ(ising.CalculateEnergy({-1, +1, -1}), -3.0);
-   EXPECT_THROW(ising.CalculateEnergy({-1, +1}), std::runtime_error);
-   EXPECT_THROW(ising.CalculateEnergy({-1, +1, -1, +1}), std::runtime_error);
+   EXPECT_THROW(ising.CalculateEnergy({-1, +1}), std::range_error);
+   EXPECT_THROW(ising.CalculateEnergy({-1, +1, -1, +1}), std::range_error);
 }
 
 }  // namespace test

@@ -35,7 +35,7 @@ TEST(Lattice, InfiniteRange) {
    EXPECT_EQ(infinite_range.GenerateCoordinateList(),
              (std::vector<std::int32_t>{0, 1, 2, 3}));
    
-   EXPECT_THROW(lattice::InfiniteRange{0}, std::runtime_error);
+   EXPECT_THROW(lattice::InfiniteRange{0}, std::invalid_argument);
    
 }
 

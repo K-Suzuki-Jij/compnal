@@ -14,8 +14,7 @@
 
 
 import pytest
-from compnal.lattice.square import Square
-from compnal.lattice.boundary_condition import BoundaryCondition
+from compnal.lattice import Square, BoundaryCondition
 
 def test_square():
     square = Square(x_size=2, y_size=3, boundary_condition="OBC")

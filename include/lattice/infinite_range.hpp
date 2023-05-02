@@ -39,7 +39,7 @@ public:
    //! @param system_size System size.
    InfiniteRange(const std::int32_t system_size) {
       if (system_size <= 0) {
-         throw std::runtime_error("system_size must be larger than 0.");
+         throw std::invalid_argument("system_size must be larger than 0.");
       }
       system_size_ = system_size;
    }

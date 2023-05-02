@@ -43,10 +43,7 @@ class Cubic:
 
         Raises:
             ValueError: When x/y/z size is smaller than or equal to zero.
-        """
-        if x_size <= 0 or y_size <= 0 or z_size <= 0:
-            raise ValueError("x/y/z size must be larger than zero.")
-        
+        """        
         self._base_cubic = base_lattice.Cubic(
             x_size=x_size, y_size=y_size, z_size=z_size,
             boundary_condition=_cast_boundary_condition(boundary_condition)
@@ -79,3 +76,7 @@ class Cubic:
     @property
     def boundary_condition(self) -> BoundaryCondition:
         return _cast_base_boundary_condition(self._base_cubic.get_boundary_condition())
+    
+    @property
+    def _base_lattice(self) -> base_lattice.Cubic:
+        return self._base_cubic

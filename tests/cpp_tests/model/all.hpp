@@ -24,6 +24,6 @@
 #define COMPNAL_TEST_MODEL_ALL_HPP_
 
 #include "./classical/test_ising.hpp"
-
+#include "./classical/test_polynomial_ising.hpp"
 
 #endif /* COMPNAL_TEST_MODEL_ALL_HPP_ */

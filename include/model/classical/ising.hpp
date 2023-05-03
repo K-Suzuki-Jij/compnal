@@ -116,7 +116,7 @@ private:
          energy += linear_*state[system_size - 1];
       }
       else {
-         throw std::runtime_error("Unsupported BinaryCondition");
+         throw std::invalid_argument("Unsupported BinaryCondition");
       }
       
       return energy;

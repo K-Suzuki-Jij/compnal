@@ -18,45 +18,47 @@ from compnal.lattice import Chain, Square, Cubic, InfiniteRange
 from compnal.base_compnal import base_classical_model
 import numpy as np
 
-class Ising:
-    """Class for the Ising model.
+
+class PolyIsing:
+    """Class for the polynomial Ising model.
 
     Args:
         lattice (Union[Chain, Square, Cubic, InfiniteRange]): Lattice.
     """
     def __init__(
-        self, 
+        self,
         lattice: Union[Chain, Square, Cubic, InfiniteRange],
-        linear: float,
-        quadratic: float
+        interaction: dict[int, float]
     ) -> None:
-        """Initialize Ising class.
+        """Initialize PolyIsing class.
 
         Args:
             lattice (Union[Chain, Square, Cubic, InfiniteRange]): Lattice.
-            linear (float): Linear interaction.
-            quadratic (float): Quadratic interaction.
+            interaction (dict[int, float]): Interaction. The key is the degree of the interaction and the value is the interaction.
+
+        Raises:
+            ValueError: When the degree of the interaction is invalid.
         """
-        self._base_model = base_classical_model.make_ising(
-            lattice=lattice._base_lattice, linear=linear, quadratic=quadratic
+        self._base_model = base_classical_model.make_polynomial_ising(
+            lattice=lattice._base_lattice, interaction=interaction
         )
         self._lattice = lattice
 
-    def get_linear(self) -> float:
-        """Get the linear interaction.
+    def get_interaction(self) -> dict[int, float]:
+        """Get the interaction.
 
         Returns:
-            float: Linear interaction.
+            dict[int, float]: Interaction.
         """
-        return self._base_model.get_linear()
-        
-    def get_quadratic(self) -> float:
-        """Get the quadratic interaction.
+        return self._base_model.get_interaction()
+    
+    def get_degree(self) -> int:
+        """Get the degree of the polynomial interactions.
 
         Returns:
-            float: Quadratic interaction.
+            int: Degree.
         """
-        return self._base_model.get_quadratic()
+        return self._base_model.get_degree()
     
     def calculate_energy(self, state: Union[np.array, list]) -> float:
         """Calculate the energy of the state.
@@ -78,7 +80,7 @@ class Ising:
                 isinstance(self._lattice, Cubic) and state.shape != (self._lattice.x_size, self._lattice.y_size, self._lattice.z_size),
                 isinstance(self._lattice, InfiniteRange) and state.shape != (self._lattice.system_size,)]):
             raise ValueError("The shape of the state is invalid.")
-
+        
         return self._base_model.calculate_energy(state=state.reshape(-1))
     
     @property

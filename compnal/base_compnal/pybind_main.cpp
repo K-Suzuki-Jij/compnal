@@ -39,10 +39,13 @@ PYBIND11_MODULE(base_compnal, m) {
    
    // classical models
    py::module_ m_c_model = m.def_submodule("base_classical_model");
-   
    compnal::wrapper::PyBindClassicalIsing<compnal::lattice::Chain>(m_c_model, "Chain");
    compnal::wrapper::PyBindClassicalIsing<compnal::lattice::Square>(m_c_model, "Square");
    compnal::wrapper::PyBindClassicalIsing<compnal::lattice::Cubic>(m_c_model, "Cubic");
    compnal::wrapper::PyBindClassicalIsing<compnal::lattice::InfiniteRange>(m_c_model, "InfiniteRange");
+   compnal::wrapper::PyBindClassicalPolynomialIsing<compnal::lattice::Chain>(m_c_model, "Chain");
+   compnal::wrapper::PyBindClassicalPolynomialIsing<compnal::lattice::Square>(m_c_model, "Square");
+   compnal::wrapper::PyBindClassicalPolynomialIsing<compnal::lattice::Cubic>(m_c_model, "Cubic");
+   compnal::wrapper::PyBindClassicalPolynomialIsing<compnal::lattice::InfiniteRange>(m_c_model, "InfiniteRange");
    
 };

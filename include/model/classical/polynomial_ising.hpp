@@ -382,6 +382,15 @@ private:
    
 };
 
+//! @brief Helper function to make PolynomialIsing class.
+//! @tparam LatticeType The lattice type.
+//! @param lattice The lattice.
+//! @param interaction The polynomial interaction.
+template<class LatticeType>
+auto make_polynomial_ising(const LatticeType &lattice, const std::unordered_map<std::int32_t, double> &interaction) {
+   return PolynomialIsing<LatticeType>{lattice, interaction};
+}
+
 } // namespace classical
 } // namespace model
 } // namespace compnal

@@ -55,6 +55,27 @@ void PyBindClassicalIsing(py::module &m, const std::string &post_name = "") {
 
 }
 
+template<class LatticeType>
+void PyBindClassicalPolynomialIsing(py::module &m, const std::string &post_name = "") {
+   using PIsing = model::classical::PolynomialIsing<LatticeType>;
+   std::string name = std::string("PolynomialIsing") + post_name;
+   auto py_class = py::class_<PIsing>(m, name.c_str(), py::module_local());
+   
+   //Constructors
+   py_class.def(py::init<const LatticeType&, const std::unordered_map<std::int32_t, double>&>(), "lattice"_a, "interaction"_a);
+   
+   //Public Member Functions
+   py_class.def("get_interaction", &PIsing::GetInteraction);
+   py_class.def("calculate_energy", py::overload_cast<const std::vector<typename PIsing::PHQType>&>(&PIsing::CalculateEnergy, py::const_), "state"_a);
+   py_class.def("get_degree", &PIsing::GetDegree);
+
+   m.def("make_polynomial_ising", [](const LatticeType &lattice,
+                                     const std::unordered_map<std::int32_t, double> &interaction) {
+      return model::classical::make_polynomial_ising<LatticeType>(lattice, interaction);
+   }, "lattice"_a, "interaction"_a);
+
+}
+
 
 } // namespace wrapper
 } // namespace compnal

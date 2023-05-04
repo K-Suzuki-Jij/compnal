@@ -23,6 +23,9 @@
 #ifndef COMPNAL_MODEL_CLASSICAL_ISING_HPP_
 #define COMPNAL_MODEL_CLASSICAL_ISING_HPP_
 
+#include <vector>
+#include <stdexcept>
+#include <cmath>
 #include "../../lattice/all.hpp"
 
 namespace compnal {
@@ -46,17 +49,27 @@ template<class LatticeType>
 class Ising {
    
 public:
-   //! @brief The physical quantity type, which represents Ising spins \f$ s_i\in \{-1,+1\} \f$
-   using PHQType = std::int8_t;
+   //! @brief The physical quantity type, which represents Ising spins \f$ s_i\in \{-S, -S+1, \ldots, S\} \f$.
+   using PHQType = std::int32_t;
    
    //! @brief Constructor for Ising class.
    //! @param lattice The lattice.
    //! @param linear The linear interaction.
    //! @param quadratic The quadratic interaction.
+   //! @param spin_magnitude The magnitude of spins. This must be half-integer.
    Ising(const LatticeType &lattice,
          const double linear,
-         const double quadratic):
-   lattice_(lattice), linear_(linear), quadratic_(quadratic) {}
+         const double quadratic,
+         const double spin_magnitude = 0.5):
+   lattice_(lattice), linear_(linear), quadratic_(quadratic) {
+      if (std::floor(2*spin_magnitude) != 2*spin_magnitude) {
+         throw std::invalid_argument("spin_magnitude must be half-integer.");
+      }
+      twice_spin_magnitude_.resize(lattice.GetSystemSize());
+      for (std::int32_t i = 0; i < lattice.GetSystemSize(); ++i) {
+         twice_spin_magnitude_[i] = static_cast<std::int32_t>(2*spin_magnitude);
+      }
+   }
    
    //! @brief Get linear interaction \f$ h\f$.
    //! @return The linear interaction \f$ h\f$.
@@ -86,6 +99,19 @@ public:
       return CalculateEnergy(lattice_, state);
    }
    
+   //! @brief Set the magnitude of the spin.
+   //! @param coordinate The coordinate.
+   //! @param spin_magnitude The magnitude of the spin. This must be half-integer.
+   void SetSpinMagnitude(const typename LatticeType::CoordinateType coordinate, const double spin_magnitude) {
+      if (std::floor(2*spin_magnitude) != 2*spin_magnitude) {
+         throw std::invalid_argument("magnitude must be half-integer.");
+      }
+      if (!lattice_.ValidateCoordinate(coordinate)) {
+         throw std::invalid_argument("magnitude must be half-integer.");
+      }
+      twice_spin_magnitude_[lattice_.CoordinateToInteger(coordinate)] = static_cast<std::int32_t>(2*spin_magnitude);
+   }
+   
 private:
    //! @brief The lattice.
    const LatticeType lattice_;
@@ -95,6 +121,9 @@ private:
    
    //! @brief The quadratic interaction.
    const double quadratic_ = 0.0;
+   
+   //! @brief Twice magnitude of spins.
+   std::vector<std::int32_t> twice_spin_magnitude_;
    
    //! @brief Calculate energy corresponding to the spin configuration on the one-dimensional chain.
    //! @param lattice The one-dimensional chain.
@@ -248,9 +277,13 @@ private:
 //! @param lattice The lattice.
 //! @param linear The linear interaction.
 //! @param quadratic The quadratic interaction.
+//! @param spin_magnitude The magnitude of spins. This must be half-integer.
 template<class LatticeType>
-auto make_ising(const LatticeType &lattice, const double linear, const double quadratic) {
-   return Ising<LatticeType>{lattice, linear, quadratic};
+auto make_ising(const LatticeType &lattice,
+                const double linear,
+                const double quadratic,
+                const double spin_magnitude = 0.5) {
+   return Ising<LatticeType>{lattice, linear, quadratic, spin_magnitude};
 }
 
 } // namespace classical

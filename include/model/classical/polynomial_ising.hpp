@@ -28,6 +28,7 @@
 #include <unordered_map>
 #include <vector>
 #include <stdexcept>
+#include <cmath>
 
 namespace compnal {
 namespace model {
@@ -51,15 +52,26 @@ template<class LatticeType>
 class PolynomialIsing {
    
 public:
-   //! @brief The physical quantity type, which represents Ising spins \f$ s_i\in \{-1,+1\} \f$
-   using PHQType = std::int8_t;
+   //! @brief The physical quantity type, which represents Ising spins \f$ s_i\in \{-S, -S+1, \ldots, S\} \f$.
+   using PHQType = std::int32_t;
    
    //! @brief Constructor for PolynomialIsing class.
    //! @param lattice The lattice.
    //! @param interaction The polynomial interaction.
+   //! @param spin_magnitude The magnitude of spins. This must be half-integer.
    PolynomialIsing(const LatticeType &lattice,
-                   const std::unordered_map<std::int32_t, double> &interaction):
+                   const std::unordered_map<std::int32_t, double> &interaction,
+                   const double spin_magnitude = 0.5):
    lattice_(lattice) {
+      if (std::floor(2*spin_magnitude) != 2*spin_magnitude) {
+         throw std::invalid_argument("spin_magnitude must be half-integer.");
+      }
+      
+      twice_spin_magnitude_.resize(lattice.GetSystemSize());
+      for (std::int32_t i = 0; i < lattice.GetSystemSize(); ++i) {
+         twice_spin_magnitude_[i] = static_cast<std::int32_t>(2*spin_magnitude);
+      }
+      
       for (const auto &it: interaction) {
          if (it.first < 0) {
             throw std::invalid_argument("The degree of interactions must be positive.");
@@ -100,6 +112,18 @@ public:
       return CalculateEnergy(lattice_, state);
    }
    
+   //! @brief Set the magnitude of the spin.
+   //! @param coordinate The coordinate.
+   //! @param spin_magnitude The magnitude of the spin. This must be half-integer.
+   void SetSpinMagnitude(const typename LatticeType::CoordinateType coordinate, const double spin_magnitude) {
+      if (std::floor(2*spin_magnitude) != 2*spin_magnitude) {
+         throw std::invalid_argument("magnitude must be half-integer.");
+      }
+      if (!lattice_.ValidateCoordinate(coordinate)) {
+         throw std::invalid_argument("magnitude must be half-integer.");
+      }
+      twice_spin_magnitude_[lattice_.CoordinateToInteger(coordinate)] = static_cast<std::int32_t>(2*spin_magnitude);
+   }
    
 private:
    //! @brief The lattice.
@@ -110,6 +134,9 @@ private:
    
    //! @brief The degree of the interactions.
    std::int32_t degree_ = 0;
+   
+   //! @brief Twice magnitude of spins.
+   std::vector<std::int32_t> twice_spin_magnitude_;
    
    //! @brief Calculate energy corresponding to the spin configuration on the one-dimensional chain.
    //! @param lattice The one-dimensional chain.
@@ -386,9 +413,12 @@ private:
 //! @tparam LatticeType The lattice type.
 //! @param lattice The lattice.
 //! @param interaction The polynomial interaction.
+//! @param spin_magnitude The magnitude of spins. This must be half-integer.
 template<class LatticeType>
-auto make_polynomial_ising(const LatticeType &lattice, const std::unordered_map<std::int32_t, double> &interaction) {
-   return PolynomialIsing<LatticeType>{lattice, interaction};
+auto make_polynomial_ising(const LatticeType &lattice,
+                           const std::unordered_map<std::int32_t, double> &interaction,
+                           const double spin_magnitude = 0.5) {
+   return PolynomialIsing<LatticeType>{lattice, interaction, spin_magnitude};
 }
 
 } // namespace classical

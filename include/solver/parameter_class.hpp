@@ -20,8 +20,36 @@
 //  
 //
 
-#ifndef parameter_class_h
-#define parameter_class_h
+#ifndef COMPNAL_SOLVER_PARAMETER_CLASS_HPP_
+#define COMPNAL_SOLVER_PARAMETER_CLASS_HPP_
 
+namespace compnal {
+namespace solver {
 
-#endif /* parameter_class_h */
+enum class MonteCarloUpdater {
+   
+   //! @brief Metropolis updater, single spin flip.
+   METROPOLIS,
+   
+   //! @brief Heat bath updater, single spin flip.
+   HEAT_BATH
+
+};
+
+enum class RandomNumberEngine {
+  
+   //! @brief 32-bit Mersenne Twister
+   MT,
+   
+   //! @brief 64-bit Mersenne Twister
+   MT_64,
+   
+   //! @brief 32-bit Xorshift
+   XORSHIFT
+   
+};
+
+} // namespace solver
+} // namespace compnal
+
+#endif /* COMPNAL_SOLVER_PARAMETER_CLASS_HPP_ */

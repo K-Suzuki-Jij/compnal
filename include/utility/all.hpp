@@ -20,8 +20,9 @@
 //  
 //
 
-#ifndef all_h
-#define all_h
+#ifndef COMPNAL_UTILITY_ALL_HPP_
+#define COMPNAL_UTILITY_ALL_HPP_
 
+#include "random.hpp"
 
-#endif /* all_h */
+#endif /* COMPNAL_UTILITY_ALL_HPP_ */

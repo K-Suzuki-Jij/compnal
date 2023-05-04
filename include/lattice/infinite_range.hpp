@@ -35,6 +35,9 @@ namespace lattice {
 //! @brief Class to represent the infinite-dimensional lattice.
 class InfiniteRange {
 public:
+   //! @brief Coordinate type.
+   using CoordinateType = std::int32_t;
+   
    //! @brief Constructor of InfiniteRange class.
    //! @param system_size System size.
    InfiniteRange(const std::int32_t system_size) {
@@ -58,10 +61,29 @@ public:
    
    //! @brief Generate index list.
    //! @return The index list.
-   std::vector<std::int32_t> GenerateCoordinateList() const {
-      std::vector<std::int32_t> coo_list(system_size_);
+   std::vector<CoordinateType> GenerateCoordinateList() const {
+      std::vector<CoordinateType> coo_list(system_size_);
       std::iota(coo_list.begin(), coo_list.end(), 0);
       return coo_list;
+   }
+   
+   //! @brief Change input coordinate to an integer.
+   //! @param coordinate The coordinate.
+   //! @return Corresponding integer.
+   std::int32_t CoordinateToInteger(const CoordinateType coordinate) const {
+      return coordinate;
+   }
+   
+   //! @brief Check if input coordinate is in the system.
+   //! @param coordinate The coordinate.
+   //! @return True if the coordinate is in the system, otherwise false.
+   bool ValidateCoordinate(const CoordinateType coordinate) const {
+      if ((0 <= coordinate) && (coordinate < system_size_)) {
+         return true;
+      }
+      else {
+         return false;
+      }
    }
    
 private:

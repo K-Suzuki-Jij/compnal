@@ -36,6 +36,9 @@ namespace lattice {
 class Cubic {
    
 public:
+   //! @brief Coordinate type.
+   using CoordinateType = std::tuple<std::int32_t, std::int32_t, std::int32_t>;
+   
    //! @brief Constructor.
    //! @param x_size The size of the x-direction.
    //! @param y_size The size of the y-direction.
@@ -93,8 +96,8 @@ public:
    
    //! @brief Generate coordinate list in the square lattice.
    //! @return The coordinate list.
-   std::vector<std::tuple<std::int32_t, std::int32_t, std::int32_t>> GenerateCoordinateList() const {
-      std::vector<std::tuple<std::int32_t, std::int32_t, std::int32_t>> coo_list(x_size_*y_size_*z_size_);
+   std::vector<CoordinateType> GenerateCoordinateList() const {
+      std::vector<CoordinateType> coo_list(x_size_*y_size_*z_size_);
       for (std::int32_t i = 0; i < z_size_; ++i) {
          for (std::int32_t j = 0; j < y_size_; ++j) {
             for (std::int32_t k = 0; k < x_size_; ++k) {
@@ -103,6 +106,27 @@ public:
          }
       }
       return coo_list;
+   }
+   
+   //! @brief Change input coordinate to an integer.
+   //! @param coordinate The coordinate.
+   //! @return Corresponding integer.
+   std::int32_t CoordinateToInteger(const CoordinateType coordinate) const {
+      return std::get<0>(coordinate)*y_size_*x_size_ + std::get<1>(coordinate)*x_size_ + std::get<2>(coordinate);
+   }
+   
+   //! @brief Check if input coordinate is in the system.
+   //! @param coordinate The coordinate.
+   //! @return True if the coordinate is in the system, otherwise false.
+   bool ValidateCoordinate(const CoordinateType coordinate) const {
+      if ((0 <= std::get<2>(coordinate)) && (std::get<2>(coordinate) < x_size_) &&
+          (0 <= std::get<1>(coordinate)) && (std::get<1>(coordinate) < y_size_) &&
+          (0 <= std::get<0>(coordinate)) && (std::get<0>(coordinate) < z_size_)) {
+         return true;
+      }
+      else {
+         return false;
+      }
    }
    
 private:

@@ -101,7 +101,7 @@ public:
       for (std::int32_t i = 0; i < z_size_; ++i) {
          for (std::int32_t j = 0; j < y_size_; ++j) {
             for (std::int32_t k = 0; k < x_size_; ++k) {
-               coo_list[i*y_size_*x_size_ + j*x_size_ + k] = {i, j, k};
+               coo_list[i*y_size_*x_size_ + j*x_size_ + k] = {k, j, i};
             }
          }
       }
@@ -112,16 +112,16 @@ public:
    //! @param coordinate The coordinate.
    //! @return Corresponding integer.
    std::int32_t CoordinateToInteger(const CoordinateType coordinate) const {
-      return std::get<0>(coordinate)*y_size_*x_size_ + std::get<1>(coordinate)*x_size_ + std::get<2>(coordinate);
+      return std::get<2>(coordinate)*y_size_*x_size_ + std::get<1>(coordinate)*x_size_ + std::get<0>(coordinate);
    }
    
    //! @brief Check if input coordinate is in the system.
    //! @param coordinate The coordinate.
    //! @return True if the coordinate is in the system, otherwise false.
    bool ValidateCoordinate(const CoordinateType coordinate) const {
-      if ((0 <= std::get<2>(coordinate)) && (std::get<2>(coordinate) < x_size_) &&
+      if ((0 <= std::get<0>(coordinate)) && (std::get<0>(coordinate) < x_size_) &&
           (0 <= std::get<1>(coordinate)) && (std::get<1>(coordinate) < y_size_) &&
-          (0 <= std::get<0>(coordinate)) && (std::get<0>(coordinate) < z_size_)) {
+          (0 <= std::get<2>(coordinate)) && (std::get<2>(coordinate) < z_size_)) {
          return true;
       }
       else {

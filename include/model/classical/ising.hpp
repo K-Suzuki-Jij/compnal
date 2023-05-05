@@ -89,6 +89,12 @@ public:
       return lattice_;
    }
    
+   //! @brief Get twice the magnitude of the spins.
+   //! @return Twice the magnitude of the spins.
+   const std::vector<std::int32_t> &GetTwiceSpinMagnitude() const {
+      return twice_spin_magnitude_;
+   }
+   
    //! @brief Calculate energy corresponding to the spin configuration.
    //! @param state The spin configuration.
    //! @return The energy.
@@ -100,14 +106,14 @@ public:
    }
    
    //! @brief Set the magnitude of the spin.
-   //! @param coordinate The coordinate.
    //! @param spin_magnitude The magnitude of the spin. This must be half-integer.
-   void SetSpinMagnitude(const typename LatticeType::CoordinateType coordinate, const double spin_magnitude) {
+   //! @param coordinate The coordinate.
+   void SetSpinMagnitude(const double spin_magnitude, const typename LatticeType::CoordinateType coordinate) {
       if (std::floor(2*spin_magnitude) != 2*spin_magnitude) {
          throw std::invalid_argument("magnitude must be half-integer.");
       }
       if (!lattice_.ValidateCoordinate(coordinate)) {
-         throw std::invalid_argument("magnitude must be half-integer.");
+         throw std::invalid_argument("The input coordinate is not in the system");
       }
       twice_spin_magnitude_[lattice_.CoordinateToInteger(coordinate)] = static_cast<std::int32_t>(2*spin_magnitude);
    }

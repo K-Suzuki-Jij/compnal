@@ -30,12 +30,22 @@ namespace test {
 
 TEST(Lattice, Square) {
    lattice::Square square{2, 3, lattice::BoundaryCondition::OBC};
+   const std::vector<std::pair<std::int32_t, std::int32_t>> coo_list = {
+      {0, 0}, {1, 0}, {0, 1}, {1, 1}, {0, 2}, {1, 2}
+   };
    EXPECT_EQ(square.GetXSize(), 2);
    EXPECT_EQ(square.GetYSize(), 3);
    EXPECT_EQ(square.GetSystemSize(), 6);
    EXPECT_EQ(square.GetBoundaryCondition(), lattice::BoundaryCondition::OBC);
-   EXPECT_EQ(square.GenerateCoordinateList(),
-             (std::vector<std::pair<std::int32_t, std::int32_t>>{{0, 0}, {0, 1}, {1, 0}, {1, 1}, {2, 0}, {2, 1}}));
+   EXPECT_EQ(square.GenerateCoordinateList(), coo_list);
+   for (std::size_t i = 0; i < coo_list.size(); ++i) {
+      EXPECT_EQ(square.CoordinateToInteger(coo_list[i]), static_cast<std::int32_t>(i));
+      EXPECT_TRUE(square.ValidateCoordinate(coo_list[i]));
+   };
+   EXPECT_FALSE(square.ValidateCoordinate({2, 0}));
+   EXPECT_FALSE(square.ValidateCoordinate({0, 3}));
+   EXPECT_FALSE(square.ValidateCoordinate({-1, 0}));
+   EXPECT_FALSE(square.ValidateCoordinate({0, -1}));
    
    EXPECT_THROW((lattice::Square{0, 2, lattice::BoundaryCondition::PBC}), std::invalid_argument);
    EXPECT_THROW((lattice::Square{2, -1, lattice::BoundaryCondition::PBC}), std::invalid_argument);

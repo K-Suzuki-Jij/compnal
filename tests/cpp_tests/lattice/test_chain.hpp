@@ -34,6 +34,15 @@ TEST(Lattice, Chain) {
    EXPECT_EQ(chain.GetBoundaryCondition(), lattice::BoundaryCondition::OBC);
    EXPECT_EQ(chain.GenerateCoordinateList(),
              (std::vector<std::int32_t>{0, 1, 2}));
+   EXPECT_EQ(chain.CoordinateToInteger(0), 0);
+   EXPECT_EQ(chain.CoordinateToInteger(1), 1);
+   EXPECT_EQ(chain.CoordinateToInteger(2), 2);
+   
+   EXPECT_TRUE(chain.ValidateCoordinate(0));
+   EXPECT_TRUE(chain.ValidateCoordinate(1));
+   EXPECT_TRUE(chain.ValidateCoordinate(2));
+   EXPECT_FALSE(chain.ValidateCoordinate(-1));
+   EXPECT_FALSE(chain.ValidateCoordinate(3));
 
    EXPECT_THROW((lattice::Chain{-1, lattice::BoundaryCondition::OBC}),
                 std::invalid_argument);

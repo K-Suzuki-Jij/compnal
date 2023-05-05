@@ -34,6 +34,17 @@ TEST(Lattice, InfiniteRange) {
    EXPECT_EQ(infinite_range.GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
    EXPECT_EQ(infinite_range.GenerateCoordinateList(),
              (std::vector<std::int32_t>{0, 1, 2, 3}));
+   EXPECT_EQ(infinite_range.CoordinateToInteger(0), 0);
+   EXPECT_EQ(infinite_range.CoordinateToInteger(1), 1);
+   EXPECT_EQ(infinite_range.CoordinateToInteger(2), 2);
+   EXPECT_EQ(infinite_range.CoordinateToInteger(3), 3);
+   
+   EXPECT_TRUE(infinite_range.ValidateCoordinate(0));
+   EXPECT_TRUE(infinite_range.ValidateCoordinate(1));
+   EXPECT_TRUE(infinite_range.ValidateCoordinate(2));
+   EXPECT_TRUE(infinite_range.ValidateCoordinate(3));
+   EXPECT_FALSE(infinite_range.ValidateCoordinate(-1));
+   EXPECT_FALSE(infinite_range.ValidateCoordinate(4));
    
    EXPECT_THROW(lattice::InfiniteRange{0}, std::invalid_argument);
    

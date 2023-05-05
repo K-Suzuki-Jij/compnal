@@ -30,22 +30,32 @@ namespace test {
 
 TEST(Lattice, Cubic) {
    lattice::Cubic cubic{2, 3, 2, lattice::BoundaryCondition::OBC};
+   const std::vector<std::tuple<std::int32_t, std::int32_t, std::int32_t>> coo_list{
+      {0, 0, 0}, {1, 0, 0},
+      {0, 1, 0}, {1, 1, 0},
+      {0, 2, 0}, {1, 2, 0},
+      {0, 0, 1}, {1, 0, 1},
+      {0, 1, 1}, {1, 1, 1},
+      {0, 2, 1}, {1, 2, 1},
+   };
+   
    EXPECT_EQ(cubic.GetXSize(), 2);
    EXPECT_EQ(cubic.GetYSize(), 3);
    EXPECT_EQ(cubic.GetZSize(), 2);
    EXPECT_EQ(cubic.GetSystemSize(), 12);
    EXPECT_EQ(cubic.GetBoundaryCondition(), lattice::BoundaryCondition::OBC);
-   
-   std::vector<std::tuple<std::int32_t, std::int32_t, std::int32_t>> coo_list{
-      {0, 0, 0}, {0, 0, 1},
-      {0, 1, 0}, {0, 1, 1},
-      {0, 2, 0}, {0, 2, 1},
-      {1, 0, 0}, {1, 0, 1},
-      {1, 1, 0}, {1, 1, 1},
-      {1, 2, 0}, {1, 2, 1}
-   };
-   
    EXPECT_EQ(cubic.GenerateCoordinateList(), coo_list);
+   for (std::size_t i = 0; i < coo_list.size(); ++i) {
+      EXPECT_EQ(cubic.CoordinateToInteger(coo_list[i]), static_cast<std::int32_t>(i));
+      EXPECT_TRUE(cubic.ValidateCoordinate(coo_list[i]));
+   };
+   EXPECT_FALSE(cubic.ValidateCoordinate({2, 0, 0}));
+   EXPECT_FALSE(cubic.ValidateCoordinate({0, 3, 0}));
+   EXPECT_FALSE(cubic.ValidateCoordinate({0, 0, 2}));
+   EXPECT_FALSE(cubic.ValidateCoordinate({-1, 0, 0}));
+   EXPECT_FALSE(cubic.ValidateCoordinate({0, -1, 0}));
+   EXPECT_FALSE(cubic.ValidateCoordinate({0, 0, -1}));
+   
    EXPECT_THROW((lattice::Cubic{0, 2, 1, lattice::BoundaryCondition::PBC}), std::invalid_argument);
    EXPECT_THROW((lattice::Cubic{2, -1, 2, lattice::BoundaryCondition::PBC}), std::invalid_argument);
    EXPECT_THROW((lattice::Cubic{2, 3, 0, lattice::BoundaryCondition::PBC}), std::invalid_argument);

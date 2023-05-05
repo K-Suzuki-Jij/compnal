@@ -87,7 +87,7 @@ public:
       std::vector<CoordinateType> coo_list(x_size_*y_size_);
       for (std::int32_t i = 0; i < y_size_; ++i) {
          for (std::int32_t j = 0; j < x_size_; ++j) {
-            coo_list[i*x_size_ + j] = {i, j};
+            coo_list[i*x_size_ + j] = {j, i};
          }
       }
       return coo_list;
@@ -97,15 +97,15 @@ public:
    //! @param coordinate The coordinate.
    //! @return Corresponding integer.
    std::int32_t CoordinateToInteger(const CoordinateType coordinate) const {
-      return coordinate.first*x_size_ + coordinate.second;
+      return coordinate.second*x_size_ + coordinate.first;
    }
    
    //! @brief Check if input coordinate is in the system.
    //! @param coordinate The coordinate.
    //! @return True if the coordinate is in the system, otherwise false.
    bool ValidateCoordinate(const CoordinateType coordinate) const {
-      if ((0 <= coordinate.second) && (coordinate.second < x_size_) &&
-          (0 <= coordinate.first) && (coordinate.first < y_size_)) {
+      if ((0 <= coordinate.first) && (coordinate.first < x_size_) &&
+          (0 <= coordinate.second) && (coordinate.second < y_size_)) {
          return true;
       }
       else {

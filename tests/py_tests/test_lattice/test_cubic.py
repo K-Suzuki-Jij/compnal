@@ -24,12 +24,12 @@ def test_cubic():
     assert cubic.system_size == 12
     assert cubic.boundary_condition == BoundaryCondition.OBC
     assert cubic.generate_coordinate_list() == [
-        (0, 0, 0), (0, 0, 1),
-        (0, 1, 0), (0, 1, 1),
-        (0, 2, 0), (0, 2, 1),
-        (1, 0, 0), (1, 0, 1),
-        (1, 1, 0), (1, 1, 1),
-        (1, 2, 0), (1, 2, 1)
+        (0, 0, 0), (1, 0, 0),
+        (0, 1, 0), (1, 1, 0),
+        (0, 2, 0), (1, 2, 0),
+        (0, 0, 1), (1, 0, 1),
+        (0, 1, 1), (1, 1, 1),
+        (0, 2, 1), (1, 2, 1),
     ]
 
     with pytest.raises(ValueError):

@@ -28,7 +28,8 @@ class Ising:
         self, 
         lattice: Union[Chain, Square, Cubic, InfiniteRange],
         linear: float,
-        quadratic: float
+        quadratic: float,
+        spin_magnitude: float = 0.5
     ) -> None:
         """Initialize Ising class.
 
@@ -36,9 +37,13 @@ class Ising:
             lattice (Union[Chain, Square, Cubic, InfiniteRange]): Lattice.
             linear (float): Linear interaction.
             quadratic (float): Quadratic interaction.
+            spin_magnitude (float, optional): Magnitude of spins. This must be half-integer. Defaults to 0.5.
+
+        Raises:
+            ValueError: When the magnitude of spins is invalid.
         """
         self._base_model = base_classical_model.make_ising(
-            lattice=lattice._base_lattice, linear=linear, quadratic=quadratic
+            lattice=lattice._base_lattice, linear=linear, quadratic=quadratic, spin_magnitude=spin_magnitude
         )
         self._lattice = lattice
 
@@ -57,6 +62,26 @@ class Ising:
             float: Quadratic interaction.
         """
         return self._base_model.get_quadratic()
+    
+    def get_spin_magnitude(self) -> dict[Union[list, tuple], float]:
+        """Get the magnitude of spins.
+
+        Returns:
+            dict[Union[list, tuple], float]: Magnitude of spins. The keys are the coordinates of the lattice and the values are the magnitude of spins.
+        """
+        return dict(zip(self._lattice.generate_coordinate_list(), [v/2 for v in self._base_model.get_twice_spin_magnitude()]))
+    
+    def set_spin_magnitude(self, spin_magnitude: float, coordinate: Union[int, tuple]) -> None:
+        """Set the magnitude of spins.
+
+        Args:
+            spin_magnitude (float): Magnitude of spins. This must be half-integer.
+            coordinate (Union[int, tuple]): Coordinate of the lattice.
+        
+        Raises:
+            ValueError: When the magnitude of spins is invalid or the coordinate is invalid.
+        """
+        self._base_model.set_spin_magnitude(spin_magnitude, coordinate)
     
     def calculate_energy(self, state: Union[np.array, list]) -> float:
         """Calculate the energy of the state.

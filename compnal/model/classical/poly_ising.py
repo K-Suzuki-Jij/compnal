@@ -28,19 +28,21 @@ class PolyIsing:
     def __init__(
         self,
         lattice: Union[Chain, Square, Cubic, InfiniteRange],
-        interaction: dict[int, float]
+        interaction: dict[int, float],
+        spin_magnitude: float = 0.5
     ) -> None:
         """Initialize PolyIsing class.
 
         Args:
             lattice (Union[Chain, Square, Cubic, InfiniteRange]): Lattice.
             interaction (dict[int, float]): Interaction. The key is the degree of the interaction and the value is the interaction.
+            spin_magnitude (float, optional): Magnitude of spins. This must be half-integer. Defaults to 0.5.
 
         Raises:
-            ValueError: When the degree of the interaction is invalid.
+            ValueError: When the degree of the interaction is invalid or the magnitude of spins is invalid.
         """
         self._base_model = base_classical_model.make_polynomial_ising(
-            lattice=lattice._base_lattice, interaction=interaction
+            lattice=lattice._base_lattice, interaction=interaction, spin_magnitude=spin_magnitude
         )
         self._lattice = lattice
 
@@ -59,6 +61,26 @@ class PolyIsing:
             int: Degree.
         """
         return self._base_model.get_degree()
+    
+    def get_spin_magnitude(self) -> dict[Union[list, tuple], float]:
+        """Get the magnitude of spins.
+
+        Returns:
+            dict[Union[list, tuple], float]: Magnitude of spins. The keys are the coordinates of the lattice and the values are the magnitude of spins.
+        """
+        return dict(zip(self._lattice.generate_coordinate_list(), [v/2 for v in self._base_model.get_twice_spin_magnitude()]))
+    
+    def set_spin_magnitude(self, spin_magnitude: float, coordinate: Union[int, tuple]) -> None:
+        """Set the magnitude of spins.
+
+        Args:
+            spin_magnitude (float): Magnitude of spins. This must be half-integer.
+            coordinate (Union[int, tuple]): Coordinate of the lattice.
+        
+        Raises:
+            ValueError: When the magnitude of spins is invalid or the coordinate is invalid.
+        """
+        self._base_model.set_spin_magnitude(spin_magnitude, coordinate)
     
     def calculate_energy(self, state: Union[np.array, list]) -> float:
         """Calculate the energy of the state.

@@ -22,7 +22,7 @@ def test_square():
     assert square.y_size == 3
     assert square.system_size == 6
     assert square.boundary_condition == BoundaryCondition.OBC
-    assert square.generate_coordinate_list() == [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)]
+    assert square.generate_coordinate_list() == [(0, 0), (1, 0), (0, 1), (1, 1), (0, 2), (1, 2)]
 
     with pytest.raises(ValueError):
         Square(x_size=2, y_size=3, boundary_condition="ABC")

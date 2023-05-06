@@ -44,10 +44,12 @@ TEST(ModelClassical, PolynomialIsingOnChain) {
    EXPECT_EQ(pising.GetDegree(), 3);
    EXPECT_NO_THROW(pising.GetLattice());
    EXPECT_EQ(pising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 1, 1, 1}));
+   EXPECT_EQ(pising.GetSpinScaleFactor(), 1);
    pising.SetSpinMagnitude(1.5, 1);
    EXPECT_EQ(pising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 3, 1, 1}));
    EXPECT_THROW(pising.SetSpinMagnitude(1.499, 1), std::invalid_argument);
    EXPECT_THROW(pising.SetSpinMagnitude(1.5, 10), std::invalid_argument);
+   EXPECT_THROW((PIsing{chain, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 1, 0}), std::invalid_argument);
    
    EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {}        }.CalculateEnergy({-1,+1,-1})), +0.0);
    EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{0, 3.0}}}.CalculateEnergy({-1,+1,-1})), +3.0);
@@ -86,10 +88,12 @@ TEST(ModelClassical, PolynomialIsingOnSquare) {
    EXPECT_EQ(pising.GetDegree(), 3);
    EXPECT_NO_THROW(pising.GetLattice());
    EXPECT_EQ(pising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}));
+   EXPECT_EQ(pising.GetSpinScaleFactor(), 1);
    pising.SetSpinMagnitude(1.5, {2, 0});
    EXPECT_EQ(pising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1}));
    EXPECT_THROW(pising.SetSpinMagnitude(1.499, {0, 0}), std::invalid_argument);
    EXPECT_THROW(pising.SetSpinMagnitude(1.5, {10, 0}), std::invalid_argument);
+   EXPECT_THROW((PIsing{square, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 1, 0}), std::invalid_argument);
    
    EXPECT_DOUBLE_EQ((PIsing{Square{3, 2, BC::OBC}, {}}.CalculateEnergy(spins)), +0.0);
    EXPECT_DOUBLE_EQ((PIsing{Square{3, 2, BC::OBC}, {{0, 3.0}}}.CalculateEnergy(spins)), +3.0);
@@ -118,7 +122,7 @@ TEST(ModelClassical, PolynomialIsingOnCubic) {
    };
    
    Cubic cubic{3, 2, 2, BC::PBC};
-   PIsing pising{cubic, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 3};
+   PIsing pising{cubic, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 3, 3};
    
    EXPECT_EQ(pising.GetInteraction().size(), 4);
    EXPECT_DOUBLE_EQ(pising.GetInteraction().at(0), -1.0);
@@ -128,10 +132,12 @@ TEST(ModelClassical, PolynomialIsingOnCubic) {
    EXPECT_EQ(pising.GetDegree(), 3);
    EXPECT_NO_THROW(pising.GetLattice());
    EXPECT_EQ(pising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6}));
+   EXPECT_EQ(pising.GetSpinScaleFactor(), 3);
    pising.SetSpinMagnitude(1.5, {2, 0, 1});
    EXPECT_EQ(pising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{6, 6, 6, 6, 6, 6, 6, 6, 3, 6, 6, 6}));
    EXPECT_THROW(pising.SetSpinMagnitude(1.499, {0, 0, 0}), std::invalid_argument);
    EXPECT_THROW(pising.SetSpinMagnitude(1.5, {10, 0, 0}), std::invalid_argument);
+   EXPECT_THROW((PIsing{cubic, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 1, 0}), std::invalid_argument);
    
    EXPECT_DOUBLE_EQ((PIsing{Cubic{3, 2, 2, BC::OBC}, {}        }.CalculateEnergy(spins)), +0.0);
    EXPECT_DOUBLE_EQ((PIsing{Cubic{3, 2, 2, BC::OBC}, {{0, 3.0}}}.CalculateEnergy(spins)), +3.0);
@@ -156,7 +162,7 @@ TEST(ModelClassical, PolynomialIsingOnInfiniteRang) {
    using PIsing = model::classical::PolynomialIsing<Infinite>;
    
    Infinite infinite{4};
-   PIsing pising{infinite, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 3.5};
+   PIsing pising{infinite, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 3.5, 6};
    
    EXPECT_EQ(pising.GetInteraction().size(), 4);
    EXPECT_DOUBLE_EQ(pising.GetInteraction().at(0), -1.0);
@@ -166,10 +172,12 @@ TEST(ModelClassical, PolynomialIsingOnInfiniteRang) {
    EXPECT_EQ(pising.GetDegree(), 3);
    EXPECT_NO_THROW(pising.GetLattice());
    EXPECT_EQ(pising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{7, 7, 7, 7}));
+   EXPECT_EQ(pising.GetSpinScaleFactor(), 6);
    pising.SetSpinMagnitude(1.5, 1);
    EXPECT_EQ(pising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{7, 3, 7, 7}));
    EXPECT_THROW(pising.SetSpinMagnitude(1.499, 0), std::invalid_argument);
    EXPECT_THROW(pising.SetSpinMagnitude(1.5, 10), std::invalid_argument);
+   EXPECT_THROW((PIsing{infinite, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 1, 0}), std::invalid_argument);
    
    EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{}      }}.CalculateEnergy({-1,+1,-1})), +0.0);
    EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{0, 3.0}}}.CalculateEnergy({-1,+1,-1})), +3.0);

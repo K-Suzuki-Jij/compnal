@@ -57,14 +57,23 @@ public:
    //! @param linear The linear interaction.
    //! @param quadratic The quadratic interaction.
    //! @param spin_magnitude The magnitude of spins. This must be half-integer.
+   //! @param spin_scale_factor A scaling factor used to adjust the value taken by the spin.
+   //! The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+   //! By changing this value, you can represent spins of different values,
+   //! such as s\in\{-1,+1\} by setting spin_scale_factor=2.
    Ising(const LatticeType &lattice,
          const double linear,
          const double quadratic,
-         const double spin_magnitude = 0.5):
+         const double spin_magnitude = 0.5,
+         const std::int32_t spin_scale_factor = 1):
    lattice_(lattice), linear_(linear), quadratic_(quadratic) {
       if (std::floor(2*spin_magnitude) != 2*spin_magnitude) {
          throw std::invalid_argument("spin_magnitude must be half-integer.");
       }
+      if (spin_scale_factor < 1) {
+         throw std::invalid_argument("spin_scale_factor must positive-integer");
+      }
+      spin_scale_factor_ = spin_scale_factor;
       twice_spin_magnitude_.resize(lattice.GetSystemSize());
       for (std::int32_t i = 0; i < lattice.GetSystemSize(); ++i) {
          twice_spin_magnitude_[i] = static_cast<std::int32_t>(2*spin_magnitude);
@@ -93,6 +102,12 @@ public:
    //! @return Twice the magnitude of the spins.
    const std::vector<std::int32_t> &GetTwiceSpinMagnitude() const {
       return twice_spin_magnitude_;
+   }
+   
+   //! @brief Get spin-scale factor.
+   //! @return Spin-scale factor.
+   std::int32_t GetSpinScaleFactor() const {
+      return spin_scale_factor_;
    }
    
    //! @brief Calculate energy corresponding to the spin configuration.
@@ -130,6 +145,12 @@ private:
    
    //! @brief Twice magnitude of spins.
    std::vector<std::int32_t> twice_spin_magnitude_;
+   
+   //! @brief spin_scale_factor A scaling factor used to adjust the value taken by the spin.
+   //! The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+   //! By changing this value, you can represent spins of different values,
+   //! such as s\in\{-1,+1\} by setting spin_scale_factor=2.
+   std::int32_t spin_scale_factor_ = 1;
    
    //! @brief Calculate energy corresponding to the spin configuration on the one-dimensional chain.
    //! @param lattice The one-dimensional chain.
@@ -284,12 +305,17 @@ private:
 //! @param linear The linear interaction.
 //! @param quadratic The quadratic interaction.
 //! @param spin_magnitude The magnitude of spins. This must be half-integer.
+//! @param spin_scale_factor A scaling factor used to adjust the value taken by the spin.
+//! The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+//! By changing this value, you can represent spins of different values,
+//! such as s\in\{-1,+1\} by setting spin_scale_factor=2.
 template<class LatticeType>
 auto make_ising(const LatticeType &lattice,
                 const double linear,
                 const double quadratic,
-                const double spin_magnitude = 0.5) {
-   return Ising<LatticeType>{lattice, linear, quadratic, spin_magnitude};
+                const double spin_magnitude = 0.5,
+                const std::int32_t spin_scale_factor = 1) {
+   return Ising<LatticeType>{lattice, linear, quadratic, spin_magnitude, spin_scale_factor};
 }
 
 } // namespace classical

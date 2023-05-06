@@ -177,3 +177,5 @@ _cmake_test_compile
 .pytest_cache
 
 _version.py
+
+.vscode

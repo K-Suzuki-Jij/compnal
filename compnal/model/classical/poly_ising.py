@@ -29,7 +29,8 @@ class PolyIsing:
         self,
         lattice: Union[Chain, Square, Cubic, InfiniteRange],
         interaction: dict[int, float],
-        spin_magnitude: float = 0.5
+        spin_magnitude: float = 0.5,
+        spin_scale_factor: int = 1
     ) -> None:
         """Initialize PolyIsing class.
 
@@ -37,12 +38,21 @@ class PolyIsing:
             lattice (Union[Chain, Square, Cubic, InfiniteRange]): Lattice.
             interaction (dict[int, float]): Interaction. The key is the degree of the interaction and the value is the interaction.
             spin_magnitude (float, optional): Magnitude of spins. This must be half-integer. Defaults to 0.5.
+            spin_scale_factor (int, optional): 
+                A scaling factor used to adjust the value taken by the spin.
+                The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+                By changing this value, you can represent spins of different values,
+                such as s\in\{-1,+1\} by setting spin_scale_factor=2.
+                This must be positive integer. Defaults to 1.
 
         Raises:
             ValueError: When the degree of the interaction is invalid or the magnitude of spins is invalid.
         """
         self._base_model = base_classical_model.make_polynomial_ising(
-            lattice=lattice._base_lattice, interaction=interaction, spin_magnitude=spin_magnitude
+            lattice=lattice._base_lattice, 
+            interaction=interaction, 
+            spin_magnitude=spin_magnitude,
+            spin_scale_factor=spin_scale_factor
         )
         self._lattice = lattice
 
@@ -70,6 +80,14 @@ class PolyIsing:
         """
         return dict(zip(self._lattice.generate_coordinate_list(), [v/2 for v in self._base_model.get_twice_spin_magnitude()]))
     
+    def get_spin_scale_factor(self) -> int:
+        """Get the spin scale factor.
+
+        Returns:
+            int: Spin scale factor.
+        """
+        return self._base_model.get_spin_scale_factor()
+
     def set_spin_magnitude(self, spin_magnitude: float, coordinate: Union[int, tuple]) -> None:
         """Set the magnitude of spins.
 

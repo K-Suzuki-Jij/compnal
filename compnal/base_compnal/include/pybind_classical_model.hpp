@@ -40,22 +40,24 @@ void PyBindClassicalIsing(py::module &m, const std::string &post_name = "") {
    auto py_class = py::class_<Ising>(m, name.c_str(), py::module_local());
    
    //Constructors
-   py_class.def(py::init<const LatticeType&, const double, const double, const double>(), 
-                "lattice"_a, "linear"_a, "quadratic"_a, "spin_magnitude"_a);
+   py_class.def(py::init<const LatticeType&, const double, const double, const double, const std::int32_t>(), 
+                "lattice"_a, "linear"_a, "quadratic"_a, "spin_magnitude"_a, "spin_scale_factor"_a);
    
    //Public Member Functions
    py_class.def("get_linear", &Ising::GetLinear);
    py_class.def("get_quadratic", &Ising::GetQuadratic);
    py_class.def("get_twice_spin_magnitude", &Ising::GetTwiceSpinMagnitude);
+   py_class.def("get_spin_scale_factor", &Ising::GetSpinScaleFactor);
    py_class.def("calculate_energy", py::overload_cast<const std::vector<typename Ising::PHQType>&>(&Ising::CalculateEnergy, py::const_), "state"_a);
    py_class.def("set_spin_magnitude", &Ising::SetSpinMagnitude, "spin_magnitude"_a, "coordinate"_a);
 
    m.def("make_ising", [](const LatticeType &lattice,
                           const double linear,
                           const double quadratic,
-                          const double spin_magnitude) {
-      return model::classical::make_ising<LatticeType>(lattice, linear, quadratic, spin_magnitude);
-   }, "lattice"_a, "linear"_a, "quadratic"_a, "spin_magnitude"_a);
+                          const double spin_magnitude,
+                          const std::int32_t spin_scale_factor) {
+      return model::classical::make_ising<LatticeType>(lattice, linear, quadratic, spin_magnitude, spin_scale_factor);
+   }, "lattice"_a, "linear"_a, "quadratic"_a, "spin_magnitude"_a, "spin_scale_factor"_a);
 
 }
 
@@ -66,21 +68,23 @@ void PyBindClassicalPolynomialIsing(py::module &m, const std::string &post_name 
    auto py_class = py::class_<PIsing>(m, name.c_str(), py::module_local());
    
    //Constructors
-   py_class.def(py::init<const LatticeType&, const std::unordered_map<std::int32_t, double>&, const double>(), 
-                "lattice"_a, "interaction"_a, "spin_magnitude"_a);
+   py_class.def(py::init<const LatticeType&, const std::unordered_map<std::int32_t, double>&, const double, const std::int32_t>(), 
+                "lattice"_a, "interaction"_a, "spin_magnitude"_a, "spin_scale_factor"_a);
    
    //Public Member Functions
    py_class.def("get_interaction", &PIsing::GetInteraction);
    py_class.def("calculate_energy", py::overload_cast<const std::vector<typename PIsing::PHQType>&>(&PIsing::CalculateEnergy, py::const_), "state"_a);
    py_class.def("get_degree", &PIsing::GetDegree);
    py_class.def("get_twice_spin_magnitude", &PIsing::GetTwiceSpinMagnitude);
+   py_class.def("get_spin_scale_factor", &PIsing::GetSpinScaleFactor);
    py_class.def("set_spin_magnitude", &PIsing::SetSpinMagnitude, "spin_magnitude"_a, "coordinate"_a);
 
    m.def("make_polynomial_ising", [](const LatticeType &lattice,
                                      const std::unordered_map<std::int32_t, double> &interaction,
-                                     const double spin_magnitude) {
-      return model::classical::make_polynomial_ising<LatticeType>(lattice, interaction, spin_magnitude);
-   }, "lattice"_a, "interaction"_a, "spin_magnitude"_a);
+                                     const double spin_magnitude,
+                                     const std::int32_t spin_scale_factor) {
+      return model::classical::make_polynomial_ising<LatticeType>(lattice, interaction, spin_magnitude, spin_scale_factor);
+   }, "lattice"_a, "interaction"_a, "spin_magnitude"_a, "spin_scale_factor"_a);
 
 }
 

@@ -29,7 +29,8 @@ class Ising:
         lattice: Union[Chain, Square, Cubic, InfiniteRange],
         linear: float,
         quadratic: float,
-        spin_magnitude: float = 0.5
+        spin_magnitude: float = 0.5,
+        spin_scale_factor: int = 1
     ) -> None:
         """Initialize Ising class.
 
@@ -38,12 +39,22 @@ class Ising:
             linear (float): Linear interaction.
             quadratic (float): Quadratic interaction.
             spin_magnitude (float, optional): Magnitude of spins. This must be half-integer. Defaults to 0.5.
+            spin_scale_factor (int, optional): 
+                A scaling factor used to adjust the value taken by the spin.
+                The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+                By changing this value, you can represent spins of different values,
+                such as s\in\{-1,+1\} by setting spin_scale_factor=2.
+                This must be positive integer. Defaults to 1.
 
         Raises:
-            ValueError: When the magnitude of spins is invalid.
+            ValueError: When the magnitude of spins or spin_scale_factor is invalid.
         """
         self._base_model = base_classical_model.make_ising(
-            lattice=lattice._base_lattice, linear=linear, quadratic=quadratic, spin_magnitude=spin_magnitude
+            lattice=lattice._base_lattice, 
+            linear=linear, 
+            quadratic=quadratic, 
+            spin_magnitude=spin_magnitude,
+            spin_scale_factor=spin_scale_factor
         )
         self._lattice = lattice
 
@@ -71,6 +82,14 @@ class Ising:
         """
         return dict(zip(self._lattice.generate_coordinate_list(), [v/2 for v in self._base_model.get_twice_spin_magnitude()]))
     
+    def get_spin_scale_factor(self) -> int:
+        """Get the spin scale factor.
+
+        Returns:
+            int: Spin scale factor.
+        """
+        return self._base_model.get_spin_scale_factor()
+
     def set_spin_magnitude(self, spin_magnitude: float, coordinate: Union[int, tuple]) -> None:
         """Set the magnitude of spins.
 

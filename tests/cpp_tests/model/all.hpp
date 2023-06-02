@@ -25,5 +25,6 @@
 
 #include "./classical/test_ising.hpp"
 #include "./classical/test_polynomial_ising.hpp"
+#include "./utility/test_variable.hpp"
 
 #endif /* COMPNAL_TEST_MODEL_ALL_HPP_ */

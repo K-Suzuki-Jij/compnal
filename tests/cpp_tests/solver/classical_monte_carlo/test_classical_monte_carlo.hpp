@@ -20,8 +20,24 @@
 //  
 //
 
-#ifndef test_classical_monte_carlo_h
-#define test_classical_monte_carlo_h
+#ifndef OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
+#define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
+
+#include "../../../../include/lattice/all.hpp"
+#include "../../../../include/model/classical/ising.hpp"
+#include "../../../../include/solver/classical_monte_carlo/classical_monte_carlo.hpp"
+
+namespace compnal {
+namespace test {
+
+TEST(SolverClassicalMonteCarlo, IsingOnChain) {
+   
+   
+   
+}
 
 
-#endif /* test_classical_monte_carlo_h */
+}  // namespace test
+}  // namespace compnal
+
+#endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_HPP_ */

@@ -13,17 +13,31 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  all.hpp
+//  template_system.hpp
 //  compnal
 //
-//  Created by kohei on 2023/05/04.
+//  Created by kohei on 2023/05/06.
 //  
 //
 
-#ifndef OMPNAL_TEST_SOLVER_ALL_
-#define OMPNAL_TEST_SOLVER_ALL_
+#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_TEMPLATE_SYSTEM_HPP_
+#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_TEMPLATE_SYSTEM_HPP_
 
-#include "classical_monte_carlo/all.hpp"
+namespace compnal {
+namespace solver {
+namespace classical_monte_carlo {
+
+template<class ModelType, class RandType>
+class System;
+
+template<class ModelType, class RandType>
+std::vector<typename ModelType::PHQType> GenerateRandomSpins(const ModelType &model) {
+   
+}
 
 
-#endif /* OMPNAL_TEST_SOLVER_ALL_ */
+} // namespace classical_monte_carlo
+} // namespace solver
+} // namespace compnal
+
+#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_TEMPLATE_SYSTEM_HPP_ */

@@ -53,7 +53,8 @@ class PolynomialIsing {
    
 public:
    //! @brief The physical quantity type, which represents Ising spins \f$ s_i\in \{-S, -S+1, \ldots, S\} \f$.
-   using PHQType = std::int32_t;
+   //! To represent half-integers, double is set here.
+   using PHQType = double;
    
    //! @brief Constructor for PolynomialIsing class.
    //! @param lattice The lattice.
@@ -64,8 +65,8 @@ public:
                    const double spin_magnitude = 0.5,
                    const std::int32_t spin_scale_factor = 1):
    lattice_(lattice) {
-      if (std::floor(2*spin_magnitude) != 2*spin_magnitude) {
-         throw std::invalid_argument("spin_magnitude must be half-integer.");
+      if (std::floor(2*spin_magnitude) != 2*spin_magnitude || spin_magnitude <= 0) {
+         throw std::invalid_argument("spin_magnitude must be positive half-integer.");
       }
       if (spin_scale_factor < 1) {
          throw std::invalid_argument("spin_scale_factor must positive-integer");

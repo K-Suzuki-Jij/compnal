@@ -24,6 +24,7 @@
 #define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
 
 #include "../parameter_class.hpp"
+#include "system/all.hpp"
 #include <random>
 
 namespace compnal {
@@ -86,6 +87,67 @@ public:
    //! @param random_number_engine The random number engine.
    void SetRandomNumberEngine(const RandomNumberEngine random_number_engine) {
       random_number_engine_ = random_number_engine;
+   }
+   
+   //! @brief Get the number of sweeps.
+   //! @return The number of sweeps.
+   std::int32_t GetNumSweeps() const {
+      return num_sweeps_;
+   }
+   
+   //! @brief Get the number of samples.
+   //! @return The number of samples.
+   std::int32_t GetNumSamples() const {
+      return num_samples_;
+   }
+   
+   //! @brief Get the number of threads in the calculation.
+   //! @return The number of threads in the calculation.
+   std::int32_t GetNumThreads() const {
+      return num_threads_;
+   }
+   
+   //! @brief Get the temperature.
+   //! @return The temperature.
+   double GetTemperature() const {
+      return temperature_;
+   }
+   
+   //! @brief Get the monte carlo updater used in the state update.
+   //! @return The monte carlo updater.
+   MonteCarloUpdater GetMonteCarloUpdater() const {
+      return updater_;
+   }
+   
+   //! @brief Get the random number engine.
+   //! @return The random number engine.
+   RandomNumberEngine GetRandomNumberEngine() const {
+      return random_number_engine_;
+   }
+   
+   //! @brief Get the seed to be used in the calculation.
+   //! @return The seed.
+   std::uint64_t GetSeed() const {
+      return seed_;
+   }
+   
+   //! @brief Get the samples.
+   //! @return The samples.
+   const std::vector<std::vector<PHQType>> &GetSamples() const {
+      return samples_;
+   }
+   
+   const ModelType GetModel() const {
+      return model_;
+   }
+   
+   std::vector<double> CalculateSampleEnergies() const {
+      std::vector<double> energies(num_samples_);
+#pragma omp parallel for num_threads(num_threads_)
+      for (std::int32_t i = 0; i < num_samples_; ++i) {
+         energies[i] = model_.CalculateEnergy(samples_[i]);
+      }
+      return energies;
    }
    
 private:

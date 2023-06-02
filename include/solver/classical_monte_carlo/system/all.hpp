@@ -16,14 +16,13 @@
 //  all.hpp
 //  compnal
 //
-//  Created by kohei on 2023/05/04.
+//  Created by kohei on 2023/05/06.
 //  
 //
 
-#ifndef OMPNAL_TEST_SOLVER_ALL_
-#define OMPNAL_TEST_SOLVER_ALL_
+#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_
+#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_
 
-#include "classical_monte_carlo/all.hpp"
+#include "ising_chain.hpp"
 
-
-#endif /* OMPNAL_TEST_SOLVER_ALL_ */
+#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_ */

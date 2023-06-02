@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 #include "lattice/all.hpp"
 #include "model/all.hpp"
+#include "solver/all.hpp"
 
 int main(std::int32_t argc, char **argv) {
    testing::InitGoogleTest(&argc, argv);

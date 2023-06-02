@@ -20,8 +20,9 @@
 //  
 //
 
-#ifndef all_h
-#define all_h
+#ifndef OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_ALL_
+#define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_ALL_
 
+#include "test_classical_monte_carlo.hpp"
 
-#endif /* all_h */
+#endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_ALL_ */

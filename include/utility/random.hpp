@@ -23,6 +23,8 @@
 #ifndef COMPNAL_UTILITY_RANDOM_HPP_
 #define COMPNAL_UTILITY_RANDOM_HPP_
 
+#include <random>
+
 namespace compnal {
 namespace utility {
 

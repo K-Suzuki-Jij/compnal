@@ -24,5 +24,6 @@
 #define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_ALL_
 
 #include "test_classical_monte_carlo.hpp"
+#include "system/test_system_ising.hpp"
 
 #endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_ALL_ */

@@ -42,9 +42,10 @@ public:
    //! By changing this value, you can represent spins of different values,
    //! such as s\in\{-1,+1\} by setting spin_scale_factor=2.
    Spin(const double spin_magnitude, const std::int32_t spin_scale_factor):
+   state_number_(0),
    twice_spin_magnitude_(static_cast<std::int32_t>(2*spin_magnitude)),
    spin_scale_factor_(spin_scale_factor),
-   num_candidate_(twice_spin_magnitude_ + 1) {
+   num_state_(twice_spin_magnitude_ + 1) {
       if (std::floor(2*spin_magnitude) != 2*spin_magnitude || spin_magnitude <= 0) {
          throw std::invalid_argument("spin_magnitude must be positive half-integer.");
       }
@@ -52,13 +53,13 @@ public:
          throw std::invalid_argument("spin_scale_factor must positive-integer");
       }
    }
-   
+      
    //! @brief Get the value of the spin variable from the state number.
    //! @param state_number The state number of the spin variable.
    //! @return The value of the spin variable.
-   double GetValueFromStateNumber(const std::int32_t state_number) const {
-      if (state_number < 0 || state_number >= num_candidate_) {
-         throw std::invalid_argument("state_number must be in [0, num_candidate_).");
+   double GetValueFromState(const std::int32_t state_number) const {
+      if (state_number < 0 || state_number >= num_state_) {
+         throw std::invalid_argument("state_number must be in [0, num_state_).");
       }
       return (-1*twice_spin_magnitude_*0.5 + state_number)*spin_scale_factor_;
    }
@@ -85,7 +86,7 @@ public:
          return 1 - state_number_;
       }
       else {
-         std::int32_t new_state_number = (*random_number_engine)()%(num_candidate_ - 1);
+         std::int32_t new_state_number = (*random_number_engine)()%(num_state_ - 1);
          if (state_number_ <= new_state_number) {
             new_state_number++;
          }
@@ -95,11 +96,19 @@ public:
    
    //! @brief Set the state number.
    //! @param state_number The state number of the spin variable.
-   void SetStateNumber(const std::int32_t state_number) {
-      if (state_number < 0 || state_number >= num_candidate_) {
-         throw std::invalid_argument("state_number must be in [0, num_candidate_).");
+   void SetState(const std::int32_t state_number) {
+      if (state_number < 0 || state_number >= num_state_) {
+         throw std::invalid_argument("state_number must be in [0, num_state_).");
       }
       state_number_ = state_number;
+   }
+   
+   //! @brief Set random state.
+   //! @tparam RandType Random number engine type.
+   //! @param random_number_engine Random number engine.
+   template<class RandType>
+   void SetStateRandomly(RandType *random_number_engine) {
+      state_number_ = (*random_number_engine)()%num_state_;
    }
    
    
@@ -117,7 +126,7 @@ private:
    const std::int32_t spin_scale_factor_ = 1;
 
    //! @brief The number of candidate states.
-   const std::int32_t num_candidate_ = twice_spin_magnitude_ + 1;
+   const std::int32_t num_state_ = twice_spin_magnitude_ + 1;
    
 };
 

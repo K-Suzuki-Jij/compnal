@@ -23,6 +23,8 @@
 #ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_TEMPLATE_SYSTEM_HPP_
 #define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_TEMPLATE_SYSTEM_HPP_
 
+#include "../../../model/utility/variable.hpp"
+
 namespace compnal {
 namespace solver {
 namespace classical_monte_carlo {
@@ -30,9 +32,29 @@ namespace classical_monte_carlo {
 template<class ModelType, class RandType>
 class System;
 
+//! @brief Generate random spin configurations.
+//! @tparam ModelType Model class.
+//! @tparam RandType Random number engine class.
+//! @param model The model.
+//! @param random_number_engine Random number engine.
+//! @return Random spin configurations.
 template<class ModelType, class RandType>
-std::vector<typename ModelType::PHQType> GenerateRandomSpins(const ModelType &model) {
+std::vector<model::utility::Spin> GenerateRandomSpins(const ModelType &model,
+                                                      RandType *random_number_engine) {
    
+   const std::int32_t system_size = model.GetLattice().GetSystemSize();
+   const std::vector<std::int32_t> &twice_spin_magnitude = model.GetTwiceSpinMagnitude();
+   
+   std::vector<model::utility::Spin> spins;
+   spins.reserve(system_size);
+   
+   for (std::int32_t i = 0; i < system_size; ++i) {
+      auto spin = model::utility::Spin{0.5*twice_spin_magnitude[i], model.GetSpinScaleFactor()};
+      spin.SetStateRandomly(random_number_engine);
+      spins.push_back(spin);
+   }
+   
+   return spins;
 }
 
 

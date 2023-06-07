@@ -23,12 +23,12 @@
 #ifndef COMPNAL_MODEL_CLASSICAL_POLYNOMIAL_ISING_HPP_
 #define COMPNAL_MODEL_CLASSICAL_POLYNOMIAL_ISING_HPP_
 
-#include "../../lattice/all.hpp"
-
 #include <unordered_map>
 #include <vector>
 #include <stdexcept>
 #include <cmath>
+#include "../../lattice/all.hpp"
+#include "../utility/variable.hpp"
 
 namespace compnal {
 namespace model {

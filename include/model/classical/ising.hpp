@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <cmath>
 #include "../../lattice/all.hpp"
+#include "../utility/variable.hpp"
 
 namespace compnal {
 namespace model {

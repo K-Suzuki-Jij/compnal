@@ -34,19 +34,36 @@ TEST(ModelUtility, Spin) {
    EXPECT_THROW((model::utility::Spin{0.5, 0}), std::invalid_argument);
    
    model::utility::Spin spin{0.5, 2};
-   EXPECT_THROW(spin.GetValueFromStateNumber(2), std::invalid_argument);
-   EXPECT_THROW(spin.GetValueFromStateNumber(-1), std::invalid_argument);
-   EXPECT_DOUBLE_EQ(spin.GetValueFromStateNumber(0), -1);
-   EXPECT_DOUBLE_EQ(spin.GetValueFromStateNumber(1), +1);
+   EXPECT_THROW(spin.GetValueFromState(2), std::invalid_argument);
+   EXPECT_THROW(spin.GetValueFromState(-1), std::invalid_argument);
+   EXPECT_DOUBLE_EQ(spin.GetValueFromState(0), -1);
+   EXPECT_DOUBLE_EQ(spin.GetValueFromState(1), +1);
    EXPECT_DOUBLE_EQ(spin.GetValue(), -1);
    EXPECT_EQ(spin.GetStateNumber(), 0);
    
    std::mt19937 engine(0);
    EXPECT_EQ(spin.GenerateCandidateState(&engine), 1);
-   EXPECT_NO_THROW(spin.SetStateNumber(1));
+   EXPECT_NO_THROW(spin.SetState(1));
    EXPECT_EQ(spin.GenerateCandidateState(&engine), 0);
-   EXPECT_THROW(spin.SetStateNumber(-1), std::invalid_argument);
-   EXPECT_THROW(spin.SetStateNumber(2), std::invalid_argument);
+   EXPECT_THROW(spin.SetState(-1), std::invalid_argument);
+   EXPECT_THROW(spin.SetState(2), std::invalid_argument);
+   
+   std::mt19937_64 engine_64(0);
+   EXPECT_NO_THROW(spin.SetState(0));
+   EXPECT_EQ(spin.GenerateCandidateState(&engine_64), 1);
+   EXPECT_NO_THROW(spin.SetState(1));
+   EXPECT_EQ(spin.GenerateCandidateState(&engine_64), 0);
+   EXPECT_THROW(spin.SetState(-1), std::invalid_argument);
+   EXPECT_THROW(spin.SetState(2), std::invalid_argument);
+   
+   utility::Xorshift xorshift(0);
+   EXPECT_NO_THROW(spin.SetState(0));
+   EXPECT_EQ(spin.GenerateCandidateState(&xorshift), 1);
+   EXPECT_NO_THROW(spin.SetState(1));
+   EXPECT_EQ(spin.GenerateCandidateState(&xorshift), 0);
+   EXPECT_THROW(spin.SetState(-1), std::invalid_argument);
+   EXPECT_THROW(spin.SetState(2), std::invalid_argument);
+   
 }
 
 

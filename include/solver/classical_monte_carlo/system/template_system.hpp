@@ -29,9 +29,6 @@ namespace compnal {
 namespace solver {
 namespace classical_monte_carlo {
 
-template<class ModelType, class RandType>
-class System;
-
 //! @brief Generate random spin configurations.
 //! @tparam ModelType Model class.
 //! @tparam RandType Random number engine class.
@@ -56,6 +53,82 @@ std::vector<model::utility::Spin> GenerateRandomSpins(const ModelType &model,
    
    return spins;
 }
+
+template<class ModelType, class RandType>
+class System;
+
+//! @brief Base system class for the Ising model.
+//! @tparam ModelType Model class.
+//! @tparam RandType Random number engine class.
+template<class ModelType, class RandType>
+class BaseIsingSystem {
+  
+public:
+   //! @brief Constructor.
+   //! @param model The model.
+   //! @param seed The seed of the random number engine.
+   BaseIsingSystem(const ModelType &model, const typename RandType::result_type seed):
+   system_size_(model.GetLattice().GetSystemSize()),
+   bc_(model.GetLattice().GetBoundaryCondition()),
+   linear_(model.GetLinear()),
+   quadratic_(model.GetQuadratic()),
+   random_number_engine_(RandType(seed)),
+   sample_(GenerateRandomSpins(model, &random_number_engine_)) {}
+   
+   //! @brief Get the system size.
+   //! @return The system size.
+   std::int32_t GetSystemSize() const {
+      return system_size_;
+   }
+   
+   //! @brief Extract the sample.
+   //! @return The sample.
+   std::vector<typename ModelType::PHQType> ExtractSample() const {
+      std::vector<typename ModelType::PHQType> sample(system_size_);
+      for (std::int32_t i = 0; i < system_size_; ++i) {
+         sample[i] = sample_[i].GetValue();
+      }
+      return sample;
+   }
+   
+   //! @brief Generate candidate state.
+   //! @param index The index of the variable.
+   //! @return The candidate state.
+   std::int32_t GenerateCandidateState(const std::int32_t index) {
+      return sample_[index].GenerateCandidateState(&random_number_engine_);
+   }
+   
+   //! @brief Get the energy difference.
+   //! @param index The index of the variable.
+   //! @param candidate_state The candidate state.
+   //! @return The energy difference.
+   double GetEnergyDifference(const std::int32_t index, const std::int32_t candidate_state) const {
+      return (sample_[index].GetValueFromState(candidate_state) - sample_[index].GetValue())*base_energy_difference_[index];
+   }
+   
+protected:
+   //! @brief The system size.
+   const std::int32_t system_size_ = 0;
+
+   //! @brief The boundary condition.
+   const lattice::BoundaryCondition bc_ = lattice::BoundaryCondition::NONE;
+
+   //! @brief The linear interaction.
+   const double linear_ = 0;
+
+   //! @brief The quadratic interaction.
+   const double quadratic_ = 0;
+
+   //! @brief The random number engine.
+   RandType random_number_engine_;
+   
+   //! @brief The spin configuration.
+   std::vector<model::utility::Spin> sample_;
+   
+   //! @brief The energy difference.
+   std::vector<double> base_energy_difference_;
+
+};
 
 
 } // namespace classical_monte_carlo

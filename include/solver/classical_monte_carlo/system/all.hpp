@@ -24,5 +24,6 @@
 #define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_
 
 #include "ising_chain.hpp"
+#include "ising_square.hpp"
 
 #endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_ */

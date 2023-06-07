@@ -13,33 +13,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  ising_chain.hpp
+//  ising_square.hpp
 //  compnal
 //
-//  Created by kohei on 2023/05/06.
+//  Created by kohei on 2023/06/08.
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_ISING_CHAIN_HPP_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_ISING_CHAIN_HPP_
+#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_ISING_SQUARE_HPP_
+#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_ISING_SQUARE_HPP_
 
 #include "template_system.hpp"
 #include "../../../model/classical/ising.hpp"
 #include "../../../model/utility/variable.hpp"
-#include "../../../lattice/chain.hpp"
+#include "../../../lattice/square.hpp"
 #include "../../../lattice/boundary_condition.hpp"
 
 namespace compnal {
 namespace solver {
 namespace classical_monte_carlo {
 
-//! @brief System class for the Ising model on a chain.
-//! @tparam RandType Random number engine class.
 template<class RandType>
-class System<model::classical::Ising<lattice::Chain>, RandType>: public BaseIsingSystem<model::classical::Ising<lattice::Chain>, RandType> {
-   
+class System<model::classical::Ising<lattice::Square>, RandType>: public BaseIsingSystem<model::classical::Ising<lattice::Square>, RandType> {
    //! @brief Model type.
-   using ModelType = model::classical::Ising<lattice::Chain>;
+   using ModelType = model::classical::Ising<lattice::Square>;
    
 public:
    //! @brief Constructor.
@@ -70,30 +67,10 @@ public:
    void Flip(const std::int32_t index, const std::int32_t update_state) {
       const double diff = this->quadratic_*(this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue());
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
-         if (0 < index && index < this->system_size_ - 1) {
-            this->base_energy_difference_[index - 1] += diff;
-            this->base_energy_difference_[index + 1] += diff;
-         }
-         else if (index == 0) {
-            this->base_energy_difference_[1] += diff;
-            this->base_energy_difference_[this->system_size_ - 1] += diff;
-         }
-         else {
-            this->base_energy_difference_[0] += diff;
-            this->base_energy_difference_[this->system_size_ - 2] += diff;
-         }
+
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
-         if (0 < index && index < this->system_size_ - 1) {
-            this->base_energy_difference_[index - 1] += diff;
-            this->base_energy_difference_[index + 1] += diff;
-         }
-         else if (index == 0) {
-            this->base_energy_difference_[1] += diff;
-         }
-         else {
-            this->base_energy_difference_[this->system_size_ - 2] += diff;
-         }
+
       }
       else {
          throw std::runtime_error("Unsupported BoundaryCondition");
@@ -108,19 +85,10 @@ private:
    std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
       std::vector<double> base_energy_difference(this->system_size_);
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
-         for (std::int32_t index = 0; index < this->system_size_ - 1; ++index) {
-            base_energy_difference[index] += this->quadratic_*sample[index + 1].GetValue() + this->linear_;
-            base_energy_difference[index + 1] += this->quadratic_*sample[index].GetValue();
-         }
-         base_energy_difference[this->system_size_ - 1] += this->quadratic_*sample[0].GetValue() + this->linear_;
-         base_energy_difference[0] += this->quadratic_*sample[this->system_size_ - 1].GetValue();
+
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t index = 0; index < this->system_size_ - 1; ++index) {
-            base_energy_difference[index] += this->quadratic_*sample[index + 1].GetValue() + this->linear_;
-            base_energy_difference[index + 1] += this->quadratic_*sample[index].GetValue();
-         }
-         base_energy_difference[this->system_size_ - 1] += this->linear_;
+
       }
       else {
          throw std::runtime_error("Unsupported BinaryCondition");
@@ -130,9 +98,11 @@ private:
    
 };
 
+
+
 } // namespace classical_monte_carlo
 } // namespace solver
 } // namespace compnal
 
 
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_ISING_CHAIN_HPP_ */
+#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_ISING_SQUARE_HPP_ */

@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  test_system_ising.hpp
+//  test_system_ising_chain.hpp
 //  compnal
 //
 //  Created by kohei on 2023/06/05.
@@ -35,10 +35,11 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnChain) {
    
    
    for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
-      Chain chain_obc{3, bc};
-      Ising ising{chain_obc, 1.0, -4.0};
+      Chain chain{3, bc};
+      Ising ising{chain, 1.0, -4.0};
+      const std::int32_t seed = 0;
       
-      solver::classical_monte_carlo::System<Ising, std::mt19937> system{ising, 0};
+      solver::classical_monte_carlo::System<Ising, std::mt19937> system{ising, seed};
       system.SetSampleByState((std::vector<std::int32_t>{0, 1, 0}));
       
       EXPECT_DOUBLE_EQ(system.ExtractSample().at(0), -0.5);
@@ -108,9 +109,9 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnChain) {
                        ising.CalculateEnergy({-0.5, +0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
    }
-   
-   
 }
+
+
 
 }  // namespace test
 }  // namespace compnal

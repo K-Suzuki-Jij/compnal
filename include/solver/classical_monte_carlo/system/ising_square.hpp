@@ -43,7 +43,9 @@ public:
    //! @param model The model.
    //! @param seed The seed of the random number engine.
    System(const ModelType &model, const typename RandType::result_type seed):
-   BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed) {
+   BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
+   x_size_(model.GetLattice().GetXSize()),
+   y_size_(model.GetLattice().GetYSize()) {
       this->base_energy_difference_ = GenerateEnergyDifference(this->sample_);
    }
    
@@ -66,11 +68,30 @@ public:
    //! @param update_state The state number to be updated.
    void Flip(const std::int32_t index, const std::int32_t update_state) {
       const double diff = this->quadratic_*(this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue());
+      const std::int32_t coo_x = index%x_size_;
+      const std::int32_t coo_y = index/x_size_;
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
-
+         this->base_energy_difference_[coo_y*x_size_ + (coo_x + 1)%x_size_] += diff;
+         this->base_energy_difference_[coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_] += diff;
+         this->base_energy_difference_[((coo_y + 1)%y_size_)*x_size_ + coo_x] += diff;
+         this->base_energy_difference_[((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x] += diff;
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
-
+         // x-direction
+         if (coo_x < x_size_ - 1) {
+            this->base_energy_difference_[index + 1] += diff;
+         }
+         if (coo_x > 0) {
+            this->base_energy_difference_[index - 1] += diff;
+         }
+         
+         // y-direction
+         if (coo_y < y_size_ - 1) {
+            this->base_energy_difference_[(coo_y + 1)*x_size_ + coo_x] += diff;
+         }
+         if (coo_y > 0) {
+            this->base_energy_difference_[(coo_y - 1)*x_size_ + coo_x] += diff;
+         }
       }
       else {
          throw std::runtime_error("Unsupported BoundaryCondition");
@@ -79,21 +100,55 @@ public:
    }
    
 private:
+   //! @brief The length of x-direction.
+   const std::int32_t x_size_ = 0;
+
+   //! @brief The length of y-direction.
+   const std::int32_t y_size_ = 0;
+   
    //! @brief Generate energy difference.
    //! @param sample The spin configuration.
    //! @return The energy difference.
    std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> base_energy_difference(this->system_size_);
+      std::vector<double> d_E(this->system_size_);
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
-
+         for (std::int32_t coo_x = 0; coo_x < x_size_; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size_; ++coo_y) {
+               const std::int32_t index_xp1 = (coo_y*x_size_ + (coo_x + 1)%x_size_);
+               const std::int32_t index_xm1 = (coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_);
+               const std::int32_t index_yp1 = (((coo_y + 1)%y_size_)*x_size_ + coo_x);
+               const std::int32_t index_ym1 = (((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x);
+               const auto v_xp1 = sample[index_xp1].GetValue();
+               const auto v_xm1 = sample[index_xm1].GetValue();
+               const auto v_yp1 = sample[index_yp1].GetValue();
+               const auto v_ym1 = sample[index_ym1].GetValue();
+               d_E[coo_y*x_size_ + coo_x] += this->quadratic_*(v_xp1 + v_xm1 + v_yp1 + v_ym1) + this->linear_;
+            }
+         }
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
-
+         for (std::int32_t coo_x = 0; coo_x < x_size_; ++coo_x) {
+            for (std::int32_t coo_y = 0; coo_y < y_size_; ++coo_y) {
+               if (coo_x < x_size_ - 1) {
+                  d_E[coo_y*x_size_ + coo_x] += this->quadratic_*sample[coo_y*x_size_ + coo_x + 1].GetValue();
+               }
+               if (coo_x > 0) {
+                  d_E[coo_y*x_size_ + coo_x] += this->quadratic_*sample[coo_y*x_size_ + coo_x - 1].GetValue();
+               }
+               if (coo_y < y_size_ - 1) {
+                  d_E[coo_y*x_size_ + coo_x] += this->quadratic_*sample[(coo_y + 1)*x_size_ + coo_x].GetValue();
+               }
+               if (coo_y > 0) {
+                  d_E[coo_y*x_size_ + coo_x] += this->quadratic_*sample[(coo_y - 1)*x_size_ + coo_x].GetValue();
+               }
+               d_E[coo_y*x_size_ + coo_x] += this->linear_;
+            }
+         }
       }
       else {
          throw std::runtime_error("Unsupported BinaryCondition");
       }
-      return base_energy_difference;
+      return d_E;
    }
    
 };

@@ -79,7 +79,7 @@ public:
    
    //! @brief Set update method used in the state update.
    //! @param updater The update method.
-   void SetUpdater(const MonteCarloUpdater updater) {
+   void SetUpdater(const StateUpdateMethod updater) {
       updater_ = updater;
    }
    
@@ -113,9 +113,9 @@ public:
       return temperature_;
    }
    
-   //! @brief Get the monte carlo updater used in the state update.
-   //! @return The monte carlo updater.
-   MonteCarloUpdater GetMonteCarloUpdater() const {
+   //! @brief Get the state update method.
+   //! @return The StateUpdateMethod.
+   StateUpdateMethod GetStateUpdateMethod() const {
       return updater_;
    }
    
@@ -173,7 +173,7 @@ private:
    std::vector<std::vector<PHQType>> samples_ = std::vector<std::vector<PHQType>>(num_samples_);
    
    //! @brief State updater.
-   MonteCarloUpdater updater_ = MonteCarloUpdater::METROPOLIS;
+   StateUpdateMethod updater_ = StateUpdateMethod::METROPOLIS;
    
    //! @brief Random number engine.
    RandomNumberEngine random_number_engine_ = RandomNumberEngine::MT;

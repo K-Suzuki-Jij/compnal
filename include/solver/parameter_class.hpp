@@ -26,7 +26,7 @@
 namespace compnal {
 namespace solver {
 
-enum class MonteCarloUpdater {
+enum class StateUpdateMethod {
    
    //! @brief Metropolis updater, single spin flip.
    METROPOLIS,
@@ -46,6 +46,14 @@ enum class RandomNumberEngine {
    
    //! @brief 32-bit Xorshift
    XORSHIFT
+   
+};
+
+enum class SpinSelectionMethod {
+   
+   RANDOM,
+   
+   SEQUENTIAL
    
 };
 

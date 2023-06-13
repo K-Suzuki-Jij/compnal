@@ -33,6 +33,8 @@ namespace compnal {
 namespace solver {
 namespace classical_monte_carlo {
 
+//! @brief System class for the Ising model on a square.
+//! @tparam RandType Random number engine class.
 template<class RandType>
 class System<model::classical::Ising<lattice::Square>, RandType>: public BaseIsingSystem<model::classical::Ising<lattice::Square>, RandType> {
    //! @brief Model type.

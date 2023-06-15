@@ -14,8 +14,8 @@
 
 from __future__ import annotations
 from typing import Union, Optional
-from compnal.model import Ising, PolyIsing
-from compnal.base_solver import base_solver
+from compnal.model.classical import Ising, PolyIsing
+from compnal.base_compnal import base_solver
 from compnal.solver.parameters import (
     StateUpdateMethod,
     RandomNumberEngine,

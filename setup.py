@@ -35,6 +35,7 @@ setup(
         'compnal.lattice',
         'compnal.model',
         'compnal.model.classical',
+        'compnal.solver',
         ],
     cmake_install_dir="compnal",
     include_package_data=False,

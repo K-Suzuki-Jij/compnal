@@ -100,11 +100,11 @@ class PolyIsing:
         """
         self._base_model.set_spin_magnitude(spin_magnitude, coordinate)
     
-    def calculate_energy(self, state: Union[np.array, list]) -> float:
+    def calculate_energy(self, state: Union[np.ndarray, list]) -> float:
         """Calculate the energy of the state.
 
         Args:
-            state (np.array): State.
+            state (np.ndarray): State.
 
         Raises:
             ValueError: When the shape of the state is invalid.

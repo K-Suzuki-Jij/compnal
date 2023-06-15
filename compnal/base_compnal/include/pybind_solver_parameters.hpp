@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  pybind_classical_monte_carlo.hpp
+//  pybind_solver_parameters.hpp
 //  compnal
 //
 //  Created by kohei on 2023/06/16.

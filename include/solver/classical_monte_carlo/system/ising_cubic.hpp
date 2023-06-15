@@ -60,7 +60,7 @@ public:
    //! @param state_list The list of states.
    void SetSampleByState(const std::vector<std::int32_t> &state_list) {
       if (state_list.size() != this->sample_.size()) {
-         throw std::runtime_error("The size of initial variables is not equal to the system size.");
+         throw std::invalid_argument("The size of initial variables is not equal to the system size.");
       }
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);
@@ -110,7 +110,7 @@ public:
          }
       }
       else {
-         throw std::runtime_error("Unsupported BoundaryCondition");
+         throw std::invalid_argument("Unsupported BoundaryCondition");
       }
       this->sample_[index].SetState(update_state);
    }
@@ -182,7 +182,7 @@ private:
          }
       }
       else {
-         throw std::runtime_error("Unsupported BinaryCondition");
+         throw std::invalid_argument("Unsupported BinaryCondition");
       }
       return d_E;
       

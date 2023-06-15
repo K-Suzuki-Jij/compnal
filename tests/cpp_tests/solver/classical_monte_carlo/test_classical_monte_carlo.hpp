@@ -30,10 +30,188 @@
 namespace compnal {
 namespace test {
 
+TEST(SolverClassicalMonteCarlo, SolverParameters) {
+   using BC = lattice::BoundaryCondition;
+   using Chain = lattice::Chain;
+   using Ising = model::classical::Ising<Chain>;
+   
+   Chain chain{3, BC::OBC};
+   Ising ising{chain, 1.0, -4.0};
+   
+   auto cmc = solver::classical_monte_carlo::make_classical_monte_carlo(ising);
+   cmc.SetNumSweeps(500);
+   cmc.SetNumSamples(100);
+   cmc.SetNumThreads(2);
+   cmc.SetTemperature(10);
+   cmc.SetStateUpdateMethod(solver::StateUpdateMethod::HEAT_BATH);
+   cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT);
+   cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::SEQUENTIAL);
+   
+   EXPECT_EQ(cmc.GetNumSweeps(), 500);
+   EXPECT_EQ(cmc.GetNumSamples(), 100);
+   EXPECT_EQ(cmc.GetNumThreads(), 2);
+   EXPECT_DOUBLE_EQ(cmc.GetTemperature(), 10.0);
+   EXPECT_EQ(cmc.GetStateUpdateMethod(), solver::StateUpdateMethod::HEAT_BATH);
+   EXPECT_EQ(cmc.GetRandomNumberEngine(), solver::RandomNumberEngine::MT);
+   EXPECT_EQ(cmc.GetSpinSelectionMethod(), solver::SpinSelectionMethod::SEQUENTIAL);
+   
+   auto samples = cmc.RunSampling();
+   EXPECT_EQ(samples.size(), cmc.GetNumSamples());
+   
+   cmc.RunSampling(0);
+   EXPECT_EQ(cmc.GetSeed(), 0);
+   
+   EXPECT_THROW(cmc.SetNumSweeps(-1), std::invalid_argument);
+   EXPECT_THROW(cmc.SetNumSamples(0), std::invalid_argument);
+   EXPECT_THROW(cmc.SetNumThreads(0), std::invalid_argument);
+   EXPECT_THROW(cmc.SetTemperature(-0.3), std::invalid_argument);
+   
+}
+
 TEST(SolverClassicalMonteCarlo, IsingOnChain) {
+   using BC = lattice::BoundaryCondition;
+   using Chain = lattice::Chain;
+   using Ising = model::classical::Ising<Chain>;
    
+   for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
+      Ising ising{Chain{3, bc}, -1.0, -4.0, 1.5, 2};
+      
+      auto cmc = solver::classical_monte_carlo::ClassicalMonteCarlo(ising);
+      cmc.SetNumSweeps(500);
+      cmc.SetNumSamples(10);
+      cmc.SetNumThreads(2);
+      cmc.SetTemperature(0.1);
+      
+      cmc.SetStateUpdateMethod(solver::StateUpdateMethod::METROPOLIS);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetStateUpdateMethod(solver::StateUpdateMethod::HEAT_BATH);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::XORSHIFT);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT_64);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::RANDOM);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::SEQUENTIAL);
+      EXPECT_NO_THROW(cmc.RunSampling());
+   }
+}
+
+TEST(SolverClassicalMonteCarlo, IsingOnSquare) {
+   using BC = lattice::BoundaryCondition;
+   using Square = lattice::Square;
+   using Ising = model::classical::Ising<Square>;
    
+   for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
+      Ising ising{Square{3, 4, bc}, -1.0, -4.0, 1.5, 2};
+      
+      auto cmc = solver::classical_monte_carlo::ClassicalMonteCarlo(ising);
+      cmc.SetNumSweeps(500);
+      cmc.SetNumSamples(10);
+      cmc.SetNumThreads(2);
+      cmc.SetTemperature(0.1);
+      
+      cmc.SetStateUpdateMethod(solver::StateUpdateMethod::METROPOLIS);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetStateUpdateMethod(solver::StateUpdateMethod::HEAT_BATH);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::XORSHIFT);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT_64);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::RANDOM);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::SEQUENTIAL);
+      EXPECT_NO_THROW(cmc.RunSampling());
+   }
+}
+
+TEST(SolverClassicalMonteCarlo, IsingOnCubic) {
+   using BC = lattice::BoundaryCondition;
+   using Cubic = lattice::Cubic;
+   using Ising = model::classical::Ising<Cubic>;
    
+   for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
+      Ising ising{Cubic{3, 4, 2, bc}, -1.0, -4.0, 1.5, 2};
+      
+      auto cmc = solver::classical_monte_carlo::ClassicalMonteCarlo(ising);
+      cmc.SetNumSweeps(500);
+      cmc.SetNumSamples(10);
+      cmc.SetNumThreads(2);
+      cmc.SetTemperature(0.1);
+      
+      cmc.SetStateUpdateMethod(solver::StateUpdateMethod::METROPOLIS);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetStateUpdateMethod(solver::StateUpdateMethod::HEAT_BATH);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::XORSHIFT);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT_64);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::RANDOM);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::SEQUENTIAL);
+      EXPECT_NO_THROW(cmc.RunSampling());
+   }
+}
+
+TEST(SolverClassicalMonteCarlo, IsingOnInfiniteRange) {
+   using BC = lattice::BoundaryCondition;
+   using InfiniteRange = lattice::InfiniteRange;
+   using Ising = model::classical::Ising<InfiniteRange>;
+   
+   Ising ising{InfiniteRange{3}, -1.0, -4.0, 1.5, 2};
+   
+   auto cmc = solver::classical_monte_carlo::ClassicalMonteCarlo(ising);
+   cmc.SetNumSweeps(500);
+   cmc.SetNumSamples(10);
+   cmc.SetNumThreads(2);
+   cmc.SetTemperature(0.1);
+   
+   cmc.SetStateUpdateMethod(solver::StateUpdateMethod::METROPOLIS);
+   EXPECT_NO_THROW(cmc.RunSampling());
+   
+   cmc.SetStateUpdateMethod(solver::StateUpdateMethod::HEAT_BATH);
+   EXPECT_NO_THROW(cmc.RunSampling());
+   
+   cmc.SetRandomNumberEngine(solver::RandomNumberEngine::XORSHIFT);
+   EXPECT_NO_THROW(cmc.RunSampling());
+   
+   cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT);
+   EXPECT_NO_THROW(cmc.RunSampling());
+   
+   cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT_64);
+   EXPECT_NO_THROW(cmc.RunSampling());
+   
+   cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::RANDOM);
+   EXPECT_NO_THROW(cmc.RunSampling());
+   
+   cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::SEQUENTIAL);
+   EXPECT_NO_THROW(cmc.RunSampling());
 }
 
 

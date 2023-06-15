@@ -56,7 +56,7 @@ public:
    //! @param state_list The list of states.
    void SetSampleByState(const std::vector<std::int32_t> &state_list) {
       if (state_list.size() != this->sample_.size()) {
-         throw std::runtime_error("The size of initial variables is not equal to the system size.");
+         throw std::invalid_argument("The size of initial variables is not equal to the system size.");
       }
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);

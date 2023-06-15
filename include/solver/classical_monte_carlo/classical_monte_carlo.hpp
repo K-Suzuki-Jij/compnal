@@ -23,13 +23,18 @@
 #ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
 #define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
 
+#include "../../utility/random.hpp"
 #include "../parameter_class.hpp"
 #include "system/all.hpp"
+#include "single_updater.hpp"
 #include <random>
 
 namespace compnal {
 namespace solver {
+namespace classical_monte_carlo {
 
+//! @brief Classical monte carlo class.
+//! @tparam ModelType Model class.
 template<class ModelType>
 class ClassicalMonteCarlo {
    
@@ -74,12 +79,12 @@ public:
       if (temperature < 0) {
          throw std::invalid_argument("Temperature must be non-negative value.");
       }
-      temperature_ = 1.0/temperature;
+      temperature_ = temperature;
    }
    
    //! @brief Set update method used in the state update.
    //! @param updater The update method.
-   void SetUpdater(const StateUpdateMethod updater) {
+   void SetStateUpdateMethod(const StateUpdateMethod updater) {
       updater_ = updater;
    }
    
@@ -87,6 +92,11 @@ public:
    //! @param random_number_engine The random number engine.
    void SetRandomNumberEngine(const RandomNumberEngine random_number_engine) {
       random_number_engine_ = random_number_engine;
+   }
+   
+   //! @brief Set spin selection method.
+   void SetSpinSelectionMethod(const SpinSelectionMethod spin_selection_method) {
+      spin_selector_ = spin_selection_method;
    }
    
    //! @brief Get the number of sweeps.
@@ -125,29 +135,46 @@ public:
       return random_number_engine_;
    }
    
+   //! @brief Get the spin selection method.
+   //! @return The spin selection method.
+   SpinSelectionMethod GetSpinSelectionMethod() const {
+      return spin_selector_;
+   }
+   
    //! @brief Get the seed to be used in the calculation.
    //! @return The seed.
    std::uint64_t GetSeed() const {
       return seed_;
    }
    
-   //! @brief Get the samples.
-   //! @return The samples.
-   const std::vector<std::vector<PHQType>> &GetSamples() const {
-      return samples_;
-   }
-   
+   //! @brief Get the model.
+   //! @return The model.
    const ModelType GetModel() const {
       return model_;
    }
    
-   std::vector<double> CalculateSampleEnergies() const {
-      std::vector<double> energies(num_samples_);
-#pragma omp parallel for num_threads(num_threads_)
-      for (std::int32_t i = 0; i < num_samples_; ++i) {
-         energies[i] = model_.CalculateEnergy(samples_[i]);
+   //! @brief Execute classical monte carlo simulation.
+   //! @return The list of samples.
+   std::vector<std::vector<PHQType>> RunSampling() {
+      return RunSampling(std::random_device()());
+   }
+   
+   //! @brief Execute classical monte carlo simulation.
+   //! @param seed The seed used in the calculation.
+   //! @return The list of samples.
+   std::vector<std::vector<PHQType>> RunSampling(const std::uint64_t seed) {
+      if (random_number_engine_ == RandomNumberEngine::XORSHIFT) {
+         return TemplateRunner<System<ModelType, utility::Xorshift>, utility::Xorshift>(static_cast<std::uint32_t>(seed));
       }
-      return energies;
+      else if (random_number_engine_ == RandomNumberEngine::MT) {
+         return TemplateRunner<System<ModelType, std::mt19937>, std::mt19937>(static_cast<std::uint32_t>(seed));
+      }
+      else if (random_number_engine_ == RandomNumberEngine::MT_64) {
+         return TemplateRunner<System<ModelType, std::mt19937_64>, std::mt19937_64>(seed);
+      }
+      else {
+         throw std::invalid_argument("Unknwon random_number_engine");
+      }
    }
    
 private:
@@ -166,11 +193,8 @@ private:
    //! @brief The temperature.
    double temperature_ = 1;
    
-   //! @brief The seed to be used in the calculation.
+   //! @brief The seed used in the calculation.
    std::uint64_t seed_ = std::random_device()();
-   
-   //! @brief The samples.
-   std::vector<std::vector<PHQType>> samples_ = std::vector<std::vector<PHQType>>(num_samples_);
    
    //! @brief State updater.
    StateUpdateMethod updater_ = StateUpdateMethod::METROPOLIS;
@@ -178,9 +202,46 @@ private:
    //! @brief Random number engine.
    RandomNumberEngine random_number_engine_ = RandomNumberEngine::MT;
    
+   //! @brief Spin selective method.
+   SpinSelectionMethod spin_selector_ = SpinSelectionMethod::RANDOM;
+   
+   //! @brief Template function for running classical monte carlo simulation.
+   //! @tparam SystemType System class.
+   //! @tparam RandType Random number engine class.
+   //! @param seed The seed used in the calculation.
+   //! @return The list of samples.
+   template<class SystemType, class RandType>
+   std::vector<std::vector<PHQType>> TemplateRunner(const typename RandType::result_type seed) {
+      seed_ = seed;
+      std::vector<std::vector<PHQType>> samples(num_samples_);
+      std::vector<typename RandType::result_type> system_seed(num_samples_);
+      std::vector<typename RandType::result_type> updater_seed(num_samples_);
+      RandType random_number_engine(seed);
+      for (std::int32_t i = 0; i < num_samples_; ++i) {
+         system_seed[i] = random_number_engine();
+         updater_seed[i] = random_number_engine();
+      }
+#pragma omp parallel for schedule(guided) num_threads(num_threads_)
+      for (std::int32_t i = 0; i < num_samples_; ++i) {
+         auto system = SystemType{model_, system_seed[i]};
+         SingleUpdater<SystemType, RandType>(&system, num_sweeps_, 1.0/temperature_, updater_seed[i], updater_, spin_selector_);
+         samples[i] = system.ExtractSample();
+      }
+      return samples;
+   }
+   
 };
 
+//! @brief Make ClassicalMonteCarlo class.
+//! @tparam ModelType Model class.
+//! @param model The model.
+//! @return The ClassicalMonteCarlo class.
+template<class ModelType>
+auto make_classical_monte_carlo(const ModelType &model) {
+   return ClassicalMonteCarlo<ModelType>(model);
+}
 
+} // namespace classical_monte_carlo
 } // namespace solver
 } // namespace compnal
 

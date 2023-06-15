@@ -186,8 +186,8 @@ TEST(ModelClassical, PolynomialIsingOnInfiniteRang) {
    EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy({-1,+1,-1})), +3.0);
    EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{1, 1.0}, {2, 2.0}, {3, 3.0}}}.CalculateEnergy({-1,+1,-1})), 0.0);
    
-   EXPECT_THROW((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy({-1,+1}))      , std::runtime_error);
-   EXPECT_THROW((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy({-1,+1,+1,+1})), std::runtime_error);
+   EXPECT_THROW((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy({-1,+1}))      , std::range_error);
+   EXPECT_THROW((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy({-1,+1,+1,+1})), std::range_error);
 }
 
 

@@ -30,7 +30,6 @@ from compnal.solver.parameters import (
 import numpy as np
 
 
-
 class ClassicalMonteCarlo:
     """Class for the classical Monte Carlo solver.
     """

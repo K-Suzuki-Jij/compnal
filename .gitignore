@@ -179,3 +179,5 @@ _cmake_test_compile
 _version.py
 
 .vscode
+
+notebook

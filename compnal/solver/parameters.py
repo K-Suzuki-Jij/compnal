@@ -95,9 +95,9 @@ def _cast_state_update_method(
         base_solver.StateUpdateMethod: State update method in base_compnal.
     """
 
-    if state_update_method == "METROPOLIS":
+    if state_update_method in ("METROPOLIS", StateUpdateMethod.METROPOLIS):
         return base_solver.StateUpdateMethod.METROPOLIS
-    elif state_update_method == "HEAT_BATH":
+    elif state_update_method in ("HEAT_BATH", StateUpdateMethod.HEAT_BATH):
         return base_solver.StateUpdateMethod.HEAT_BATH
     else:
         raise ValueError("Invalid state update method.")
@@ -145,11 +145,11 @@ def _cast_random_number_engine(
         base_solver.RandomNumberEngine: Random number engine in base_compnal.
     """
 
-    if random_number_engine == "MT":
+    if random_number_engine in ("MT", RandomNumberEngine.MT):
         return base_solver.RandomNumberEngine.MT
-    elif random_number_engine == "MT64":
+    elif random_number_engine in ("MT_64", RandomNumberEngine.MT_64):
         return base_solver.RandomNumberEngine.MT_64
-    elif random_number_engine == "XORSHIFT":
+    elif random_number_engine in ("XORSHIFT", RandomNumberEngine.XORSHIFT):
         return base_solver.RandomNumberEngine.XORSHIFT
     else:
         raise ValueError("Invalid random number engine.")
@@ -195,9 +195,9 @@ def _cast_spin_selection_method(
         base_solver.SpinSelectionMethod: Spin selection method in base_compnal.
     """
 
-    if spin_selection_method == "RANDOM":
+    if spin_selection_method in ("RANDOM", SpinSelectionMethod.RANDOM):
         return base_solver.SpinSelectionMethod.RANDOM
-    elif spin_selection_method == "SEQUENTIAL":
+    elif spin_selection_method in ("SEQUENTIAL", SpinSelectionMethod.SEQUENTIAL):
         return base_solver.SpinSelectionMethod.SEQUENTIAL
     else:
         raise ValueError("Invalid spin selection method.")

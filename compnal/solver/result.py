@@ -6,6 +6,7 @@ from compnal.solver.parameters import (
     RandomNumberEngine,
     SpinSelectionMethod
 )
+import numpy as np
 
 
 @dataclass
@@ -73,11 +74,13 @@ class CMCResult:
     info: Optional[CMCInfo] = None
     params: Optional[CMCParams] = None
 
-    def calculate_mean(bias: float = 0.0) -> float:
-        pass
+    def calculate_mean(self, bias: float = 0.0) -> float:
+        return self.calculate_moment(order=1, bias=bias)
 
-    def calculate_moment(order: int, bias: float = 0.0) -> float:
-        pass
+    def calculate_moment(self, order: int, bias: float = 0.0) -> float:
+        return np.mean(
+            [np.mean(np.array(list(sample.values())) + bias)**order for sample in self.samples]
+        )
 
     def to_serializable() -> dict:
         pass

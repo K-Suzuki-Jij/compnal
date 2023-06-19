@@ -1,6 +1,7 @@
-from compnal.solver.classical_monte_carlo import ClassicalMonteCarlo
+from compnal.solver.cmc import CMC
 from compnal.solver.parameters import (
     StateUpdateMethod,
     RandomNumberEngine,
     SpinSelectionMethod,
 )
+from compnal.solver.result import CMCResult, CMCInfo, CMCParams

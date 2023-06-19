@@ -55,8 +55,9 @@ TEST(SolverClassicalMonteCarlo, SolverParameters) {
    EXPECT_EQ(cmc.GetRandomNumberEngine(), solver::RandomNumberEngine::MT);
    EXPECT_EQ(cmc.GetSpinSelectionMethod(), solver::SpinSelectionMethod::SEQUENTIAL);
    
-   auto samples = cmc.RunSampling();
-   EXPECT_EQ(samples.size(), cmc.GetNumSamples());
+   cmc.RunSampling();
+   EXPECT_EQ(cmc.GetSamples().size(), cmc.GetNumSamples());
+   EXPECT_EQ(cmc.CalculateEnergies().size(), cmc.GetNumSamples());
    
    cmc.RunSampling(0);
    EXPECT_EQ(cmc.GetSeed(), 0);

@@ -99,30 +99,7 @@ class PolyIsing:
             ValueError: When the magnitude of spins is invalid or the coordinate is invalid.
         """
         self._base_model.set_spin_magnitude(spin_magnitude, coordinate)
-    
-    def calculate_energy(self, state: Union[np.ndarray, list]) -> float:
-        """Calculate the energy of the state.
-
-        Args:
-            state (np.ndarray): State.
-
-        Raises:
-            ValueError: When the shape of the state is invalid.
-
-        Returns:
-            float: Energy.
-        """
-        state = np.array(state)
-
-        # Check if the state is valid
-        if any([isinstance(self._lattice, Chain) and state.shape != (self._lattice.system_size,),
-                isinstance(self._lattice, Square) and state.shape != (self._lattice.x_size, self._lattice.y_size),
-                isinstance(self._lattice, Cubic) and state.shape != (self._lattice.x_size, self._lattice.y_size, self._lattice.z_size),
-                isinstance(self._lattice, InfiniteRange) and state.shape != (self._lattice.system_size,)]):
-            raise ValueError("The shape of the state is invalid.")
         
-        return self._base_model.calculate_energy(state=state.reshape(-1))
-    
     @property
     def lattice(self) -> Union[Chain, Square, Cubic, InfiniteRange]:
         return self._lattice

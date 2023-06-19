@@ -153,24 +153,39 @@ public:
       return model_;
    }
    
-   //! @brief Execute classical monte carlo simulation.
+   //! @brief Get the list of samples.
    //! @return The list of samples.
-   std::vector<std::vector<PHQType>> RunSampling() {
-      return RunSampling(std::random_device()());
+   const std::vector<std::vector<PHQType>> &GetSamples() const {
+      return samples_;
+   }
+   
+   //! @brief Calculate energies for each sample.
+   //! @return The list of energy.
+   const std::vector<double> CalculateEnergies() const {
+      std::vector<double> energies(num_samples_);
+#pragma omp parallel for schedule(guided) num_threads(num_threads_)
+      for (std::int32_t i = 0; i < num_samples_; ++i) {
+         energies[i] = model_.CalculateEnergy(samples_[i]);
+      }
+      return energies;
+   }
+   
+   //! @brief Execute classical monte carlo simulation.
+   void RunSampling() {
+      RunSampling(std::random_device()());
    }
    
    //! @brief Execute classical monte carlo simulation.
    //! @param seed The seed used in the calculation.
-   //! @return The list of samples.
-   std::vector<std::vector<PHQType>> RunSampling(const std::uint64_t seed) {
+   void RunSampling(const std::uint64_t seed) {
       if (random_number_engine_ == RandomNumberEngine::XORSHIFT) {
-         return TemplateRunner<System<ModelType, utility::Xorshift>, utility::Xorshift>(static_cast<std::uint32_t>(seed));
+         samples_ = TemplateRunner<System<ModelType, utility::Xorshift>, utility::Xorshift>(static_cast<std::uint32_t>(seed));
       }
       else if (random_number_engine_ == RandomNumberEngine::MT) {
-         return TemplateRunner<System<ModelType, std::mt19937>, std::mt19937>(static_cast<std::uint32_t>(seed));
+         samples_ = TemplateRunner<System<ModelType, std::mt19937>, std::mt19937>(static_cast<std::uint32_t>(seed));
       }
       else if (random_number_engine_ == RandomNumberEngine::MT_64) {
-         return TemplateRunner<System<ModelType, std::mt19937_64>, std::mt19937_64>(seed);
+         samples_ = TemplateRunner<System<ModelType, std::mt19937_64>, std::mt19937_64>(seed);
       }
       else {
          throw std::invalid_argument("Unknwon random_number_engine");
@@ -195,6 +210,9 @@ private:
    
    //! @brief The seed used in the calculation.
    std::uint64_t seed_ = std::random_device()();
+   
+   //! @brief The list of samples.
+   std::vector<std::vector<PHQType>> samples_;
    
    //! @brief State updater.
    StateUpdateMethod updater_ = StateUpdateMethod::METROPOLIS;

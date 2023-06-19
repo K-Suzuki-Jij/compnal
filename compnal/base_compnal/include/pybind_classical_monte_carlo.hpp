@@ -60,7 +60,9 @@ void PyBindClassicalMonteCarlo(py::module &m, const std::string &post_name = "")
    py_class.def("get_random_number_engine", &CMC::GetRandomNumberEngine);
    py_class.def("get_spin_selection_method", &CMC::GetSpinSelectionMethod);
    py_class.def("get_seed", &CMC::GetSeed);
+   py_class.def("get_samples", &CMC::GetSamples);
    py_class.def("get_model", &CMC::GetModel);
+   py_class.def("calculate_energies", &CMC::CalculateEnergies);
    py_class.def("run_sampling", py::overload_cast<>(&CMC::RunSampling));
    py_class.def("run_sampling", py::overload_cast<const std::uint64_t>(&CMC::RunSampling), "seed"_a);
 

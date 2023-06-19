@@ -1,15 +1,15 @@
 import pytest
-import numpy as np
+import statistics
 from compnal.model.classical import Ising
 from compnal.lattice import Chain, Square, Cubic, InfiniteRange
-from compnal.solver import ClassicalMonteCarlo
+from compnal.solver import CMC
 from compnal.solver.parameters import (
     StateUpdateMethod,
     RandomNumberEngine,
     SpinSelectionMethod
 )
 
-def test_classical_monte_carlo_ising_chain():
+def test_cmc_ising_chain():
     boundary_condition_list = ["OBC", "PBC"]
     state_update_method_list = [StateUpdateMethod.METROPOLIS, StateUpdateMethod.HEAT_BATH]
     random_number_engine_list = [RandomNumberEngine.MT, RandomNumberEngine.MT_64, RandomNumberEngine.XORSHIFT]
@@ -23,10 +23,10 @@ def test_classical_monte_carlo_ising_chain():
                         system_size=5, boundary_condition=boundary_condition
                     )
                     ising = Ising(
-                        lattice=chain, linear=1.0, quadratic=-4.0, spin_magnitude=0.5, spin_scale_factor=2
+                        lattice=chain, linear=1.0, quadratic=-1.0, spin_magnitude=0.5, spin_scale_factor=2
                     )
-                    cmc = ClassicalMonteCarlo(model=ising)
-                    samples = cmc.run_sampling(
+                    results = CMC.run_sampling(
+                        model=ising,
                         temperature=1.0, 
                         num_sweeps=1000, 
                         num_samples=1, 
@@ -36,20 +36,20 @@ def test_classical_monte_carlo_ising_chain():
                         spin_selection_method=spin_selection_method,
                         seed=0
                     )
-                    for sample in samples:
-                        assert abs(np.mean(sample)) == pytest.approx(1.0, abs=1e-8)
+                    for sample in results.samples:
+                        assert statistics.mean(sample.values()) == pytest.approx(-1.0, abs=1e-8)
 
-                    assert cmc.temperature == 1.0
-                    assert cmc.num_sweeps == 1000
-                    assert cmc.num_samples == 1
-                    assert cmc.num_threads == 1
-                    assert cmc.state_update_method == state_update_method
-                    assert cmc.random_number_engine == random_number_engine
-                    assert cmc.spin_selection_method == spin_selection_method
-                    assert cmc.get_seed() == 0
+                    assert results.temperature == 1.0
+                    assert results.params.num_sweeps == 1000
+                    assert results.params.num_samples == 1
+                    assert results.params.num_threads == 1
+                    assert results.params.state_update_method == state_update_method
+                    assert results.params.random_number_engine == random_number_engine
+                    assert results.params.spin_selection_method == spin_selection_method
+                    assert results.params.seed == 0
 
 
-def test_classical_monte_carlo_ising_square():
+def test_cmc_ising_square():
     boundary_condition_list = ["OBC", "PBC"]
     state_update_method_list = [StateUpdateMethod.METROPOLIS, StateUpdateMethod.HEAT_BATH]
     random_number_engine_list = [RandomNumberEngine.MT, RandomNumberEngine.MT_64, RandomNumberEngine.XORSHIFT]
@@ -60,14 +60,14 @@ def test_classical_monte_carlo_ising_square():
             for random_number_engine in random_number_engine_list:
                 for spin_selection_method in spin_selection_method_list:
                     square = Square(
-                        x_size=3, y_size=4, boundary_condition=boundary_condition
+                        x_size=4, y_size=3, boundary_condition=boundary_condition
                     )
                     ising = Ising(
-                        lattice=square, linear=1.0, quadratic=-4.0, spin_magnitude=1, spin_scale_factor=1
+                        lattice=square, linear=1.0, quadratic=-1.0, spin_magnitude=1, spin_scale_factor=1
                     )
-                    cmc = ClassicalMonteCarlo(model=ising)
-                    samples = cmc.run_sampling(
-                        temperature=1.0, 
+                    results = CMC.run_sampling(
+                        model=ising,
+                        temperature=0.5, 
                         num_sweeps=2000, 
                         num_samples=1, 
                         num_threads=1,
@@ -76,20 +76,20 @@ def test_classical_monte_carlo_ising_square():
                         spin_selection_method=spin_selection_method,
                         seed=0
                     )
-                    for sample in samples:
-                        assert abs(np.mean(sample)) == pytest.approx(1.0, abs=1e-8)
+                    for sample in results.samples:
+                        assert statistics.mean(sample.values()) == pytest.approx(-1.0, abs=1e-8)
 
-                    assert cmc.temperature == 1.0
-                    assert cmc.num_sweeps == 2000
-                    assert cmc.num_samples == 1
-                    assert cmc.num_threads == 1
-                    assert cmc.state_update_method == state_update_method
-                    assert cmc.random_number_engine == random_number_engine
-                    assert cmc.spin_selection_method == spin_selection_method
-                    assert cmc.get_seed() == 0
+                    assert results.temperature == 0.5
+                    assert results.params.num_sweeps == 2000
+                    assert results.params.num_samples == 1
+                    assert results.params.num_threads == 1
+                    assert results.params.state_update_method == state_update_method
+                    assert results.params.random_number_engine == random_number_engine
+                    assert results.params.spin_selection_method == spin_selection_method
+                    assert results.params.seed == 0
 
 
-def test_classical_monte_carlo_ising_cubic():
+def test_cmc_ising_cubic():
     boundary_condition_list = ["OBC", "PBC"]
     state_update_method_list = [StateUpdateMethod.METROPOLIS, StateUpdateMethod.HEAT_BATH]
     random_number_engine_list = [RandomNumberEngine.MT, RandomNumberEngine.MT_64, RandomNumberEngine.XORSHIFT]
@@ -103,12 +103,12 @@ def test_classical_monte_carlo_ising_cubic():
                         x_size=3, y_size=4, z_size=3, boundary_condition=boundary_condition
                     )
                     ising = Ising(
-                        lattice=cubic, linear=1.0, quadratic=-4.0, spin_magnitude=1, spin_scale_factor=1
+                        lattice=cubic, linear=1.0, quadratic=-1.0, spin_magnitude=1, spin_scale_factor=1
                     )
-                    cmc = ClassicalMonteCarlo(model=ising)
-                    samples = cmc.run_sampling(
-                        temperature=2.0, 
-                        num_sweeps=5000, 
+                    results = CMC.run_sampling(
+                        model=ising,
+                        temperature=0.8, 
+                        num_sweeps=4000, 
                         num_samples=1, 
                         num_threads=1,
                         state_update_method=state_update_method,
@@ -116,20 +116,20 @@ def test_classical_monte_carlo_ising_cubic():
                         spin_selection_method=spin_selection_method,
                         seed=0
                     )
-                    for sample in samples:
-                        assert abs(np.mean(sample)) == pytest.approx(1.0, abs=1e-8)
+                    for sample in results.samples:
+                        assert statistics.mean(sample.values()) == pytest.approx(-1.0, abs=1e-8)
 
-                    assert cmc.temperature == 2.0
-                    assert cmc.num_sweeps == 5000
-                    assert cmc.num_samples == 1
-                    assert cmc.num_threads == 1
-                    assert cmc.state_update_method == state_update_method
-                    assert cmc.random_number_engine == random_number_engine
-                    assert cmc.spin_selection_method == spin_selection_method
-                    assert cmc.get_seed() == 0
+                    assert results.temperature == 0.8
+                    assert results.params.num_sweeps == 4000
+                    assert results.params.num_samples == 1
+                    assert results.params.num_threads == 1
+                    assert results.params.state_update_method == state_update_method
+                    assert results.params.random_number_engine == random_number_engine
+                    assert results.params.spin_selection_method == spin_selection_method
+                    assert results.params.seed == 0
 
 
-def test_classical_monte_carlo_ising_infinite_range():
+def test_cmc_ising_infinite_range():
     state_update_method_list = [StateUpdateMethod.METROPOLIS, StateUpdateMethod.HEAT_BATH]
     random_number_engine_list = [RandomNumberEngine.MT, RandomNumberEngine.MT_64, RandomNumberEngine.XORSHIFT]
     spin_selection_method_list = [SpinSelectionMethod.RANDOM, SpinSelectionMethod.SEQUENTIAL]
@@ -141,10 +141,10 @@ def test_classical_monte_carlo_ising_infinite_range():
                     system_size=5
                 )
                 ising = Ising(
-                    lattice=infinite_range, linear=1.0, quadratic=-4.0, spin_magnitude=1, spin_scale_factor=1
+                    lattice=infinite_range, linear=1.0, quadratic=-1.0, spin_magnitude=1, spin_scale_factor=1
                 )
-                cmc = ClassicalMonteCarlo(model=ising)
-                samples = cmc.run_sampling(
+                results = CMC.run_sampling(
+                    model=ising,
                     temperature=1.0, 
                     num_sweeps=1000, 
                     num_samples=1, 
@@ -154,16 +154,16 @@ def test_classical_monte_carlo_ising_infinite_range():
                     spin_selection_method=spin_selection_method,
                     seed=0
                 )
-                for sample in samples:
-                    assert abs(np.mean(sample)) == pytest.approx(1.0, abs=1e-8)
+                for sample in results.samples:
+                    assert statistics.mean(sample.values()) == pytest.approx(-1.0, abs=1e-8)
 
-                assert cmc.temperature == 1.0
-                assert cmc.num_sweeps == 1000
-                assert cmc.num_samples == 1
-                assert cmc.num_threads == 1
-                assert cmc.state_update_method == state_update_method
-                assert cmc.random_number_engine == random_number_engine
-                assert cmc.spin_selection_method == spin_selection_method
-                assert cmc.get_seed() == 0
+                assert results.temperature == 1.0
+                assert results.params.num_sweeps == 1000
+                assert results.params.num_samples == 1
+                assert results.params.num_threads == 1
+                assert results.params.state_update_method == state_update_method
+                assert results.params.random_number_engine == random_number_engine
+                assert results.params.spin_selection_method == spin_selection_method
+                assert results.params.seed == 0
 
 

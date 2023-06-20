@@ -17,7 +17,7 @@ from enum import Enum
 from typing import Union
 from compnal.base_compnal import base_lattice
 
-class BoundaryCondition(Enum):
+class BoundaryCondition(int, Enum):
     """Boundary condition.
 
     Args:

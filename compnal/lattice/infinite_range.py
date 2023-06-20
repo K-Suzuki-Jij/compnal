@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 from compnal.base_compnal import base_lattice
+from compnal.lattice.lattice_info import LatticeInfo, LatticeType
 from compnal.lattice.boundary_condition import (
     BoundaryCondition, 
     _cast_base_boundary_condition
@@ -46,6 +47,45 @@ class InfiniteRange:
             list[int]: Coordinate list.
         """
         return self._base_infinite_range.generate_coordinate_list()
+    
+    def to_serializable(self) -> dict:
+        """Convert to serializable object.
+
+        Returns:
+            dict: Serializable object.
+        """
+        return self.export_info().to_serializable()
+    
+    @classmethod
+    def from_serializable(cls, obj: dict) -> InfiniteRange:
+        """Generate infinite range lattice from serializable object.
+
+        Args:
+            obj (dict): Serializable object.
+
+        Raises:
+            ValueError: When the lattice type is not infinite range.
+
+        Returns:
+            InfiniteRange: Infinite range lattice.
+        """
+        if obj["lattice_type"] != LatticeType.INFINITE_RANGE:
+            raise ValueError("The lattice type is not InfiniteRange.")
+
+        return cls(system_size=obj["system_size"])
+
+    def export_info(self) -> LatticeInfo:
+        """Export lattice information.
+
+        Returns:
+            LatticeInfo: Lattice information.
+        """
+        return LatticeInfo(
+            lattice_type=LatticeType.INFINITE_RANGE,
+            system_size=self.system_size,
+            shape=None,
+            boundary_condition=self.boundary_condition
+        )
 
     @property
     def system_size(self) -> int:

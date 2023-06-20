@@ -16,6 +16,7 @@
 from __future__ import annotations
 from typing import Union
 from compnal.base_compnal import base_lattice
+from compnal.lattice.lattice_info import LatticeInfo, LatticeType
 from compnal.lattice.boundary_condition import (
     BoundaryCondition, 
     _cast_base_boundary_condition, 
@@ -61,6 +62,49 @@ class Square:
             list[tuple[int, int]]: Coordinate list.
         """
         return self._base_square.generate_coordinate_list()
+    
+    def to_serializable(self) -> dict:
+        """Convert to serializable object.
+
+        Returns:
+            dict: Serializable object.
+        """
+        return self.export_info().to_serializable()
+    
+    @classmethod
+    def from_serializable(cls, obj: dict) -> Square:
+        """Create Square instance from serializable object.
+
+        Args:
+            obj (dict): Serializable object.
+
+        Raises:
+            ValueError: When the lattice type is not square.
+
+        Returns:
+            Square: Square instance.
+        """
+        if obj["lattice_type"] != LatticeType.SQUARE:
+            raise ValueError("The lattice type is not square.")
+
+        return cls(
+            x_size=obj["shape"][0],
+            y_size=obj["shape"][1],
+            boundary_condition=obj["boundary_condition"]
+        )
+    
+    def export_info(self) -> LatticeInfo:
+        """Export lattice information.
+
+        Returns:
+            LatticeInfo: Lattice information.
+        """
+        return LatticeInfo(
+            lattice_type=LatticeType.SQUARE,
+            system_size=self.system_size,
+            shape=(self.x_size, self.y_size),
+            boundary_condition=self.boundary_condition
+        )
     
     @property
     def x_size(self) -> int:

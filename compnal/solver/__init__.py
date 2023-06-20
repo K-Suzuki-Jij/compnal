@@ -4,4 +4,4 @@ from compnal.solver.parameters import (
     RandomNumberEngine,
     SpinSelectionMethod,
 )
-from compnal.solver.result import CMCResult, CMCInfo, CMCParams
+from compnal.solver.result import CMCResult, CMCHardwareInfo, CMCParams

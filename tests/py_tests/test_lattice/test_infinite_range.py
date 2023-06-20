@@ -15,7 +15,7 @@
 
 import pytest
 from compnal.lattice import InfiniteRange, BoundaryCondition
-
+from compnal.lattice import LatticeType
 
 def test_infinite_range():
     infinite_range = InfiniteRange(system_size=3)
@@ -25,3 +25,22 @@ def test_infinite_range():
 
     with pytest.raises(ValueError):
         InfiniteRange(system_size=0)
+
+    info = infinite_range.export_info()
+    assert info.lattice_type == LatticeType.INFINITE_RANGE
+    assert info.system_size == 3
+    assert info.shape == None
+    assert info.boundary_condition == BoundaryCondition.NONE
+
+def test_infinite_serializable():
+    infinite_range = InfiniteRange(system_size=3)
+    obj = infinite_range.to_serializable()
+    assert obj["lattice_type"] == LatticeType.INFINITE_RANGE
+    assert obj["system_size"] == 3
+    assert obj["shape"] == None
+    assert obj["boundary_condition"] == BoundaryCondition.NONE
+
+    infinite_range = InfiniteRange.from_serializable(obj)
+    assert infinite_range.system_size == 3
+    assert infinite_range.boundary_condition == BoundaryCondition.NONE
+    assert infinite_range.generate_coordinate_list() == [0, 1, 2]

@@ -15,6 +15,7 @@
 
 import pytest
 from compnal.lattice import Cubic, BoundaryCondition
+from compnal.lattice import LatticeType
 
 def test_cubic():
     cubic = Cubic(x_size=2, y_size=3, z_size=2, boundary_condition="OBC")
@@ -43,3 +44,32 @@ def test_cubic():
 
     with pytest.raises(ValueError):
         Cubic(x_size=3, y_size=2, z_size=-1, boundary_condition="OBC")
+
+    info = cubic.export_info()
+    assert info.lattice_type == LatticeType.CUBIC
+    assert info.system_size == 12
+    assert info.shape == (2, 3, 2)
+    assert info.boundary_condition == BoundaryCondition.OBC
+
+def test_cubic_serializable():
+    cubic = Cubic(x_size=2, y_size=3, z_size=2, boundary_condition="OBC")
+    obj = cubic.to_serializable()
+    assert obj["lattice_type"] == LatticeType.CUBIC
+    assert obj["system_size"] == 12
+    assert obj["shape"] == (2, 3, 2)
+    assert obj["boundary_condition"] == BoundaryCondition.OBC
+
+    cubic = Cubic.from_serializable(obj)
+    assert cubic.x_size == 2
+    assert cubic.y_size == 3
+    assert cubic.z_size == 2
+    assert cubic.system_size == 12
+    assert cubic.boundary_condition == BoundaryCondition.OBC
+    assert cubic.generate_coordinate_list() == [
+        (0, 0, 0), (1, 0, 0),
+        (0, 1, 0), (1, 1, 0),
+        (0, 2, 0), (1, 2, 0),
+        (0, 0, 1), (1, 0, 1),
+        (0, 1, 1), (1, 1, 1),
+        (0, 2, 1), (1, 2, 1),
+    ]

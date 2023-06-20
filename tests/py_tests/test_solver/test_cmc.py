@@ -165,5 +165,3 @@ def test_cmc_ising_infinite_range():
                 assert results.params.random_number_engine == random_number_engine
                 assert results.params.spin_selection_method == spin_selection_method
                 assert results.params.seed == 0
-
-

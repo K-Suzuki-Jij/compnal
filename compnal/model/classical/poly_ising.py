@@ -14,7 +14,9 @@
 
 from __future__ import annotations
 from typing import Union
+from compnal.lattice.lattice_info import LatticeType
 from compnal.lattice import Chain, Square, Cubic, InfiniteRange
+from compnal.model.classical.model_info import ClassicalModelInfo, ClassicalModelType
 from compnal.base_compnal import base_classical_model
 import numpy as np
 
@@ -99,6 +101,60 @@ class PolyIsing:
             ValueError: When the magnitude of spins is invalid or the coordinate is invalid.
         """
         self._base_model.set_spin_magnitude(spin_magnitude, coordinate)
+
+    def to_serializable(self) -> dict:
+        """Convert to a serializable object.
+
+        Returns:
+            dict: Serializable object.
+        """
+        return self.export_info().to_serializable()
+    
+    @classmethod
+    def from_serializable(cls, obj: dict) -> PolyIsing:
+        """Create PolyIsing class from a serializable object.
+
+        Args:
+            obj (dict): Serializable object.
+
+        Returns:
+            PolyIsing: PolyIsing class.
+        """
+        if obj["lattice"]["lattice_type"] == LatticeType.CHAIN:
+            lattice = Chain.from_serializable(obj["lattice"])
+        elif obj["lattice"]["lattice_type"] == LatticeType.SQUARE:
+            lattice = Square.from_serializable(obj["lattice"])
+        elif obj["lattice"]["lattice_type"] == LatticeType.CUBIC:
+            lattice = Cubic.from_serializable(obj["lattice"])
+        elif obj["lattice"]["lattice_type"] == LatticeType.INFINITE_RANGE:
+            lattice = InfiniteRange.from_serializable(obj["lattice"])
+        else:
+            raise ValueError("Invalid lattice type.")
+        
+        poly_ising = cls(
+            lattice=lattice,
+            interaction=obj["interactions"],
+            spin_scale_factor=obj["spin_scale_factor"]
+        )
+
+        for coordinate, spin_magnitude in zip(obj["spin_magnitude_keys"], obj["spin_magnitude_values"]):
+            poly_ising.set_spin_magnitude(spin_magnitude, coordinate)
+
+        return poly_ising
+
+    def export_info(self) -> ClassicalModelInfo:
+        """Export model information.
+
+        Returns:
+            ClassicalModelInfo: Model information.
+        """
+        return ClassicalModelInfo(
+            model_type=ClassicalModelType.POLY_ISING,
+            interactions=self.get_interaction(),
+            spin_magnitude=self.get_spin_magnitude(),
+            spin_scale_factor=self.get_spin_scale_factor(),
+            lattice=self._lattice.export_info()
+        )
         
     @property
     def lattice(self) -> Union[Chain, Square, Cubic, InfiniteRange]:

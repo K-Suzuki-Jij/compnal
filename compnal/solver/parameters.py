@@ -12,12 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+
 from enum import Enum
 from typing import Union
 from compnal.base_compnal import base_solver
 
 
-class StateUpdateMethod(Enum):
+class StateUpdateMethod(int, Enum):
     """State update method.
 
     Args:
@@ -29,7 +30,7 @@ class StateUpdateMethod(Enum):
     HEAT_BATH = 1
 
 
-class RandomNumberEngine(Enum):
+class RandomNumberEngine(int, Enum):
     """Random number engine.
     
     Args:
@@ -43,7 +44,7 @@ class RandomNumberEngine(Enum):
     XORSHIFT = 2
 
 
-class SpinSelectionMethod(Enum):
+class SpinSelectionMethod(int, Enum):
     """Spin selection method.
 
     Args:

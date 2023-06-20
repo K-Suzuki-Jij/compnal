@@ -15,6 +15,7 @@
 
 import pytest
 from compnal.lattice import Square, BoundaryCondition
+from compnal.lattice import LatticeType
 
 def test_square():
     square = Square(x_size=2, y_size=3, boundary_condition="OBC")
@@ -32,3 +33,24 @@ def test_square():
 
     with pytest.raises(ValueError):
         Square(x_size=3, y_size=-1, boundary_condition="OBC")
+
+    info = square.export_info()
+    assert info.lattice_type == LatticeType.SQUARE
+    assert info.system_size == 6
+    assert info.shape == (2, 3)
+    assert info.boundary_condition == BoundaryCondition.OBC
+
+def test_square_serializable():
+    square = Square(x_size=2, y_size=3, boundary_condition="OBC")
+    obj = square.to_serializable()
+    assert obj["lattice_type"] == LatticeType.SQUARE
+    assert obj["system_size"] == 6
+    assert obj["shape"] == (2, 3)
+    assert obj["boundary_condition"] == BoundaryCondition.OBC
+
+    square = Square.from_serializable(obj)
+    assert square.x_size == 2
+    assert square.y_size == 3
+    assert square.system_size == 6
+    assert square.boundary_condition == BoundaryCondition.OBC
+    assert square.generate_coordinate_list() == [(0, 0), (1, 0), (0, 1), (1, 1), (0, 2), (1, 2)]

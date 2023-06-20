@@ -15,8 +15,9 @@
 from __future__ import annotations
 from typing import Union
 from compnal.lattice import Chain, Square, Cubic, InfiniteRange
+from compnal.lattice.lattice_info import LatticeType
+from compnal.model.classical.model_info import ClassicalModelInfo, ClassicalModelType
 from compnal.base_compnal import base_classical_model
-import numpy as np
 
 class Ising:
     """Class for the Ising model.
@@ -78,9 +79,15 @@ class Ising:
         """Get the magnitude of spins.
 
         Returns:
-            dict[Union[list, tuple], float]: Magnitude of spins. The keys are the coordinates of the lattice and the values are the magnitude of spins.
+            dict[Union[list, tuple], float]: Magnitude of spins. 
+                The keys are the coordinates of the lattice and the values are the magnitude of spins.
         """
-        return dict(zip(self._lattice.generate_coordinate_list(), [v/2 for v in self._base_model.get_twice_spin_magnitude()]))
+        return dict(
+            zip(
+                self._lattice.generate_coordinate_list(), 
+                [v/2 for v in self._base_model.get_twice_spin_magnitude()]
+            )
+        )
     
     def get_spin_scale_factor(self) -> int:
         """Get the spin scale factor.
@@ -102,6 +109,61 @@ class Ising:
         """
         self._base_model.set_spin_magnitude(spin_magnitude, coordinate)
     
+    def to_serializable(self) -> dict:
+        """Convert to a serializable object.
+
+        Returns:
+            dict: Serializable object.
+        """
+        return self.export_info().to_serializable()
+    
+    @classmethod
+    def from_serializable(cls, obj: dict) -> Ising:
+        """Create an Ising class from a serializable object.
+
+        Args:
+            obj (dict): Serializable object.
+
+        Returns:
+            Ising: Ising class.
+        """
+        if obj["lattice"]["lattice_type"] == LatticeType.CHAIN:
+            lattice = Chain.from_serializable(obj["lattice"])
+        elif obj["lattice"]["lattice_type"] == LatticeType.SQUARE:
+            lattice = Square.from_serializable(obj["lattice"])
+        elif obj["lattice"]["lattice_type"] == LatticeType.CUBIC:
+            lattice = Cubic.from_serializable(obj["lattice"])
+        elif obj["lattice"]["lattice_type"] == LatticeType.INFINITE_RANGE:
+            lattice = InfiniteRange.from_serializable(obj["lattice"])
+        else:
+            raise ValueError("Invalid lattice type.")
+
+        ising = cls(
+            lattice=lattice,
+            linear=obj["interactions"][1],
+            quadratic=obj["interactions"][2],
+            spin_scale_factor=obj["spin_scale_factor"],
+        )
+
+        for coordinate, spin_magnitude in zip(obj["spin_magnitude_keys"], obj["spin_magnitude_values"]):
+            ising.set_spin_magnitude(spin_magnitude, coordinate)
+
+        return ising
+
+    def export_info(self) -> ClassicalModelInfo:
+        """Export model information.
+
+        Returns:
+            ClassicalModelInfo: Model information.
+        """
+        return ClassicalModelInfo(
+            model_type=ClassicalModelType.ISING,
+            interactions={1: self.get_linear(), 2: self.get_quadratic()},
+            spin_magnitude=self.get_spin_magnitude(),
+            spin_scale_factor=self.get_spin_scale_factor(),
+            lattice=self._lattice.export_info()
+        )
+
     @property
     def lattice(self) -> Union[Chain, Square, Cubic, InfiniteRange]:
         return self._lattice

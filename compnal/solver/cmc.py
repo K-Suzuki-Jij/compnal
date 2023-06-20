@@ -12,11 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+
 from __future__ import annotations
 from typing import Union, Optional
 from compnal.base_compnal import base_solver
 from compnal.model.classical import Ising, PolyIsing
-from compnal.solver.result import CMCInfo, CMCParams, CMCResult
+from compnal.solver.result import CMCHardwareInfo, CMCParams, CMCResult
 from compnal.solver.parameters import (
     StateUpdateMethod,
     RandomNumberEngine,
@@ -106,8 +107,8 @@ class CMC:
             seed=_base_solver.get_seed()
         )
 
-        cmc_info = CMCInfo(
-            date=datetime.datetime.now().strftime('%Y%m%d_%H%M%S'),
+        cmc_info = CMCHardwareInfo(
+            date=datetime.datetime.now().strftime('%Y%m%d%H%M%S'),
             total_time=time.time() - start_total_time,
             sampling_time=end_sampling_time - start_sampling_time,
             cpu_threads=psutil.cpu_count(),
@@ -121,7 +122,7 @@ class CMC:
             samples=samples,
             energies=energies,
             temperature=temperature,
-            model=model,
-            info=cmc_info,
+            model_info=model.export_info(),
+            hard_info=cmc_info,
             params=cmc_params
         )

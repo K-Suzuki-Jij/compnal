@@ -19,7 +19,7 @@ from typing import Optional
 from dataclasses import dataclass, asdict
 from compnal.lattice.boundary_condition import BoundaryCondition
 
-class LatticeType(int, Enum):
+class LatticeType(str, Enum):
     """Lattice type.
 
     Args:
@@ -28,10 +28,10 @@ class LatticeType(int, Enum):
         CUBIC: Cubic lattice.
         INFINITE_RANGE: Infinite-range lattice.
     """
-    CHAIN = 0
-    SQUARE = 1
-    CUBIC = 2
-    INFINITE_RANGE = 3
+    CHAIN = "CHAIN"
+    SQUARE = "SQUARE"
+    CUBIC = "CUBIC"
+    INFINITE_RANGE = "INFINITE_RANGE"
     
 
 @dataclass

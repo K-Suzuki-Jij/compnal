@@ -14,7 +14,7 @@
 
 
 from typing import Optional
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from compnal.model.classical.model_info import ClassicalModelInfo
 from compnal.solver.parameters import (
     StateUpdateMethod,
@@ -22,6 +22,8 @@ from compnal.solver.parameters import (
     SpinSelectionMethod
 )
 import numpy as np
+import uuid
+import pandas as pd
 
 
 @dataclass
@@ -128,18 +130,18 @@ class CMCResult:
     hard_info: Optional[CMCHardwareInfo] = None
     params: Optional[CMCParams] = None
 
-    def calculate_mean(self, bias: float = 0.0) -> float:
+    def calculate_mean(self, bias: float = 0.0) -> tuple[float, float]:
         """Calculate the mean of the samples.
 
         Args:
             bias (float, optional): The bias in E(X - bias). Defaults to 0.0.
 
         Returns:
-            float: The mean of the samples.
+            tuple[float, float]: The mean of the samples and its standard deviation.
         """
         return self.calculate_moment(order=1, bias=bias)
 
-    def calculate_moment(self, order: int, bias: float = 0.0) -> float:
+    def calculate_moment(self, order: int, bias: float = 0.0) -> tuple[float, float]:
         """Calculate the moment of the samples.
 
         Args:
@@ -147,11 +149,10 @@ class CMCResult:
             bias (float, optional): The bias in E((X - bias)^order). Defaults to 0.0.
 
         Returns:
-            float: The moment of the samples.
+            tuple[float, float]: The moment of the samples and its standard deviation.
         """
-        return np.mean(
-            [np.mean(np.array(list(sample.values())) + bias)**order for sample in self.samples]
-        )
+        a = [np.mean(np.array(list(sample.values())) + bias)**order for sample in self.samples]
+        return np.mean(a), np.std(a)
 
     def to_serializable(self) -> dict:
         """Convert to a serializable object.
@@ -194,7 +195,93 @@ class CMCResult:
         )
     
 
+@dataclass
+class CMCResultSet:
+    """Class for the results of the classical Monte Carlo solver.
 
+    Attributes:
+        results (dict[uuid.UUID, CMCResult]): Results.
+        index_to_uuid (dict[int, uuid.UUID]): Index to UUID.
+    """
+    results: dict[uuid.UUID, CMCResult] = field(default_factory=dict)
+    index_to_uuid: dict[int, uuid.UUID] = field(default_factory=dict)
+
+    def append(self, result: CMCResult) -> None:
+        """Append a result.
+
+        Args:
+            result (CMCResult): Result.
+        """
+        id = uuid.uuid4()
+        self.index_to_uuid[len(self.results)] = id
+        self.results[id] = result
+            
+    def to_serializable(self) -> dict:
+        """Convert to a serializable object.
+
+        Returns:
+            dict: Serializable object.
+        """
+        return {
+            "results": {
+                str(id): result.to_serializable() for id, result in self.results.items()
+            },
+            "index_to_uuid": {
+                str(index): str(id) for index, id in self.index_to_uuid.items()
+            }
+        }
+    
+    @classmethod
+    def from_serializable(cls, obj: dict):
+        """Convert from a serializable object.
+
+        Args:
+            obj (dict): Serializable object.
+
+        Returns:
+            CMCResultSet: Results.
+        """
+        return cls(
+            results={
+                uuid.UUID(id): CMCResult.from_serializable(result) for id, result in obj["results"].items()
+            },
+            index_to_uuid={
+                int(index): uuid.UUID(id) for index, id in obj["index_to_uuid"].items()
+            }
+        )
+    
+    def to_dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame(
+            data={
+                "temperature": [r.temperature for r in self.results.values()],
+                "energy": [np.mean(r.energies) for r in self.results.values()],
+                "energy_std": [np.std(r.energies) for r in self.results.values()],
+                "1_moment": [r.calculate_moment(order=1)[0] for r in self.results.values()],
+                "1_moment_std": [r.calculate_moment(order=1)[1] for r in self.results.values()],
+                "2_moment": [r.calculate_moment(order=2)[0] for r in self.results.values()],
+                "2_moment_std": [r.calculate_moment(order=2)[1] for r in self.results.values()],
+                "num_sweeps": [r.params.num_sweeps for r in self.results.values()],
+                "num_samples": [r.params.num_samples for r in self.results.values()],
+                "system_size": [r.model_info.lattice.system_size for r in self.results.values()],
+                "lattice": [r.model_info.lattice.lattice_type for r in self.results.values()],
+                "model": [r.model_info.model_type for r in self.results.values()],
+                "updater": [r.params.state_update_method for r in self.results.values()],
+                "random": [r.params.random_number_engine for r in self.results.values()],
+                "selection": [r.params.spin_selection_method for r in self.results.values()],
+                "original": [r for r in self.results.values()]
+            }
+        )
+
+    def __len__(self) -> int:
+        return len(self.results)
+    
+    def __getitem__(self, index: int) -> CMCResult:
+        return self.results[self.index_to_uuid[index]]
+
+
+    
+
+    
 
 
 

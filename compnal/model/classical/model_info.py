@@ -20,15 +20,15 @@ from enum import Enum
 from compnal.lattice.lattice_info import LatticeInfo
 
 
-class ClassicalModelType(int, Enum):
+class ClassicalModelType(str, Enum):
     """Classical model type.
 
     Args:
         ISING: Ising model.
         POLY_ISING: Polynomial Ising model.
     """
-    ISING = 0
-    POLY_ISING = 1
+    ISING = "ISING"
+    POLY_ISING = "POLY_ISING"
 
 
 @dataclass

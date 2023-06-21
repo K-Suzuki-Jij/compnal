@@ -18,7 +18,7 @@ from typing import Union
 from compnal.base_compnal import base_solver
 
 
-class StateUpdateMethod(int, Enum):
+class StateUpdateMethod(str, Enum):
     """State update method.
 
     Args:
@@ -26,11 +26,11 @@ class StateUpdateMethod(int, Enum):
         HEAT_BATH: Heat bath algorithm.
     """
 
-    METROPOLIS = 0
-    HEAT_BATH = 1
+    METROPOLIS = "METROPOLIS"
+    HEAT_BATH = "HEAT_BATH"
 
 
-class RandomNumberEngine(int, Enum):
+class RandomNumberEngine(str, Enum):
     """Random number engine.
     
     Args:
@@ -39,12 +39,12 @@ class RandomNumberEngine(int, Enum):
         XORSHIFT: XORSHIFT.
     """
 
-    MT = 0
-    MT_64 = 1
-    XORSHIFT = 2
+    MT = "MT"
+    MT_64 = "MT_64"
+    XORSHIFT = "XORSHIFT"
 
 
-class SpinSelectionMethod(int, Enum):
+class SpinSelectionMethod(str, Enum):
     """Spin selection method.
 
     Args:
@@ -52,8 +52,8 @@ class SpinSelectionMethod(int, Enum):
         SEQUENTIAL: Sequential selection.
     """
 
-    RANDOM = 0
-    SEQUENTIAL = 1
+    RANDOM = "RANDOM"
+    SEQUENTIAL = "SEQUENTIAL"
 
 
 def _cast_base_state_update_method(

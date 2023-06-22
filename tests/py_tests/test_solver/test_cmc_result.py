@@ -8,6 +8,7 @@ from compnal.solver import (
 )
 from compnal.model.classical import ClassicalModelInfo, ClassicalModelType
 from compnal.lattice import LatticeInfo, LatticeType, BoundaryCondition
+import numpy as np
 
 def test_cmc_hardware_info():
     info = CMCHardwareInfo.from_serializable(
@@ -58,14 +59,9 @@ def test_cmc_params():
 def test_cmc_result():
     result = CMCResult.from_serializable(
         CMCResult(
-            samples=[
-                {(0, 0): +1, (0, 1): -1, (1, 0): -1, (1, 1): +1},
-                {(0, 0): -1, (0, 1): -1, (1, 0): -1, (1, 1): +1},
-                {(0, 0): -1, (0, 1): -1, (1, 0): -1, (1, 1): -1},
-            ],
-            energies=[
-                0.0, -4.0, -8.0
-            ],
+            samples=np.full((2, 2), -1),
+            energies=np.array([1,2,3,4]),
+            coordinate=[(0, 0), (0, 1), (1, 0), (1, 1)],
             temperature=1.0,
             model_info=ClassicalModelInfo(
                 model_type=ClassicalModelType.ISING,
@@ -101,11 +97,8 @@ def test_cmc_result():
         ).to_serializable()
     )
 
-    assert result.samples == [
-                {(0, 0): +1, (0, 1): -1, (1, 0): -1, (1, 1): +1},
-                {(0, 0): -1, (0, 1): -1, (1, 0): -1, (1, 1): +1},
-                {(0, 0): -1, (0, 1): -1, (1, 0): -1, (1, 1): -1},
-            ]
-    assert result.energies == [0.0, -4.0, -8.0]
+    assert (result.samples == np.full((2, 2), -1)).all()
+    assert (result.energies == np.array([1,2,3,4])).all()
+    assert result.coordinate == [(0, 0), (0, 1), (1, 0), (1, 1)]
     assert result.temperature == 1.0
     

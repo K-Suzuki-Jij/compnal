@@ -37,7 +37,7 @@ def test_cmc_ising_chain():
                         seed=0
                     )
                     for sample in results.samples:
-                        assert statistics.mean(sample.values()) == pytest.approx(-1.0, abs=1e-8)
+                        assert statistics.mean(sample) == pytest.approx(-1.0, abs=1e-8)
 
                     assert results.temperature == 1.0
                     assert results.params.num_sweeps == 1000
@@ -77,7 +77,7 @@ def test_cmc_ising_square():
                         seed=0
                     )
                     for sample in results.samples:
-                        assert statistics.mean(sample.values()) == pytest.approx(-1.0, abs=1e-8)
+                        assert statistics.mean(sample) == pytest.approx(-1.0, abs=1e-8)
 
                     assert results.temperature == 0.5
                     assert results.params.num_sweeps == 2000
@@ -117,7 +117,7 @@ def test_cmc_ising_cubic():
                         seed=0
                     )
                     for sample in results.samples:
-                        assert statistics.mean(sample.values()) == pytest.approx(-1.0, abs=1e-8)
+                        assert statistics.mean(sample) == pytest.approx(-1.0, abs=1e-8)
 
                     assert results.temperature == 0.8
                     assert results.params.num_sweeps == 4000
@@ -155,7 +155,7 @@ def test_cmc_ising_infinite_range():
                     seed=0
                 )
                 for sample in results.samples:
-                    assert statistics.mean(sample.values()) == pytest.approx(-1.0, abs=1e-8)
+                    assert statistics.mean(sample) == pytest.approx(-1.0, abs=1e-8)
 
                 assert results.temperature == 1.0
                 assert results.params.num_sweeps == 1000

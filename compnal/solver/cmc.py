@@ -30,6 +30,7 @@ from compnal.solver.parameters import (
     _cast_spin_selection_method
 )
 import time
+import numpy as np
 import datetime
 import psutil
 import platform
@@ -94,8 +95,8 @@ class CMC:
         end_sampling_time = time.time()
 
         coordinate_list = model._lattice.generate_coordinate_list()
-        samples = [dict(zip(coordinate_list, sample)) for sample in _base_solver.get_samples()]
-        energies = _base_solver.calculate_energies()
+        samples = np.array(_base_solver.get_samples())
+        energies = np.array(_base_solver.calculate_energies())
         
         cmc_params = CMCParams(
             num_sweeps=num_sweeps,
@@ -121,6 +122,7 @@ class CMC:
         return CMCResult(
             samples=samples,
             energies=energies,
+            coordinate=coordinate_list,
             temperature=temperature,
             model_info=model.export_info(),
             hard_info=cmc_info,

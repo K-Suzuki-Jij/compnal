@@ -22,8 +22,6 @@ from compnal.solver.parameters import (
     SpinSelectionMethod
 )
 import numpy as np
-import uuid
-import pandas as pd
 
 
 @dataclass
@@ -116,15 +114,16 @@ class CMCResult:
     """Class for the results of the classical Monte Carlo solver.
 
     Attributes:
-        samples (list[dict], Optional): Samples. Defaults to None.
+        samples (list[list[float]], Optional): Samples. Defaults to None.
         energies (list[float], Optional): Energies. Defaults to None.
         temperature (float, Optional): Temperature. Defaults to None.
         model_info (ClassicalModelInfo, Optional): Model information. Defaults to None.
         hard_info (CMCHardwareInfo, Optional): Hardware information. Defaults to None.
         params (CMCParams, Optional): Parameters. Defaults to None.
     """
-    samples: Optional[list[dict]] = None
+    samples: Optional[list[list[float]]] = None
     energies: Optional[list[float]] = None
+    coordinate: Optional[list] = None
     temperature: Optional[float] = None
     model_info: Optional[ClassicalModelInfo] = None
     hard_info: Optional[CMCHardwareInfo] = None
@@ -153,6 +152,14 @@ class CMCResult:
         """
         a = [np.mean(np.array(list(sample.values())) + bias)**order for sample in self.samples]
         return np.mean(a), np.std(a)
+    
+    def calculate_energy(self) -> tuple[float, float]:
+        """Calculate the energy.
+
+        Returns:
+            tuple[float, float]: The energy and its standard deviation.
+        """
+        return np.mean(self.energies), np.std(self.energies)
 
     def to_serializable(self) -> dict:
         """Convert to a serializable object.
@@ -161,9 +168,9 @@ class CMCResult:
             dict: Serializable object.
         """
         return {
-            "samples_values": [list(sample.values()) for sample in self.samples],
-            "samples_keys": [list(sample.keys()) for sample in self.samples],
+            "samples": self.samples,
             "energies": self.energies,
+            "coordinate": self.coordinate,
             "temperature": self.temperature,
             "model_info": self.model_info.to_serializable(),
             "hard_info": self.hard_info.to_serializable(),
@@ -181,121 +188,11 @@ class CMCResult:
             CMCResult: Results.
         """
         return cls(
-            samples=[
-                dict(zip(
-                    obj["samples_keys"][i],
-                    obj["samples_values"][i]
-                )) for i in range(len(obj["samples_keys"]))
-            ],
+            samples=obj["samples"],
             energies=obj["energies"],
+            coordinate=obj["coordinate"],
             temperature=obj["temperature"],
             model_info=ClassicalModelInfo.from_serializable(obj["model_info"]),
             hard_info=CMCHardwareInfo.from_serializable(obj["hard_info"]),
             params=CMCParams.from_serializable(obj["params"])
         )
-    
-
-@dataclass
-class CMCResultSet:
-    """Class for the results of the classical Monte Carlo solver.
-
-    Attributes:
-        results (dict[uuid.UUID, CMCResult]): Results.
-        index_to_uuid (dict[int, uuid.UUID]): Index to UUID.
-    """
-    results: dict[uuid.UUID, CMCResult] = field(default_factory=dict)
-    index_to_uuid: dict[int, uuid.UUID] = field(default_factory=dict)
-
-    def append(self, result: CMCResult) -> None:
-        """Append a result.
-
-        Args:
-            result (CMCResult): Result.
-        """
-        id = uuid.uuid4()
-        self.index_to_uuid[len(self.results)] = id
-        self.results[id] = result
-            
-    def to_serializable(self) -> dict:
-        """Convert to a serializable object.
-
-        Returns:
-            dict: Serializable object.
-        """
-        return {
-            "results": {
-                str(id): result.to_serializable() for id, result in self.results.items()
-            },
-            "index_to_uuid": {
-                str(index): str(id) for index, id in self.index_to_uuid.items()
-            }
-        }
-    
-    @classmethod
-    def from_serializable(cls, obj: dict):
-        """Convert from a serializable object.
-
-        Args:
-            obj (dict): Serializable object.
-
-        Returns:
-            CMCResultSet: Results.
-        """
-        return cls(
-            results={
-                uuid.UUID(id): CMCResult.from_serializable(result) for id, result in obj["results"].items()
-            },
-            index_to_uuid={
-                int(index): uuid.UUID(id) for index, id in obj["index_to_uuid"].items()
-            }
-        )
-    
-    def to_dataframe(self) -> pd.DataFrame:
-        return pd.DataFrame(
-            data={
-                "temperature": [r.temperature for r in self.results.values()],
-                "energy": [np.mean(r.energies) for r in self.results.values()],
-                "energy_std": [np.std(r.energies) for r in self.results.values()],
-                "1_moment": [r.calculate_moment(order=1)[0] for r in self.results.values()],
-                "1_moment_std": [r.calculate_moment(order=1)[1] for r in self.results.values()],
-                "2_moment": [r.calculate_moment(order=2)[0] for r in self.results.values()],
-                "2_moment_std": [r.calculate_moment(order=2)[1] for r in self.results.values()],
-                "num_sweeps": [r.params.num_sweeps for r in self.results.values()],
-                "num_samples": [r.params.num_samples for r in self.results.values()],
-                "system_size": [r.model_info.lattice.system_size for r in self.results.values()],
-                "lattice": [r.model_info.lattice.lattice_type for r in self.results.values()],
-                "model": [r.model_info.model_type for r in self.results.values()],
-                "updater": [r.params.state_update_method for r in self.results.values()],
-                "random": [r.params.random_number_engine for r in self.results.values()],
-                "selection": [r.params.spin_selection_method for r in self.results.values()],
-                "original": [r for r in self.results.values()]
-            }
-        )
-
-    def __len__(self) -> int:
-        return len(self.results)
-    
-    def __getitem__(self, index: int) -> CMCResult:
-        return self.results[self.index_to_uuid[index]]
-
-
-    
-
-    
-
-
-
-
-
-    
-
-
-
-
-
-
-
-    
-
-
-

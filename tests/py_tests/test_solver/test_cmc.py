@@ -103,7 +103,7 @@ def test_cmc_ising_cubic():
                         x_size=3, y_size=4, z_size=3, boundary_condition=boundary_condition
                     )
                     ising = Ising(
-                        lattice=cubic, linear=1.0, quadratic=-1.0, spin_magnitude=1, spin_scale_factor=1
+                        lattice=cubic, linear=10.0, quadratic=-1.0, spin_magnitude=1, spin_scale_factor=1
                     )
                     results = CMC.run_sampling(
                         model=ising,

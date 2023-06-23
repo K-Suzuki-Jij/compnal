@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 
-from typing import Optional
+from typing import Optional, Union
 from dataclasses import dataclass, asdict, field
 from compnal.model.classical.model_info import ClassicalModelInfo
 from compnal.solver.parameters import (
@@ -123,7 +123,7 @@ class CMCResult:
     """
     samples: Optional[list[list[float]]] = None
     energies: Optional[list[float]] = None
-    coordinate: Optional[list] = None
+    coordinate: Optional[dict[Union[int, tuple], int]] = None
     temperature: Optional[float] = None
     model_info: Optional[ClassicalModelInfo] = None
     hard_info: Optional[CMCHardwareInfo] = None
@@ -152,6 +152,20 @@ class CMCResult:
         """
         a = [np.mean(np.array(list(sample.values())) + bias)**order for sample in self.samples]
         return np.mean(a), np.std(a)
+    
+    def calculate_correlation(self, i: Union[int, tuple], j: Union[int, tuple]) -> tuple[float, float]:
+        """Calculate the correlation between the spin i and j.
+        
+        Args:
+            i (Union[int, tuple]): The coordinate of the spin.
+            j (Union[int, tuple]): The coordinate of the spin.
+
+        Returns:
+            tuple[float, float]: The correlation and its standard deviation.
+        """
+        a = self.samples.T[self.coordinate[i]]*self.samples.T[self.coordinate[j]]
+        return np.mean(a), np.std(a)
+
     
     def calculate_energy(self) -> tuple[float, float]:
         """Calculate the energy.

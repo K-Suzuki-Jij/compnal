@@ -24,6 +24,7 @@
 #define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_TEMPLATE_SYSTEM_HPP_
 
 #include "../../../model/utility/variable.hpp"
+#include <Eigen/Dense>
 
 namespace compnal {
 namespace solver {
@@ -83,10 +84,10 @@ public:
    
    //! @brief Extract the sample.
    //! @return The sample.
-   std::vector<typename ModelType::PHQType> ExtractSample() const {
-      std::vector<typename ModelType::PHQType> sample(system_size_);
+   Eigen::Vector<typename ModelType::PHQType, Eigen::Dynamic> ExtractSample() const {
+      Eigen::Vector<typename ModelType::PHQType, Eigen::Dynamic> sample(system_size_);
       for (std::int32_t i = 0; i < system_size_; ++i) {
-         sample[i] = sample_[i].GetValue();
+         sample(i) = sample_[i].GetValue();
       }
       return sample;
    }

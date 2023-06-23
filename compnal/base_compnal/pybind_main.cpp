@@ -23,6 +23,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/iostream.h>
+#include <pybind11/eigen.h>
 
 #include "include/pybind_lattice.hpp"
 #include "include/pybind_classical_model.hpp"

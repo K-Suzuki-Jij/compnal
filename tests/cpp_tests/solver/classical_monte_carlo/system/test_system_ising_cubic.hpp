@@ -41,18 +41,18 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnCubic) {
       const std::int32_t seed = 0;
       solver::classical_monte_carlo::System<Ising, std::mt19937> system{ising, seed};
       system.SetSampleByState((std::vector<std::int32_t>{0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1}));
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(0), -0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(1), +0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(2), -0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(3), -0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(4), -0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(5), +0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(6), -0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(7), +0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(8), -0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(9), -0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(10), -0.5);
-      EXPECT_DOUBLE_EQ(system.ExtractSample().at(11), +0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(0), -0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(1), +0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(2), -0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(3), -0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(4), -0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(5), +0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(6), -0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(7), +0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(8), -0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(9), -0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(10), -0.5);
+      EXPECT_DOUBLE_EQ(system.ExtractSample()(11), +0.5);
       
       EXPECT_EQ(system.GenerateCandidateState(0), 1);
       EXPECT_EQ(system.GenerateCandidateState(1), 0);
@@ -68,227 +68,227 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnCubic) {
       EXPECT_EQ(system.GenerateCandidateState(11), 0);
       
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 0),
-                       ising.CalculateEnergy({-0.5, -0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, -0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(5, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(6, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(7, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(8, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(9, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(10, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(11, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 1),
-                       ising.CalculateEnergy({+0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, +0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, +0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, +0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(5, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(6, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, +0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, +0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(7, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(8, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, +0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, +0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(9, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(10, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, +0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, +0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(11, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       
       system.Flip(3, 1);
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 0),
-                       ising.CalculateEnergy({-0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(5, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(6, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(7, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(8, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(9, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(10, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(11, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 1),
-                       ising.CalculateEnergy({+0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, +0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, +0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, +0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(5, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(6, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, +0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, +0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(7, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(8, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, +0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, +0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(9, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(10, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, +0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, +0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(11, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       
       system.Flip(3, 0);
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 0),
-                       ising.CalculateEnergy({-0.5, -0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, -0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(5, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(6, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(7, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(8, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(9, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(10, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(11, 0),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, -0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 1),
-                       ising.CalculateEnergy({+0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, +0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, +0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, +0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(5, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(6, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, +0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, +0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(7, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(8, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, +0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, +0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(9, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(10, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, +0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, +0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(11, 1),
-                       ising.CalculateEnergy({-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
+                       ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, -0.5, -0.5, +0.5, -0.5, +0.5, -0.5, -0.5, -0.5, +0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
    }
    

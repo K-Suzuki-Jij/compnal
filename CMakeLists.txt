@@ -29,6 +29,8 @@ if(OpenMP_FOUND)
   add_definitions(-DEIGEN_DONT_PARALLELIZE)
 endif()
 
+find_package(Eigen3 CONFIG)
+
 add_subdirectory(include)
 
 # Build Python Extension 

@@ -129,6 +129,16 @@ public:
       return CalculateEnergy(lattice_, state);
    }
    
+   //! @brief Calculate energy corresponding to the spin configuration.
+   //! @param state The spin configuration.
+   //! @return The energy.
+   double CalculateEnergy(const Eigen::Vector<PHQType, Eigen::Dynamic> &state) const {
+      if (state.size() != lattice_.GetSystemSize()) {
+         throw std::range_error("The system size is not equal to the size of spins");
+      }
+      return CalculateEnergy(lattice_, state);
+   }
+   
    //! @brief Set the magnitude of the spin.
    //! @param spin_magnitude The magnitude of the spin. This must be half-integer.
    //! @param coordinate The coordinate.
@@ -165,8 +175,9 @@ private:
    //! @param lattice The one-dimensional chain.
    //! @param state The spin configuration.
    //! @return The energy.
+   template<class VecType>
    double CalculateEnergy(const lattice::Chain &lattice,
-                          const std::vector<PHQType> &state) const {
+                          const std::vector<VecType> &state) const {
       double energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       
@@ -216,8 +227,9 @@ private:
    //! @param lattice The two-dimensional square lattice.
    //! @param state The spin configuration.
    //! @return The energy.
+   template<class VecType>
    double CalculateEnergy(const lattice::Square &lattice,
-                          const std::vector<PHQType> &state) const {
+                          const VecType &state) const {
       double energy = 0;
       const std::int32_t x_size = lattice.GetXSize();
       const std::int32_t y_size = lattice.GetYSize();
@@ -296,8 +308,9 @@ private:
    //! @param lattice The three-dimensional cubic lattice.
    //! @param state The spin configuration.
    //! @return The energy.
+   template<class VecType>
    double CalculateEnergy(const lattice::Cubic &lattice,
-                          const std::vector<PHQType> &state) const {
+                          const VecType &state) const {
       double energy = 0;
       const std::int32_t x_size = lattice.GetXSize();
       const std::int32_t y_size = lattice.GetYSize();
@@ -394,8 +407,9 @@ private:
    //! @param lattice The infinite range lattice.
    //! @param state The spin configuration.
    //! @return The energy.
+   template<class VecType>
    double CalculateEnergy(const lattice::InfiniteRange &lattice,
-                          const std::vector<PHQType> &state) const {
+                          const VecType &state) const {
       double energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       

@@ -41,9 +41,9 @@ TEST(ModelClassical, IsingOnChain) {
    EXPECT_NO_THROW(ising_obc.GetLattice());
    EXPECT_EQ(ising_obc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 1, 1}));
    EXPECT_EQ(ising_obc.GetSpinScaleFactor(), 1);
-   EXPECT_DOUBLE_EQ(ising_obc.CalculateEnergy({-1, +1, -1}), 7.0);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1}), std::range_error);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1, +1, +1}), std::range_error);
+   EXPECT_DOUBLE_EQ(ising_obc.CalculateEnergy(std::vector<double>{-1, +1, -1}), 7.0);
+   EXPECT_THROW(ising_obc.CalculateEnergy(std::vector<double>{-1, +1}), std::range_error);
+   EXPECT_THROW(ising_obc.CalculateEnergy(std::vector<double>{-1, +1, +1, +1}), std::range_error);
    ising_obc.SetSpinMagnitude(1.5, 1);
    EXPECT_EQ(ising_obc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 3, 1}));
    EXPECT_THROW(ising_obc.SetSpinMagnitude(1.499, 1), std::invalid_argument);
@@ -57,9 +57,9 @@ TEST(ModelClassical, IsingOnChain) {
    EXPECT_NO_THROW(ising_pbc.GetLattice());
    EXPECT_EQ(ising_pbc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{2, 2, 2}));
    EXPECT_EQ(ising_pbc.GetSpinScaleFactor(), 2);
-   EXPECT_DOUBLE_EQ(ising_pbc.CalculateEnergy({-1, +1, -1}), 3.0);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1}), std::range_error);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1, +1, +1}), std::range_error);
+   EXPECT_DOUBLE_EQ(ising_pbc.CalculateEnergy(std::vector<double>{-1, +1, -1}), 3.0);
+   EXPECT_THROW(ising_pbc.CalculateEnergy(std::vector<double>{-1, +1}), std::range_error);
+   EXPECT_THROW(ising_pbc.CalculateEnergy(std::vector<double>{-1, +1, +1, +1}), std::range_error);
    ising_pbc.SetSpinMagnitude(1.5, 1);
    EXPECT_EQ(ising_pbc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{2, 3, 2}));
    EXPECT_THROW(ising_pbc.SetSpinMagnitude(1.499, 1), std::invalid_argument);
@@ -71,9 +71,6 @@ TEST(ModelClassical, IsingOnSquare) {
    using BC = lattice::BoundaryCondition;
    using Square = lattice::Square;
    using Ising = model::classical::Ising<Square>;
-   const std::vector<typename Ising::PHQType> spins = {
-      -1,+1,-1,+1,+1,+1
-   };
    
    Square square_obc{3, 2, BC::OBC};
    Ising ising_obc{square_obc, 1.0, 2.0};
@@ -82,9 +79,9 @@ TEST(ModelClassical, IsingOnSquare) {
    EXPECT_NO_THROW(ising_obc.GetLattice());
    EXPECT_EQ(ising_obc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 1, 1, 1, 1, 1}));
    EXPECT_EQ(ising_obc.GetSpinScaleFactor(), 1);
-   EXPECT_DOUBLE_EQ(ising_obc.CalculateEnergy(spins), 0.0);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1}), std::range_error);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1,+1,-1,+1,+1,+1,+1}), std::range_error);
+   EXPECT_DOUBLE_EQ(ising_obc.CalculateEnergy(std::vector<double>{-1,+1,-1,+1,+1,+1}), 0.0);
+   EXPECT_THROW(ising_obc.CalculateEnergy(std::vector<double>{-1, +1}), std::range_error);
+   EXPECT_THROW(ising_obc.CalculateEnergy(std::vector<double>{-1,+1,-1,+1,+1,+1,+1}), std::range_error);
    ising_obc.SetSpinMagnitude(1.5, {2, 0});
    EXPECT_EQ(ising_obc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 1, 3, 1, 1, 1}));
    EXPECT_THROW(ising_obc.SetSpinMagnitude(1.499, {0, 0}), std::invalid_argument);
@@ -98,9 +95,9 @@ TEST(ModelClassical, IsingOnSquare) {
    EXPECT_NO_THROW(ising_pbc.GetLattice());
    EXPECT_EQ(ising_pbc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{3, 3, 3, 3, 3, 3}));
    EXPECT_EQ(ising_pbc.GetSpinScaleFactor(), 2);
-   EXPECT_DOUBLE_EQ(ising_pbc.CalculateEnergy(spins), 2.0);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1}), std::range_error);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1,+1,-1,+1,+1,+1,+1}), std::range_error);
+   EXPECT_DOUBLE_EQ(ising_pbc.CalculateEnergy(std::vector<double>{-1,+1,-1,+1,+1,+1}), 2.0);
+   EXPECT_THROW(ising_pbc.CalculateEnergy(std::vector<double>{-1, +1}), std::range_error);
+   EXPECT_THROW(ising_pbc.CalculateEnergy(std::vector<double>{-1,+1,-1,+1,+1,+1,+1}), std::range_error);
    ising_pbc.SetSpinMagnitude(2, {2, 0});
    EXPECT_EQ(ising_pbc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{3, 3, 4, 3, 3, 3}));
    EXPECT_THROW(ising_pbc.SetSpinMagnitude(1.499, {0, 0}), std::invalid_argument);
@@ -112,10 +109,7 @@ TEST(ModelClassical, IsingOnCubic) {
    using BC = lattice::BoundaryCondition;
    using Cubic = lattice::Cubic;
    using Ising = model::classical::Ising<Cubic>;
-   const std::vector<typename Ising::PHQType> spins = {
-      -1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1
-   };
-   
+
    Cubic cubic_obc{3, 2, 2, BC::OBC};
    Ising ising_obc{cubic_obc, 1.0, 2.0};
    EXPECT_DOUBLE_EQ(ising_obc.GetLinear(), 1.0);
@@ -123,9 +117,11 @@ TEST(ModelClassical, IsingOnCubic) {
    EXPECT_NO_THROW(ising_obc.GetLattice());
    EXPECT_EQ(ising_obc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}));
    EXPECT_EQ(ising_obc.GetSpinScaleFactor(), 1);
-   EXPECT_DOUBLE_EQ(ising_obc.CalculateEnergy(spins), 12.0);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1, +1}), std::range_error);
-   EXPECT_THROW(ising_obc.CalculateEnergy({-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1}), std::range_error);
+   EXPECT_DOUBLE_EQ(ising_obc.CalculateEnergy(std::vector<double>{
+      -1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1
+   }), 12.0);
+   EXPECT_THROW(ising_obc.CalculateEnergy(std::vector<double>{-1, +1}), std::range_error);
+   EXPECT_THROW(ising_obc.CalculateEnergy(std::vector<double>{-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1}), std::range_error);
    ising_obc.SetSpinMagnitude(1.5, {2, 0, 1});
    EXPECT_EQ(ising_obc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1}));
    EXPECT_THROW(ising_obc.SetSpinMagnitude(1.499, {0, 0, 0}), std::invalid_argument);
@@ -139,9 +135,11 @@ TEST(ModelClassical, IsingOnCubic) {
    EXPECT_NO_THROW(ising_pbc.GetLattice());
    EXPECT_EQ(ising_pbc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8}));
    EXPECT_EQ(ising_pbc.GetSpinScaleFactor(), 2);
-   EXPECT_DOUBLE_EQ(ising_pbc.CalculateEnergy(spins), 28.0);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1, +1}), std::range_error);
-   EXPECT_THROW(ising_pbc.CalculateEnergy({-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1}), std::range_error);
+   EXPECT_DOUBLE_EQ(ising_pbc.CalculateEnergy(std::vector<double>{
+      -1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1
+   }), 28.0);
+   EXPECT_THROW(ising_pbc.CalculateEnergy(std::vector<double>{-1, +1}), std::range_error);
+   EXPECT_THROW(ising_pbc.CalculateEnergy(std::vector<double>{-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1}), std::range_error);
    ising_pbc.SetSpinMagnitude(1.5, {2, 0, 1});
    EXPECT_EQ(ising_pbc.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{8, 8, 8, 8, 8, 8, 8, 8, 3, 8, 8, 8}));
    EXPECT_THROW(ising_pbc.SetSpinMagnitude(1.499, {0, 0, 0}), std::invalid_argument);
@@ -160,9 +158,9 @@ TEST(ModelClassical, IsingOnInfiniteRange) {
    EXPECT_NO_THROW(ising.GetLattice());
    EXPECT_EQ(ising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{7, 7, 7}));
    EXPECT_EQ(ising.GetSpinScaleFactor(), 1);
-   EXPECT_DOUBLE_EQ(ising.CalculateEnergy({-1, +1, -1}), -3.0);
-   EXPECT_THROW(ising.CalculateEnergy({-1, +1}), std::range_error);
-   EXPECT_THROW(ising.CalculateEnergy({-1, +1, -1, +1}), std::range_error);
+   EXPECT_DOUBLE_EQ(ising.CalculateEnergy(std::vector<double>{-1, +1, -1}), -3.0);
+   EXPECT_THROW(ising.CalculateEnergy(std::vector<double>{-1, +1}), std::range_error);
+   EXPECT_THROW(ising.CalculateEnergy(std::vector<double>{-1, +1, -1, +1}), std::range_error);
    ising.SetSpinMagnitude(1.5, 1);
    EXPECT_EQ(ising.GetTwiceSpinMagnitude(), (std::vector<std::int32_t>{7, 3, 7}));
    EXPECT_THROW(ising.SetSpinMagnitude(1.499, 0), std::invalid_argument);

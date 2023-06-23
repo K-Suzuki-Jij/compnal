@@ -28,6 +28,7 @@
 #include "system/all.hpp"
 #include "single_updater.hpp"
 #include <random>
+#include <Eigen/Dense>
 
 namespace compnal {
 namespace solver {
@@ -155,17 +156,17 @@ public:
    
    //! @brief Get the list of samples.
    //! @return The list of samples.
-   const std::vector<std::vector<PHQType>> &GetSamples() const {
+   const Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &GetSamples() const {
       return samples_;
    }
    
    //! @brief Calculate energies for each sample.
    //! @return The list of energy.
-   const std::vector<double> CalculateEnergies() const {
-      std::vector<double> energies(num_samples_);
+   Eigen::Vector<PHQType, Eigen::Dynamic> CalculateEnergies() const {
+      Eigen::Vector<PHQType, Eigen::Dynamic> energies(num_samples_);
 #pragma omp parallel for schedule(guided) num_threads(num_threads_)
       for (std::int32_t i = 0; i < num_samples_; ++i) {
-         energies[i] = model_.CalculateEnergy(samples_[i]);
+         energies(i) = model_.CalculateEnergy(samples_.row(i));
       }
       return energies;
    }
@@ -212,7 +213,7 @@ private:
    std::uint64_t seed_ = std::random_device()();
    
    //! @brief The list of samples.
-   std::vector<std::vector<PHQType>> samples_;
+   Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> samples_;
    
    //! @brief State updater.
    StateUpdateMethod updater_ = StateUpdateMethod::METROPOLIS;
@@ -229,9 +230,9 @@ private:
    //! @param seed The seed used in the calculation.
    //! @return The list of samples.
    template<class SystemType, class RandType>
-   std::vector<std::vector<PHQType>> TemplateRunner(const typename RandType::result_type seed) {
+   Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> TemplateRunner(const typename RandType::result_type seed) {
       seed_ = seed;
-      std::vector<std::vector<PHQType>> samples(num_samples_);
+      Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> samples(num_samples_, model_.GetLattice().GetSystemSize());
       std::vector<typename RandType::result_type> system_seed(num_samples_);
       std::vector<typename RandType::result_type> updater_seed(num_samples_);
       RandType random_number_engine(seed);
@@ -243,7 +244,7 @@ private:
       for (std::int32_t i = 0; i < num_samples_; ++i) {
          auto system = SystemType{model_, system_seed[i]};
          SingleUpdater<SystemType, RandType>(&system, num_sweeps_, 1.0/temperature_, updater_seed[i], updater_, spin_selector_);
-         samples[i] = system.ExtractSample();
+         samples.row(i) = system.ExtractSample();
       }
       return samples;
    }

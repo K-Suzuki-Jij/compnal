@@ -48,7 +48,6 @@ void PyBindClassicalIsing(py::module &m, const std::string &post_name = "") {
    py_class.def("get_quadratic", &Ising::GetQuadratic);
    py_class.def("get_twice_spin_magnitude", &Ising::GetTwiceSpinMagnitude);
    py_class.def("get_spin_scale_factor", &Ising::GetSpinScaleFactor);
-   py_class.def("calculate_energy", py::overload_cast<const std::vector<typename Ising::PHQType>&>(&Ising::CalculateEnergy, py::const_), "state"_a);
    py_class.def("set_spin_magnitude", &Ising::SetSpinMagnitude, "spin_magnitude"_a, "coordinate"_a);
 
    m.def("make_ising", [](const LatticeType &lattice,
@@ -73,7 +72,6 @@ void PyBindClassicalPolynomialIsing(py::module &m, const std::string &post_name 
    
    //Public Member Functions
    py_class.def("get_interaction", &PIsing::GetInteraction);
-   py_class.def("calculate_energy", py::overload_cast<const std::vector<typename PIsing::PHQType>&>(&PIsing::CalculateEnergy, py::const_), "state"_a);
    py_class.def("get_degree", &PIsing::GetDegree);
    py_class.def("get_twice_spin_magnitude", &PIsing::GetTwiceSpinMagnitude);
    py_class.def("get_spin_scale_factor", &PIsing::GetSpinScaleFactor);

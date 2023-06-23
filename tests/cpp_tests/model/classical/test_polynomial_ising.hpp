@@ -51,22 +51,22 @@ TEST(ModelClassical, PolynomialIsingOnChain) {
    EXPECT_THROW(pising.SetSpinMagnitude(1.5, 10), std::invalid_argument);
    EXPECT_THROW((PIsing{chain, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 1, 0}), std::invalid_argument);
    
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {}        }.CalculateEnergy({-1,+1,-1})), +0.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{0, 3.0}}}.CalculateEnergy({-1,+1,-1})), +3.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{1, 1.0}}}.CalculateEnergy({-1,+1,-1})), -1.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{2, 2.0}}}.CalculateEnergy({-1,+1,-1})), -4.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{3, 2.0}}}.CalculateEnergy({-1,+1,-1})), +2.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{1, 1.0}, {3, 2.0}}}.CalculateEnergy({-1,+1,-1})), +1.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {}        }.CalculateEnergy(std::vector<double>{-1,+1,-1})), +0.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{0, 3.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), +3.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{1, 1.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), -1.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{2, 2.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), -4.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{3, 2.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), +2.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::OBC}, {{1, 1.0}, {3, 2.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), +1.0);
    
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {}        }.CalculateEnergy({-1,+1,-1})), +0.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{0, 3.0}}}.CalculateEnergy({-1,+1,-1})), +3.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{1, 1.0}}}.CalculateEnergy({-1,+1,-1})), -1.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{2, 2.0}}}.CalculateEnergy({-1,+1,-1})), -2.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{3, 2.0}}}.CalculateEnergy({-1,+1,-1})), +6.0);
-   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{1, 1.0}, {3, 2.0}}}.CalculateEnergy({-1,+1,-1})), +5.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {}        }.CalculateEnergy(std::vector<double>{-1,+1,-1})), +0.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{0, 3.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), +3.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{1, 1.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), -1.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{2, 2.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), -2.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{3, 2.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), +6.0);
+   EXPECT_DOUBLE_EQ((PIsing{Chain{3, BC::PBC}, {{1, 1.0}, {3, 2.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), +5.0);
    
-   EXPECT_THROW((PIsing{Chain{3, BC::PBC}, {{1, 1.0}}}.CalculateEnergy({-1,+1}))      , std::range_error);
-   EXPECT_THROW((PIsing{Chain{3, BC::PBC}, {{1, 1.0}}}.CalculateEnergy({-1,+1,+1,+1})), std::range_error);
+   EXPECT_THROW((PIsing{Chain{3, BC::PBC}, {{1, 1.0}}}.CalculateEnergy(std::vector<double>{-1,+1}))      , std::range_error);
+   EXPECT_THROW((PIsing{Chain{3, BC::PBC}, {{1, 1.0}}}.CalculateEnergy(std::vector<double>{-1,+1,+1,+1})), std::range_error);
 }
 
 TEST(ModelClassical, PolynomialIsingOnSquare) {
@@ -109,8 +109,8 @@ TEST(ModelClassical, PolynomialIsingOnSquare) {
    EXPECT_DOUBLE_EQ((PIsing{Square{3, 2, BC::PBC}, {{3, 2.0}}}.CalculateEnergy(spins)), +16.0);
    EXPECT_DOUBLE_EQ((PIsing{Square{3, 2, BC::PBC}, {{0, 3.0}, {1, 2.0}, {3, 2.0}}}.CalculateEnergy(spins)), +23.0);
    
-   EXPECT_THROW((PIsing{Square{3, 2, BC::PBC}, {{1, 1.0}}}.CalculateEnergy({-1,+1}))      , std::range_error);
-   EXPECT_THROW((PIsing{Square{3, 2, BC::PBC}, {{1, 1.0}}}.CalculateEnergy({-1,+1,+1,+1,+1,+1,+1})), std::range_error);
+   EXPECT_THROW((PIsing{Square{3, 2, BC::PBC}, {{1, 1.0}}}.CalculateEnergy(std::vector<double>{-1,+1}))      , std::range_error);
+   EXPECT_THROW((PIsing{Square{3, 2, BC::PBC}, {{1, 1.0}}}.CalculateEnergy(std::vector<double>{-1,+1,+1,+1,+1,+1,+1})), std::range_error);
 }
 
 TEST(ModelClassical, PolynomialIsingOnCubic) {
@@ -153,8 +153,8 @@ TEST(ModelClassical, PolynomialIsingOnCubic) {
    EXPECT_DOUBLE_EQ((PIsing{Cubic{3, 2, 2, BC::PBC}, {{3, 2.0}}}.CalculateEnergy(spins)), +40.0);
    EXPECT_DOUBLE_EQ((PIsing{Cubic{3, 2, 2, BC::PBC}, {{1, 1.0}, {3, 2.0}}}.CalculateEnergy(spins)), +44.0);
    
-   EXPECT_THROW((PIsing{Cubic{3, 2, 2, BC::PBC}, {{1, 1.0}}}.CalculateEnergy({-1,+1}))      , std::range_error);
-   EXPECT_THROW((PIsing{Cubic{3, 2, 2, BC::PBC}, {{1, 1.0}}}.CalculateEnergy({-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1})), std::range_error);
+   EXPECT_THROW((PIsing{Cubic{3, 2, 2, BC::PBC}, {{1, 1.0}}}.CalculateEnergy(std::vector<double>{-1,+1}))      , std::range_error);
+   EXPECT_THROW((PIsing{Cubic{3, 2, 2, BC::PBC}, {{1, 1.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1,+1,+1,+1,-1,+1,-1,+1,+1,+1,+1})), std::range_error);
 }
 
 TEST(ModelClassical, PolynomialIsingOnInfiniteRang) {
@@ -179,15 +179,15 @@ TEST(ModelClassical, PolynomialIsingOnInfiniteRang) {
    EXPECT_THROW(pising.SetSpinMagnitude(1.5, 10), std::invalid_argument);
    EXPECT_THROW((PIsing{infinite, {{0, -1.0}, {1, +2.0}, {2, -3.0}, {3, +4.0}}, 1, 0}), std::invalid_argument);
    
-   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{}      }}.CalculateEnergy({-1,+1,-1})), +0.0);
-   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{0, 3.0}}}.CalculateEnergy({-1,+1,-1})), +3.0);
-   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{1, 1.0}}}.CalculateEnergy({-1,+1,-1})), -1.0);
-   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{2, 2.0}}}.CalculateEnergy({-1,+1,-1})), -2.0);
-   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy({-1,+1,-1})), +3.0);
-   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{1, 1.0}, {2, 2.0}, {3, 3.0}}}.CalculateEnergy({-1,+1,-1})), 0.0);
+   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{}      }}.CalculateEnergy(std::vector<double>{-1,+1,-1})), +0.0);
+   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{0, 3.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), +3.0);
+   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{1, 1.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), -1.0);
+   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{2, 2.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), -2.0);
+   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), +3.0);
+   EXPECT_DOUBLE_EQ((PIsing{Infinite{3}, {{1, 1.0}, {2, 2.0}, {3, 3.0}}}.CalculateEnergy(std::vector<double>{-1,+1,-1})), 0.0);
    
-   EXPECT_THROW((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy({-1,+1}))      , std::range_error);
-   EXPECT_THROW((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy({-1,+1,+1,+1})), std::range_error);
+   EXPECT_THROW((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy(std::vector<double>{-1,+1}))      , std::range_error);
+   EXPECT_THROW((PIsing{Infinite{3}, {{3, 3.0}}}.CalculateEnergy(std::vector<double>{-1,+1,+1,+1})), std::range_error);
 }
 
 

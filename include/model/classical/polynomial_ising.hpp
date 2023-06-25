@@ -177,7 +177,7 @@ private:
    //! @return The energy.
    template<class VecType>
    double CalculateEnergy(const lattice::Chain &lattice,
-                          const std::vector<VecType> &state) const {
+                          const VecType &state) const {
       double energy = 0;
       const std::int32_t system_size = lattice.GetSystemSize();
       

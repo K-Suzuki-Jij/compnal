@@ -46,7 +46,9 @@ public:
    //! @param model The model.
    //! @param seed The seed of the random number engine.
    System(const ModelType &model, const typename RandType::result_type seed):
-   BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed) {
+   BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
+   linear_(model.GetLinear()),
+   quadratic_(model.GetQuadratic()) {
       this->base_energy_difference_ = GenerateEnergyDifference(this->sample_);
    }
    
@@ -80,6 +82,12 @@ public:
    
    
 private:
+   //! @brief The linear interaction.
+   const double linear_ = 0;
+
+   //! @brief The quadratic interaction.
+   const double quadratic_ = 0;
+   
    //! @brief Generate energy difference.
    //! @param sample The spin configuration.
    //! @return The energy difference.

@@ -48,6 +48,8 @@ public:
    //! @param seed The seed of the random number engine.
    System(const ModelType &model, const typename RandType::result_type seed):
    BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
+   linear_(model.GetLinear()),
+   quadratic_(model.GetQuadratic()),
    x_size_(model.GetLattice().GetXSize()),
    y_size_(model.GetLattice().GetYSize()),
    z_size_(model.GetLattice().GetZSize()){
@@ -117,6 +119,12 @@ public:
    
    
 private:
+   //! @brief The linear interaction.
+   const double linear_ = 0;
+
+   //! @brief The quadratic interaction.
+   const double quadratic_ = 0;
+   
    //! @brief The length of x-direction.
    const std::int32_t x_size_ = 0;
 

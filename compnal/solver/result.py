@@ -129,51 +129,66 @@ class CMCResult:
     hard_info: Optional[CMCHardwareInfo] = None
     params: Optional[CMCParams] = None
 
-    def calculate_mean(self, bias: float = 0.0) -> tuple[float, float]:
+    def calculate_mean(self, bias: float = 0.0, std: bool = False) -> tuple[float, float]:
         """Calculate the mean of the samples.
 
         Args:
             bias (float, optional): The bias in E(X - bias). Defaults to 0.0.
+            std (bool, optional): If True, calculate the standard deviation. Defaults to False.
 
         Returns:
-            tuple[float, float]: The mean of the samples and its standard deviation.
+            Union[tuple[float, float], float]: The mean of the samples, and if `std` is `True`, its standard deviation.
         """
-        return self.calculate_moment(order=1, bias=bias)
+        return self.calculate_moment(order=1, bias=bias, std=std)
 
-    def calculate_moment(self, order: int, bias: float = 0.0) -> tuple[float, float]:
+    def calculate_moment(self, order: int, bias: float = 0.0, std = False) -> tuple[float, float]:
         """Calculate the moment of the samples.
 
         Args:
             order (int): The order of the moment.
             bias (float, optional): The bias in E((X - bias)^order). Defaults to 0.0.
+            std (bool, optional): If True, calculate the standard deviation. Defaults to False.
 
         Returns:
-            tuple[float, float]: The moment of the samples and its standard deviation.
+            Union[tuple[float, float], float]: The moment of the samples, and if `std` is `True`, its standard deviation.
         """
         a = [np.mean(np.array(list(sample.values())) + bias)**order for sample in self.samples]
-        return np.mean(a), np.std(a)
+        if std:
+            return np.mean(a), np.std(a)
+        else:
+            return np.mean(a)
     
-    def calculate_correlation(self, i: Union[int, tuple], j: Union[int, tuple]) -> tuple[float, float]:
+    def calculate_correlation(self, i: Union[int, tuple], j: Union[int, tuple], std = False) -> tuple[float, float]:
         """Calculate the correlation between the spin i and j.
         
         Args:
             i (Union[int, tuple]): The coordinate of the spin.
             j (Union[int, tuple]): The coordinate of the spin.
+            std (bool, optional): If True, calculate the standard deviation. Defaults to False.
 
         Returns:
-            tuple[float, float]: The correlation and its standard deviation.
+            Union[tuple[float, float], float]: The correlation between the spin i and j, and if `std` is `True`, its standard deviation.
         """
         a = self.samples.T[self.coordinate[i]]*self.samples.T[self.coordinate[j]]
-        return np.mean(a), np.std(a)
+        if std:
+            return np.mean(a), np.std(a)
+        else:
+            return np.mean(a)
 
     
-    def calculate_energy(self) -> tuple[float, float]:
+    def calculate_energy(self, std = False) -> tuple[float, float]:
         """Calculate the energy.
 
+        Args:
+            std (bool, optional): If True, calculate the standard deviation. Defaults to False.
+
         Returns:
-            tuple[float, float]: The energy and its standard deviation.
+            Union[tuple[float, float], float]: The energy, and if `std` is `True`, its standard deviation.
         """
-        return np.mean(self.energies), np.std(self.energies)
+        if std:
+            return np.mean(self.energies), np.std(self.energies)
+        else:
+            return np.mean(self.energies)
 
     def to_serializable(self) -> dict:
         """Convert to a serializable object.

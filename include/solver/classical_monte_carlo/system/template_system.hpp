@@ -71,8 +71,6 @@ public:
    BaseIsingSystem(const ModelType &model, const typename RandType::result_type seed):
    system_size_(model.GetLattice().GetSystemSize()),
    bc_(model.GetLattice().GetBoundaryCondition()),
-   linear_(model.GetLinear()),
-   quadratic_(model.GetQuadratic()),
    random_number_engine_(RandType(seed)),
    sample_(GenerateRandomSpins(model, &random_number_engine_)) {}
    
@@ -113,12 +111,6 @@ protected:
 
    //! @brief The boundary condition.
    const lattice::BoundaryCondition bc_ = lattice::BoundaryCondition::NONE;
-
-   //! @brief The linear interaction.
-   const double linear_ = 0;
-
-   //! @brief The quadratic interaction.
-   const double quadratic_ = 0;
 
    //! @brief The random number engine.
    RandType random_number_engine_;

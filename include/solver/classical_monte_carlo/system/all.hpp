@@ -28,4 +28,6 @@
 #include "ising_cubic.hpp"
 #include "ising_infinite_range.hpp"
 
+#include "poly_ising_chain.hpp"
+
 #endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_ */

@@ -76,6 +76,9 @@ public:
       else if (degree_ == 3) {
          Flip3Body(index, update_state);
       }
+      else if (degree_ == 4) {
+         Flip4Body(index, update_state);
+      }
       else {
          FlipAny(index, update_state);
       }
@@ -187,23 +190,87 @@ private:
          const std::int32_t m1 = index - 1;
          const std::int32_t p1 = index + 1;
          const std::int32_t p2 = index + 2;
-         
-         const double sample_m2 = m2 >= 0 ? this->sample_[m2].GetValue() : 0;
-         const double sample_m1 = m1 >= 0 ? this->sample_[m1].GetValue() : 0;
-         const double sample_p1 = p1 < this->system_size_ ? this->sample_[p1].GetValue() : 0;
-         const double sample_p2 = p2 < this->system_size_ ? this->sample_[p2].GetValue() : 0;
-         
+         const double s_m2 = m2 >= 0 ? this->sample_[m2].GetValue() : 0;
+         const double s_m1 = m1 >= 0 ? this->sample_[m1].GetValue() : 0;
+         const double s_p1 = p1 < this->system_size_ ? this->sample_[p1].GetValue() : 0;
+         const double s_p2 = p2 < this->system_size_ ? this->sample_[p2].GetValue() : 0;
          if (m2 >= 0) {
-            this->base_energy_difference_[m2] += val_3*sample_m1;
+            this->base_energy_difference_[m2] += val_3*s_m1;
          }
          if (m1 >= 0) {
-            this->base_energy_difference_[m1] += val_3*(sample_m2 + sample_p1) + val_2;
+            this->base_energy_difference_[m1] += val_3*(s_m2 + s_p1) + val_2;
          }
          if (p1 < this->system_size_) {
-            this->base_energy_difference_[p1] += val_3*(sample_m1 + sample_p2) + val_2;
+            this->base_energy_difference_[p1] += val_3*(s_m1 + s_p2) + val_2;
          }
          if (p2 < this->system_size_) {
-            this->base_energy_difference_[p2] += val_3*sample_p1;
+            this->base_energy_difference_[p2] += val_3*s_p1;
+         }
+      }
+      else {
+         throw std::invalid_argument("Unsupported BoundaryCondition");
+      }
+      this->sample_[index].SetState(update_state);
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip4Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = (interaction_.count(2) == 1 ? interaction_.at(2) : 0)*diff;
+      const double val_3 = (interaction_.count(3) == 1 ? interaction_.at(3) : 0)*diff;
+      const double val_4 = interaction_.at(4)*diff;
+      if (this->bc_ == lattice::BoundaryCondition::PBC) {
+         const std::int32_t m3 = (index - 3 + this->system_size_)%this->system_size_;
+         const std::int32_t m2 = (index - 2 + this->system_size_)%this->system_size_;
+         const std::int32_t m1 = (index - 1 + this->system_size_)%this->system_size_;
+         const std::int32_t p1 = (index + 1)%this->system_size_;
+         const std::int32_t p2 = (index + 2)%this->system_size_;
+         const std::int32_t p3 = (index + 3)%this->system_size_;
+         const double s_m3 = this->sample_[m3].GetValue();
+         const double s_m2 = this->sample_[m2].GetValue();
+         const double s_m1 = this->sample_[m1].GetValue();
+         const double s_p1 = this->sample_[p1].GetValue();
+         const double s_p2 = this->sample_[p2].GetValue();
+         const double s_p3 = this->sample_[p3].GetValue();
+         this->base_energy_difference_[m3] += val_4*s_m2*s_m1;
+         this->base_energy_difference_[m2] += val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
+         this->base_energy_difference_[m1] += val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
+         this->base_energy_difference_[p1] += val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
+         this->base_energy_difference_[p2] += val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
+         this->base_energy_difference_[p3] += val_4*s_p1*s_p2;
+      }
+      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
+         const std::int32_t m3 = index - 3;
+         const std::int32_t m2 = index - 2;
+         const std::int32_t m1 = index - 1;
+         const std::int32_t p1 = index + 1;
+         const std::int32_t p2 = index + 2;
+         const std::int32_t p3 = index + 3;
+         const double s_m3 = m3 >= 0 ? this->sample_[m3].GetValue() : 0;
+         const double s_m2 = m2 >= 0 ? this->sample_[m2].GetValue() : 0;
+         const double s_m1 = m1 >= 0 ? this->sample_[m1].GetValue() : 0;
+         const double s_p1 = p1 < this->system_size_ ? this->sample_[p1].GetValue() : 0;
+         const double s_p2 = p2 < this->system_size_ ? this->sample_[p2].GetValue() : 0;
+         const double s_p3 = p3 < this->system_size_ ? this->sample_[p3].GetValue() : 0;
+         if (m3 >= 0) {
+            this->base_energy_difference_[m3] += val_4*s_m2*s_m1;
+         }
+         if (m2 >= 0) {
+            this->base_energy_difference_[m2] += val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
+         }
+         if (m1 >= 0) {
+            this->base_energy_difference_[m1] += val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
+         }
+         if (p1 < this->system_size_) {
+            this->base_energy_difference_[p1] += val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
+         }
+         if (p2 < this->system_size_) {
+            this->base_energy_difference_[p2] += val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
+         }
+         if (p3 < this->system_size_) {
+            this->base_energy_difference_[p3] += val_4*s_p1*s_p2;
          }
       }
       else {

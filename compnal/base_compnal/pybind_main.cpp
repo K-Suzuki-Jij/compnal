@@ -63,5 +63,6 @@ PYBIND11_MODULE(base_compnal, m) {
    compnal::wrapper::PyBindClassicalMonteCarlo<compnal::model::classical::Ising<compnal::lattice::Cubic>>(m_solver, "IsingCubic");
    compnal::wrapper::PyBindClassicalMonteCarlo<compnal::model::classical::Ising<compnal::lattice::InfiniteRange>>(m_solver, "IsingInfiniteRange");
 
+   compnal::wrapper::PyBindClassicalMonteCarlo<compnal::model::classical::PolynomialIsing<compnal::lattice::Chain>>(m_solver, "PolyIsingChain");
 
 };

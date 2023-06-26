@@ -216,6 +216,43 @@ TEST(SolverClassicalMonteCarlo, IsingOnInfiniteRange) {
 }
 
 
+TEST(SolverClassicalMonteCarlo, PolyIsingOnChain) {
+   using BC = lattice::BoundaryCondition;
+   using Chain = lattice::Chain;
+   using PolyIsing = model::classical::PolynomialIsing<Chain>;
+   
+   for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
+      PolyIsing poly_ising{Chain{7, bc}, {{1, -1.5}, {4, +2.0}}, 1.5, 2};
+      
+      auto cmc = solver::classical_monte_carlo::ClassicalMonteCarlo(poly_ising);
+      cmc.SetNumSweeps(500);
+      cmc.SetNumSamples(10);
+      cmc.SetNumThreads(2);
+      cmc.SetTemperature(0.1);
+      
+      cmc.SetStateUpdateMethod(solver::StateUpdateMethod::METROPOLIS);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetStateUpdateMethod(solver::StateUpdateMethod::HEAT_BATH);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::XORSHIFT);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetRandomNumberEngine(solver::RandomNumberEngine::MT_64);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::RANDOM);
+      EXPECT_NO_THROW(cmc.RunSampling());
+      
+      cmc.SetSpinSelectionMethod(solver::SpinSelectionMethod::SEQUENTIAL);
+      EXPECT_NO_THROW(cmc.RunSampling());
+   }
+}
+
 }  // namespace test
 }  // namespace compnal
 

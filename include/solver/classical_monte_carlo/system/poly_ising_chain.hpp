@@ -70,7 +70,10 @@ public:
    //! @param index The index of the variable to be flipped.
    //! @param update_state The state number to be updated.
    void Flip(const std::int32_t index, const std::int32_t update_state) {
-      if (degree_ == 3) {
+      if (degree_ == 2) {
+         Flip2Body(index, update_state);
+      }
+      else if (degree_ == 3) {
          Flip3Body(index, update_state);
       }
       else {
@@ -132,6 +135,34 @@ private:
          throw std::invalid_argument("Unsupported BinaryCondition");
       }
       return d_E;
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip2Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = interaction_.at(2)*diff;
+      if (this->bc_ == lattice::BoundaryCondition::PBC) {
+         const std::int32_t m1 = (index - 1 + this->system_size_)%this->system_size_;
+         const std::int32_t p1 = (index + 1)%this->system_size_;
+         this->base_energy_difference_[m1] += val_2;
+         this->base_energy_difference_[p1] += val_2;
+      }
+      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
+         const std::int32_t m1 = index - 1;
+         const std::int32_t p1 = index + 1;
+         if (m1 >= 0) {
+            this->base_energy_difference_[m1] += val_2;
+         }
+         if (p1 < this->system_size_) {
+            this->base_energy_difference_[p1] += val_2;
+         }
+      }
+      else {
+         throw std::invalid_argument("Unsupported BoundaryCondition");
+      }
+      this->sample_[index].SetState(update_state);
    }
    
    //! @brief Flip a variable.

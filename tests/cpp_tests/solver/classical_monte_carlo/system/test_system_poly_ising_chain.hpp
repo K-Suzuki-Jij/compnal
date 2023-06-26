@@ -36,7 +36,7 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnChain) {
    
    for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
       Chain chain{5, bc};
-      PolyIsing poly_ising{chain, {{1, -0.5}, {2, -1.5}, {3, +1.0}, {4, +2}}};
+      PolyIsing poly_ising{chain, {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}}};
       const std::int32_t seed = 0;
       
       solver::classical_monte_carlo::System<PolyIsing, std::mt19937> system{poly_ising, seed};
@@ -69,9 +69,87 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnChain) {
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 0),
                        poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5}) -
                        poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, -0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, +0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      
+      system.Flip(2, 1);
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, -0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, -0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, +0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      system.Flip(0, 1);
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, -0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, -0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, +0.5, -0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 0),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(1, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(2, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(3, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, +0.5, +0.5, -0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
+      EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 1),
+                       poly_ising.CalculateEnergy(std::vector<double>{+0.5, +0.5, +0.5, +0.5, +0.5}) -
+                       poly_ising.CalculateEnergy(system.ExtractSample()));
       
    }
-
+   
    
 }
 

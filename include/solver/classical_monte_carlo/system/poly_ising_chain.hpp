@@ -66,6 +66,56 @@ public:
       this->base_energy_difference_ = GenerateEnergyDifference(this->sample_);
    }
    
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip(const std::int32_t index, const std::int32_t update_state) {
+      if (this->bc_ == lattice::BoundaryCondition::PBC) {
+         for (const auto &it: interaction_) {
+            const double val = it.second*(this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue());
+            for (std::int32_t i = 0; i < it.first; ++i) {
+               double spin_prod = 1;
+               for (std::int32_t j = 0; j < it.first; ++j) {
+                  const std::int32_t p_ind = (index - it.first + 1 + i + j + this->system_size_)%this->system_size_;
+                  if (p_ind != index) {
+                     spin_prod *= this->sample_[p_ind].GetValue();
+                  }
+               }
+               for (std::int32_t j = 0; j < it.first; ++j) {
+                  const std::int32_t p_ind = (index - it.first + 1 + i + j + this->system_size_)%this->system_size_;
+                  if (p_ind != index) {
+                     this->base_energy_difference_[p_ind] += val*spin_prod/this->sample_[p_ind].GetValue();
+                  }
+               }
+            }
+         }
+      }
+      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
+         for (const auto &it: interaction_) {
+            const double val = it.second*(this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue());
+            for (std::int32_t i = std::max(index - it.first + 1, 0); i <= index; ++i) {
+               if (i > this->system_size_ - it.first) {
+                  break;
+               }
+               double spin_prod = 1;
+               for (std::int32_t j = i; j < i + it.first; ++j) {
+                  if (j != index) {
+                     spin_prod *= this->sample_[j].GetValue();
+                  }
+               }
+               for (std::int32_t j = i; j < i + it.first; ++j) {
+                  if (j != index) {
+                     this->base_energy_difference_[j] += val*spin_prod/this->sample_[j].GetValue();
+                  }
+               }
+            }
+         }
+      }
+      else {
+         throw std::invalid_argument("Unsupported BoundaryCondition");
+      }
+      this->sample_[index].SetState(update_state);
+   }
    
 private:
    //! @brief The polynomial interaction.

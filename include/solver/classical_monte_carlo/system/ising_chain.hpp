@@ -49,7 +49,7 @@ public:
    BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
    linear_(model.GetLinear()),
    quadratic_(model.GetQuadratic()) {
-      this->base_energy_difference_ = GenerateEnergyDifference(this->sample_);
+      this->d_E = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Set sample by states.
@@ -63,7 +63,7 @@ public:
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);
       }
-      this->base_energy_difference_ = GenerateEnergyDifference(this->sample_);
+      this->d_E = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -72,15 +72,15 @@ public:
    void Flip(const std::int32_t index, const std::int32_t update_state) {
       const double diff = this->quadratic_*(this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue());
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
-         this->base_energy_difference_[(index - 1 + this->system_size_)%this->system_size_] += diff;
-         this->base_energy_difference_[(index + 1)%this->system_size_] += diff;
+         this->d_E[(index - 1 + this->system_size_)%this->system_size_] += diff;
+         this->d_E[(index + 1)%this->system_size_] += diff;
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          if (index < this->system_size_ - 1) {
-            this->base_energy_difference_[index + 1] += diff;
+            this->d_E[index + 1] += diff;
          }
          if (index > 0) {
-            this->base_energy_difference_[index - 1] += diff;
+            this->d_E[index - 1] += diff;
          }
       }
       else {

@@ -102,7 +102,7 @@ public:
    //! @param candidate_state The candidate state.
    //! @return The energy difference.
    double GetEnergyDifference(const std::int32_t index, const std::int32_t candidate_state) const {
-      return (sample_[index].GetValueFromState(candidate_state) - sample_[index].GetValue())*base_energy_difference_[index];
+      return (sample_[index].GetValueFromState(candidate_state) - sample_[index].GetValue())*d_E[index];
    }
    
 protected:
@@ -119,7 +119,7 @@ protected:
    std::vector<model::utility::Spin> sample_;
    
    //! @brief The energy difference.
-   std::vector<double> base_energy_difference_;
+   std::vector<double> d_E;
 
 };
 

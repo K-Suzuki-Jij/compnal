@@ -53,7 +53,7 @@ public:
    x_size_(model.GetLattice().GetXSize()),
    y_size_(model.GetLattice().GetYSize()),
    z_size_(model.GetLattice().GetZSize()){
-      this->base_energy_difference_ = GenerateEnergyDifference(this->sample_);
+      this->d_E = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Set sample by states.
@@ -67,7 +67,7 @@ public:
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);
       }
-      this->base_energy_difference_ = GenerateEnergyDifference(this->sample_);
+      this->d_E = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -79,36 +79,36 @@ public:
       const std::int32_t coo_y = (index%(x_size_*y_size_))/x_size_;
       const std::int32_t coo_z = index/(x_size_*y_size_);
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
-         this->base_energy_difference_[coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 1)%x_size_] += diff;
-         this->base_energy_difference_[coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_] += diff;
-         this->base_energy_difference_[coo_z*x_size_*y_size_ + ((coo_y + 1)%y_size_)*x_size_ + coo_x] += diff;
-         this->base_energy_difference_[coo_z*x_size_*y_size_ + ((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x] += diff;
-         this->base_energy_difference_[((coo_z + 1)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += diff;
-         this->base_energy_difference_[((coo_z - 1 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += diff;
+         this->d_E[coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 1)%x_size_] += diff;
+         this->d_E[coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_] += diff;
+         this->d_E[coo_z*x_size_*y_size_ + ((coo_y + 1)%y_size_)*x_size_ + coo_x] += diff;
+         this->d_E[coo_z*x_size_*y_size_ + ((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x] += diff;
+         this->d_E[((coo_z + 1)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += diff;
+         this->d_E[((coo_z - 1 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += diff;
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          // x-direction
          if (coo_x < x_size_ - 1) {
-            this->base_energy_difference_[index + 1] += diff;
+            this->d_E[index + 1] += diff;
          }
          if (coo_x > 0) {
-            this->base_energy_difference_[index - 1] += diff;
+            this->d_E[index - 1] += diff;
          }
          
          // y-direction
          if (coo_y < y_size_ - 1) {
-            this->base_energy_difference_[coo_z*x_size_*y_size_ + (coo_y + 1)*x_size_ + coo_x] += diff;
+            this->d_E[coo_z*x_size_*y_size_ + (coo_y + 1)*x_size_ + coo_x] += diff;
          }
          if (coo_y > 0) {
-            this->base_energy_difference_[coo_z*x_size_*y_size_ + (coo_y - 1)*x_size_ + coo_x] += diff;
+            this->d_E[coo_z*x_size_*y_size_ + (coo_y - 1)*x_size_ + coo_x] += diff;
          }
          
          // z-direction
          if (coo_z < z_size_ - 1) {
-            this->base_energy_difference_[(coo_z + 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += diff;
+            this->d_E[(coo_z + 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += diff;
          }
          if (coo_z > 0) {
-            this->base_energy_difference_[(coo_z - 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += diff;
+            this->d_E[(coo_z - 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += diff;
          }
       }
       else {

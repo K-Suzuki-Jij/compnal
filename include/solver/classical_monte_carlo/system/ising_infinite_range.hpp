@@ -49,7 +49,7 @@ public:
    BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
    linear_(model.GetLinear()),
    quadratic_(model.GetQuadratic()) {
-      this->base_energy_difference_ = GenerateEnergyDifference(this->sample_);
+      this->d_E = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Set sample by states.
@@ -63,7 +63,7 @@ public:
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);
       }
-      this->base_energy_difference_ = GenerateEnergyDifference(this->sample_);
+      this->d_E = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -72,10 +72,10 @@ public:
    void Flip(const std::int32_t index, const std::int32_t update_state) {
       const double diff = this->quadratic_*(this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue());
       for (std::int32_t i = 0; i < index; ++i) {
-         this->base_energy_difference_[i] += diff;
+         this->d_E[i] += diff;
       }
       for (std::int32_t i = index + 1; i < this->system_size_; ++i) {
-         this->base_energy_difference_[i] += diff;
+         this->d_E[i] += diff;
       }
       this->sample_[index].SetState(update_state);
    }

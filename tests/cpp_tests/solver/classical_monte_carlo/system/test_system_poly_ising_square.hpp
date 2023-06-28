@@ -57,39 +57,59 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnSquare) {
       }
    }
    
-   Square square{8, 8, BC::OBC};
-   PolyIsing poly_ising{square, interaction_set[3]};
-   const std::int32_t seed = 0;
-   
-   solver::classical_monte_carlo::System<PolyIsing, std::mt19937> system{poly_ising, seed};
-   system.SetSampleByState(initial_state_level);
-   
-   for (std::int32_t i = 0; i < x_size; ++i) {
-      for (std::int32_t j = 0; j < y_size; ++j) {
-         EXPECT_DOUBLE_EQ(system.ExtractSample()(j*x_size + i), -0.5);
-         EXPECT_EQ(system.GenerateCandidateState(j*x_size + i), 1);
-      }
-   }
-   
-   EXPECT_EQ(system.GetSystemSize(), x_size*y_size);
-   
-   for (std::int32_t i = 0; i < x_size; ++i) {
-      for (std::int32_t j = 0; j < y_size; ++j) {
-         initial_state[j*x_size + i] = 0.5;
-         EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
-                          poly_ising.CalculateEnergy(initial_state) -
-                          poly_ising.CalculateEnergy(system.ExtractSample()));
-         initial_state[j*x_size + i] = -0.5;
+   for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
+      for (const auto &interaction: interaction_set) {
+         Square square{x_size, y_size, bc};
+         PolyIsing poly_ising{square, interaction};
+         const std::int32_t seed = 0;
          
-         system.Flip(0, 1);
-         initial_state[0] = 0.5;
-         initial_state[j*x_size + i] = 0.5;
-         EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
-                          poly_ising.CalculateEnergy(initial_state) -
-                          poly_ising.CalculateEnergy(system.ExtractSample()));
-         initial_state[0] = -0.5;
-         initial_state[j*x_size + i] = -0.5;
-         system.Flip(0, 0);
+         solver::classical_monte_carlo::System<PolyIsing, std::mt19937> system{poly_ising, seed};
+         system.SetSampleByState(initial_state_level);
+         
+         for (std::int32_t i = 0; i < x_size; ++i) {
+            for (std::int32_t j = 0; j < y_size; ++j) {
+               EXPECT_DOUBLE_EQ(system.ExtractSample()(j*x_size + i), -0.5);
+               EXPECT_EQ(system.GenerateCandidateState(j*x_size + i), 1);
+            }
+         }
+         
+         EXPECT_EQ(system.GetSystemSize(), x_size*y_size);
+         
+         for (std::int32_t i = 0; i < x_size; ++i) {
+            for (std::int32_t j = 0; j < y_size; ++j) {
+               initial_state[j*x_size + i] = 0.5;
+               EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
+                                poly_ising.CalculateEnergy(initial_state) -
+                                poly_ising.CalculateEnergy(system.ExtractSample()));
+               
+               system.Flip(0, 1);
+               initial_state[0] = 0.5;
+               EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
+                                poly_ising.CalculateEnergy(initial_state) -
+                                poly_ising.CalculateEnergy(system.ExtractSample()));
+               
+               
+               system.Flip(30, 1);
+               initial_state[30] = 0.5;
+               EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
+                                poly_ising.CalculateEnergy(initial_state) -
+                                poly_ising.CalculateEnergy(system.ExtractSample()));
+               
+               system.Flip(y_size*x_size - 1, 1);
+               initial_state[y_size*x_size - 1] = 0.5;
+               EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
+                                poly_ising.CalculateEnergy(initial_state) -
+                                poly_ising.CalculateEnergy(system.ExtractSample()));
+               
+               initial_state[j*x_size + i] = -0.5;
+               initial_state[y_size*x_size - 1] = -0.5;
+               initial_state[30] = -0.5;
+               initial_state[0] = -0.5;
+               system.Flip(0, 0);
+               system.Flip(30, 0);
+               system.Flip(y_size*x_size - 1, 0);
+            }
+         }
       }
    }
    

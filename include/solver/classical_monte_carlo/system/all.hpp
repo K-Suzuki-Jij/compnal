@@ -29,5 +29,6 @@
 #include "ising_infinite_range.hpp"
 
 #include "poly_ising_chain.hpp"
+#include "poly_ising_square.hpp"
 
 #endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_ */

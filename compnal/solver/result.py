@@ -152,7 +152,7 @@ class CMCResult:
         Returns:
             Union[tuple[float, float], float]: The moment of the samples, and if `std` is `True`, its standard deviation.
         """
-        a = [np.mean(np.array(list(sample.values())) + bias)**order for sample in self.samples]
+        a = [np.mean(np.array(list(sample)) + bias)**order for sample in self.samples]
         if std:
             return np.mean(a), np.std(a)
         else:

@@ -75,7 +75,7 @@ class ClassicalModelInfo:
             interactions=obj.get("interactions", None),
             spin_magnitude=dict(
                 zip(
-                    obj.get("spin_magnitude_keys", None), 
+                    [tuple(elem) for elem in obj.get("spin_magnitude_keys", None)], 
                     obj.get("spin_magnitude_values", None)
                 )
             ),

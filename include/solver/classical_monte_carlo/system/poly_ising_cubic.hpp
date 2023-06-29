@@ -13,24 +13,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  all.hpp
+//  poly_ising_cubic.hpp
 //  compnal
 //
-//  Created by kohei on 2023/05/06.
+//  Created by kohei on 2023/06/29.
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_
+#ifndef poly_ising_cubic_h
+#define poly_ising_cubic_h
 
-#include "ising_chain.hpp"
-#include "ising_square.hpp"
-#include "ising_cubic.hpp"
-#include "ising_infinite_range.hpp"
 
-#include "poly_ising_chain.hpp"
-#include "poly_ising_square.hpp"
-
-#include "poly_ising_infinite_range.hpp"
-
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_ */
+#endif /* poly_ising_cubic_h */

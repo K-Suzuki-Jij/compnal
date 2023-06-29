@@ -24,5 +24,6 @@
 #define COMPNAL_UTILITY_ALL_HPP_
 
 #include "random.hpp"
+#include "combination.hpp"
 
 #endif /* COMPNAL_UTILITY_ALL_HPP_ */

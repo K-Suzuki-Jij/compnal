@@ -32,5 +32,7 @@
 #include "system/test_system_poly_ising_chain.hpp"
 #include "system/test_system_poly_ising_square.hpp"
 
+#include "system/test_system_poly_ising_infinite_range.hpp"
+
 
 #endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_ALL_ */

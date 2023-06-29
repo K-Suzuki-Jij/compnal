@@ -16,21 +16,14 @@
 //  all.hpp
 //  compnal
 //
-//  Created by kohei on 2023/05/06.
+//  Created by kohei on 2023/06/29.
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_
+#ifndef COMPNAL_TEST_UTILITY_ALL_HPP_
+#define COMPNAL_TEST_UTILITY_ALL_HPP_
 
-#include "ising_chain.hpp"
-#include "ising_square.hpp"
-#include "ising_cubic.hpp"
-#include "ising_infinite_range.hpp"
+#include "test_combination.hpp"
 
-#include "poly_ising_chain.hpp"
-#include "poly_ising_square.hpp"
 
-#include "poly_ising_infinite_range.hpp"
-
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_ */
+#endif /* COMPNAL_TEST_UTILITY_ALL_HPP_ */

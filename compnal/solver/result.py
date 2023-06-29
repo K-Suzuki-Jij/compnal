@@ -116,6 +116,7 @@ class CMCResult:
     Attributes:
         samples (list[list[float]], Optional): Samples. Defaults to None.
         energies (list[float], Optional): Energies. Defaults to None.
+        coordinate_to_index (dict[Union[int, tuple], int], Optional): Coordinate to index. Defaults to None.
         temperature (float, Optional): Temperature. Defaults to None.
         model_info (ClassicalModelInfo, Optional): Model information. Defaults to None.
         hard_info (CMCHardwareInfo, Optional): Hardware information. Defaults to None.
@@ -123,7 +124,7 @@ class CMCResult:
     """
     samples: Optional[list[list[float]]] = None
     energies: Optional[list[float]] = None
-    coordinate: Optional[dict[Union[int, tuple], int]] = None
+    coordinate_to_index: Optional[dict[Union[int, tuple], int]] = None
     temperature: Optional[float] = None
     model_info: Optional[ClassicalModelInfo] = None
     hard_info: Optional[CMCHardwareInfo] = None
@@ -169,7 +170,7 @@ class CMCResult:
         Returns:
             Union[tuple[float, float], float]: The correlation between the spin i and j, and if `std` is `True`, its standard deviation.
         """
-        a = self.samples.T[self.coordinate[i]]*self.samples.T[self.coordinate[j]]
+        a = self.samples.T[self.coordinate_to_index[i]]*self.samples.T[self.coordinate_to_index[j]]
         if std:
             return np.mean(a), np.std(a)
         else:
@@ -197,9 +198,9 @@ class CMCResult:
             dict: Serializable object.
         """
         return {
-            "samples": self.samples,
-            "energies": self.energies,
-            "coordinate": self.coordinate,
+            "samples": [list(sample) for sample in self.samples],
+            "energies": list(self.energies),
+            "coordinate": list(self.coordinate_to_index.keys()),
             "temperature": self.temperature,
             "model_info": self.model_info.to_serializable(),
             "hard_info": self.hard_info.to_serializable(),
@@ -217,9 +218,9 @@ class CMCResult:
             CMCResult: Results.
         """
         return cls(
-            samples=obj["samples"],
-            energies=obj["energies"],
-            coordinate=obj["coordinate"],
+            samples=np.array(obj["samples"]),
+            energies=np.array(obj["energies"]),
+            coordinate_to_index={tuple(coo): i for i, coo in enumerate(obj["coordinate"])},
             temperature=obj["temperature"],
             model_info=ClassicalModelInfo.from_serializable(obj["model_info"]),
             hard_info=CMCHardwareInfo.from_serializable(obj["hard_info"]),

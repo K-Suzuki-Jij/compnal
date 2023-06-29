@@ -96,7 +96,6 @@ class CMC:
         coordinate_list = {coo: i for i, coo in enumerate(model._lattice.generate_coordinate_list())}
         samples = _base_solver.get_samples()
         energies = _base_solver.calculate_energies()
-        
         cmc_params = CMCParams(
             num_sweeps=num_sweeps,
             num_samples=num_samples,
@@ -121,7 +120,7 @@ class CMC:
         return CMCResult(
             samples=samples,
             energies=energies,
-            coordinate=coordinate_list,
+            coordinate_to_index=coordinate_list,
             temperature=temperature,
             model_info=model.export_info(),
             hard_info=cmc_info,

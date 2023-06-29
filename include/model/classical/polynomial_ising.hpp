@@ -29,6 +29,7 @@
 #include <cmath>
 #include "../../lattice/all.hpp"
 #include "../utility/variable.hpp"
+#include "../../utility/combination.hpp"
 
 namespace compnal {
 namespace model {

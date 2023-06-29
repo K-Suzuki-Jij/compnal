@@ -34,7 +34,7 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnInfiniteRange) {
    
    const std::int32_t system_size = 8;
    std::vector<std::unordered_map<std::int32_t, double>> interaction_set = {
-      {{2, -1.0}},
+      {{1, -1.5}, {2, +1.0}},
       {{1, -1.5}, {2, +1.0}, {3, -1.0}},
       {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}},
       {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}, {5, +3.0}},
@@ -51,25 +51,47 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnInfiniteRange) {
       initial_state[i] = -0.5;
    }
    
-   InfiniteRange infinite_range{system_size};
-   PolyIsing poly_ising{infinite_range, interaction_set[0]};
-   
-   const std::int32_t seed = 0;
-   
-   solver::classical_monte_carlo::System<PolyIsing, std::mt19937> system{poly_ising, seed};
-   system.SetSampleByState(initial_state_level);
-   
-   for (std::int32_t i = 0; i < system_size; ++i) {
-      EXPECT_DOUBLE_EQ(system.ExtractSample()(i), -0.5);
-      EXPECT_EQ(system.GenerateCandidateState(i), 1);
+   for (const auto &interaction: interaction_set) {
+      InfiniteRange infinite_range{system_size};
+      PolyIsing poly_ising{infinite_range, interaction};
+      
+      const std::int32_t seed = 0;
+      
+      solver::classical_monte_carlo::System<PolyIsing, std::mt19937> system{poly_ising, seed};
+      system.SetSampleByState(initial_state_level);
+      
+      for (std::int32_t i = 0; i < system_size; ++i) {
+         EXPECT_DOUBLE_EQ(system.ExtractSample()(i), -0.5);
+         EXPECT_EQ(system.GenerateCandidateState(i), 1);
+      }
+      
+      EXPECT_EQ(system.GetSystemSize(), system_size);
+      
+      for (std::int32_t i = 1; i < system_size; ++i) {
+         initial_state[i] = 0.5;
+         EXPECT_DOUBLE_EQ(system.GetEnergyDifference(i, 1),
+                          poly_ising.CalculateEnergy(initial_state) -
+                          poly_ising.CalculateEnergy(system.ExtractSample()));
+         
+         system.Flip(0, 1);
+         initial_state[0] = 0.5;
+         EXPECT_DOUBLE_EQ(system.GetEnergyDifference(i, 1),
+                          poly_ising.CalculateEnergy(initial_state) -
+                          poly_ising.CalculateEnergy(system.ExtractSample()));
+         
+         system.Flip(4, 1);
+         initial_state[4] = 0.5;
+         EXPECT_DOUBLE_EQ(system.GetEnergyDifference(i, 1),
+                          poly_ising.CalculateEnergy(initial_state) -
+                          poly_ising.CalculateEnergy(system.ExtractSample()));
+         
+         system.Flip(0, 0);
+         system.Flip(4, 0);
+         initial_state[i] = -0.5;
+         initial_state[0] = -0.5;
+         initial_state[4] = -0.5;
+      }
    }
-   
-   EXPECT_EQ(system.GetSystemSize(), system_size);
-   
-   initial_state[0] = 0.5;
-   EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 1),
-                    poly_ising.CalculateEnergy(initial_state) -
-                    poly_ising.CalculateEnergy(system.ExtractSample()));
 }
 
 

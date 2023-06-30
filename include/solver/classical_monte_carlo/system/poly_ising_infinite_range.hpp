@@ -51,7 +51,7 @@ public:
    BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
    interaction_(model.GetInteraction()),
    degree_(model.GetDegree()) {
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Set sample by states.
@@ -65,14 +65,28 @@ public:
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);
       }
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
    //! @param index The index of the variable to be flipped.
    //! @param update_state The state number to be updated.
    void Flip(const std::int32_t index, const std::int32_t update_state) {
-      FlipAny(index, update_state);      
+      if (degree_ == 2) {
+         Flip2Body(index, update_state);
+      }
+      else if (degree_ == 3) {
+         Flip3Body(index, update_state);
+      }
+      else if (degree_ == 4) {
+         Flip4Body(index, update_state);
+      }
+      else if (degree_ == 5) {
+         Flip5Body(index, update_state);
+      }
+      else {
+         FlipAny(index, update_state);
+      }
    }
    
    
@@ -87,7 +101,7 @@ private:
    //! @param sample The spin configuration.
    //! @return The energy difference.
    std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> d_E(this->system_size_);
+      std::vector<double> d_E_(this->system_size_);
       
       for (std::int32_t index = 0; index < this->system_size_; ++index) {
          double val = 0.0;
@@ -126,9 +140,95 @@ private:
                start_index = indices[size] + 1;
             }
          }
-         d_E[index] += val;
+         d_E_[index] += val;
       }      
-      return d_E;
+      return d_E_;
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip2Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = interaction_.at(2)*diff;
+      for (std::int32_t i2 = 0; i2 < this->system_size_; ++i2) {
+         if (i2 == index) {continue;}
+         this->d_E_[i2] += val_2;
+      }
+      this->sample_[index].SetState(update_state);
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip3Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = (interaction_.count(2) == 1 ? interaction_.at(2) : 0)*diff;
+      const double val_3 = interaction_.at(3)*diff;
+      double all_sum = 0;
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         all_sum += this->sample_[i].GetValue();
+      }
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         this->d_E_[i] += val_3*(all_sum - this->sample_[i].GetValue()) + val_2;;
+      }
+      this->sample_[index].SetState(update_state);
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip4Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = (interaction_.count(2) == 1 ? interaction_.at(2) : 0)*diff;
+      const double val_3 = (interaction_.count(3) == 1 ? interaction_.at(3) : 0)*diff;
+      const double val_4 = interaction_.at(4)*diff;
+      double all_sum = 0;
+      double square_sum = 0;
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         all_sum += this->sample_[i].GetValue();
+         square_sum += this->sample_[i].GetValue()*this->sample_[i].GetValue();
+      }
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         const double a = (all_sum - this->sample_[i].GetValue());
+         const double b = (square_sum - this->sample_[i].GetValue()*this->sample_[i].GetValue());
+         this->d_E_[i] += val_4*(a*a - b)*0.5 + val_3*a + val_2;
+      }
+      this->sample_[index].SetState(update_state);
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip5Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = (interaction_.count(2) == 1 ? interaction_.at(2) : 0)*diff;
+      const double val_3 = (interaction_.count(3) == 1 ? interaction_.at(3) : 0)*diff;
+      const double val_4 = (interaction_.count(4) == 1 ? interaction_.at(4) : 0)*diff;
+      const double val_5 = interaction_.at(5)*diff;
+      double all_sum = 0;
+      double square_sum = 0;
+      double cubic_sum = 0;
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         const double s = this->sample_[i].GetValue();
+         all_sum += s;
+         square_sum += s*s;
+         cubic_sum += s*s*s;
+      }
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         const double s = this->sample_[i].GetValue();
+         const double a1 = all_sum - s;
+         const double a2 = square_sum - s*s;
+         const double a3 = cubic_sum - s*s*s;
+         this->d_E_[i] += val_5*(a1*a1*a1 - 3*a2*a1 + 2*a3)/6 + val_4*(a1*a1 - a2)/2 + val_3*a1 + val_2;
+      }
+      this->sample_[index].SetState(update_state);
    }
    
    //! @brief Flip a variable.
@@ -160,10 +260,10 @@ private:
 
                   for (std::int32_t j = 0; j < it.first - 1; ++j) {
                      if (indices[j] >= index) {
-                        this->d_E[indices[j] + 1] += val*spin_prod/this->sample_[indices[j] + 1].GetValue();
+                        this->d_E_[indices[j] + 1] += val*spin_prod/this->sample_[indices[j] + 1].GetValue();
                      }
                      else {
-                        this->d_E[indices[j]] += val*spin_prod/this->sample_[indices[j]].GetValue();
+                        this->d_E_[indices[j]] += val*spin_prod/this->sample_[indices[j]].GetValue();
                      }
                   }
                   break;

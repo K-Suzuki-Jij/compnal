@@ -49,7 +49,7 @@ public:
    BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
    linear_(model.GetLinear()),
    quadratic_(model.GetQuadratic()) {
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Set sample by states.
@@ -63,7 +63,7 @@ public:
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);
       }
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -72,10 +72,10 @@ public:
    void Flip(const std::int32_t index, const std::int32_t update_state) {
       const double diff = this->quadratic_*(this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue());
       for (std::int32_t i = 0; i < index; ++i) {
-         this->d_E[i] += diff;
+         this->d_E_[i] += diff;
       }
       for (std::int32_t i = index + 1; i < this->system_size_; ++i) {
-         this->d_E[i] += diff;
+         this->d_E_[i] += diff;
       }
       this->sample_[index].SetState(update_state);
    }
@@ -92,15 +92,15 @@ private:
    //! @param sample The spin configuration.
    //! @return The energy difference.
    std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> d_E(this->system_size_);
+      std::vector<double> d_E_(this->system_size_);
       for (std::int32_t i = 0; i < this->system_size_; ++i) {
-         d_E[i] += this->linear_;
+         d_E_[i] += this->linear_;
          for (std::int32_t j = i + 1; j < this->system_size_; ++j) {
-            d_E[i] += this->quadratic_*sample[j].GetValue();
-            d_E[j] += this->quadratic_*sample[i].GetValue();
+            d_E_[i] += this->quadratic_*sample[j].GetValue();
+            d_E_[j] += this->quadratic_*sample[i].GetValue();
          }
       }
-      return d_E;
+      return d_E_;
    }
    
 };

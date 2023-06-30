@@ -45,7 +45,7 @@ public:
    degree_(model.GetDegree()),
    x_size_(model.GetLattice().GetXSize()),
    y_size_(model.GetLattice().GetYSize()) {
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Set sample by states.
@@ -59,7 +59,7 @@ public:
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);
       }
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -100,7 +100,7 @@ private:
    //! @param sample The spin configuration.
    //! @return The energy difference.
    std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> d_E(this->system_size_);
+      std::vector<double> d_E_(this->system_size_);
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
          for (std::int32_t coo_x = 0; coo_x < x_size_; ++coo_x) {
             for (std::int32_t coo_y = 0; coo_y < y_size_; ++coo_y) {
@@ -129,7 +129,7 @@ private:
                      }
                   }
                }
-               d_E[coo_y*x_size_ + coo_x] += val;
+               d_E_[coo_y*x_size_ + coo_x] += val;
             }
          }
       }
@@ -166,7 +166,7 @@ private:
                      }
                   }
                }
-               d_E[coo_y*x_size_ + coo_x] += val;
+               d_E_[coo_y*x_size_ + coo_x] += val;
             }
          }
       }
@@ -174,7 +174,7 @@ private:
          throw std::invalid_argument("Unsupported BinaryCondition");
       }
       
-      return d_E;
+      return d_E_;
    }
    
    //! @brief Flip a variable.
@@ -186,23 +186,23 @@ private:
       const std::int32_t coo_x = index%x_size_;
       const std::int32_t coo_y = index/x_size_;
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
-         this->d_E[coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_] += val_2;
-         this->d_E[coo_y*x_size_ + (coo_x + 1)%x_size_] += val_2;
-         this->d_E[((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x] += val_2;
-         this->d_E[((coo_y + 1 + y_size_)%y_size_)*x_size_ + coo_x] += val_2;
+         this->d_E_[coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_] += val_2;
+         this->d_E_[coo_y*x_size_ + (coo_x + 1)%x_size_] += val_2;
+         this->d_E_[((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x] += val_2;
+         this->d_E_[((coo_y + 1 + y_size_)%y_size_)*x_size_ + coo_x] += val_2;
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          if (coo_x - 1 >= 0) {
-            this->d_E[coo_y*x_size_ + coo_x - 1] += val_2;
+            this->d_E_[coo_y*x_size_ + coo_x - 1] += val_2;
          }
          if (coo_y - 1 >= 0) {
-            this->d_E[(coo_y - 1)*x_size_ + coo_x] += val_2;
+            this->d_E_[(coo_y - 1)*x_size_ + coo_x] += val_2;
          }
          if (coo_x + 1 < x_size_) {
-            this->d_E[coo_y*x_size_ + coo_x + 1] += val_2;
+            this->d_E_[coo_y*x_size_ + coo_x + 1] += val_2;
          }
          if (coo_y + 1 < y_size_) {
-            this->d_E[(coo_y + 1)*x_size_ + coo_x] += val_2;
+            this->d_E_[(coo_y + 1)*x_size_ + coo_x] += val_2;
          }
       }
       else {
@@ -229,14 +229,14 @@ private:
          const std::int32_t y_m1 = ((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x;
          const std::int32_t y_p1 = ((coo_y + 1)%y_size_)*x_size_ + coo_x;
          const std::int32_t y_p2 = ((coo_y + 2)%y_size_)*x_size_ + coo_x;
-         this->d_E[x_m2] += val_3*this->sample_[x_m1].GetValue();
-         this->d_E[x_m1] += val_3*(this->sample_[x_m2].GetValue() + this->sample_[x_p1].GetValue()) + val_2;
-         this->d_E[x_p1] += val_3*(this->sample_[x_m1].GetValue() + this->sample_[x_p2].GetValue()) + val_2;
-         this->d_E[x_p2] += val_3*this->sample_[x_p1].GetValue();
-         this->d_E[y_m2] += val_3*this->sample_[y_m1].GetValue();
-         this->d_E[y_m1] += val_3*(this->sample_[y_m2].GetValue() + this->sample_[y_p1].GetValue()) + val_2;
-         this->d_E[y_p1] += val_3*(this->sample_[y_m1].GetValue() + this->sample_[y_p2].GetValue()) + val_2;
-         this->d_E[y_p2] += val_3*this->sample_[y_p1].GetValue();
+         this->d_E_[x_m2] += val_3*this->sample_[x_m1].GetValue();
+         this->d_E_[x_m1] += val_3*(this->sample_[x_m2].GetValue() + this->sample_[x_p1].GetValue()) + val_2;
+         this->d_E_[x_p1] += val_3*(this->sample_[x_m1].GetValue() + this->sample_[x_p2].GetValue()) + val_2;
+         this->d_E_[x_p2] += val_3*this->sample_[x_p1].GetValue();
+         this->d_E_[y_m2] += val_3*this->sample_[y_m1].GetValue();
+         this->d_E_[y_m1] += val_3*(this->sample_[y_m2].GetValue() + this->sample_[y_p1].GetValue()) + val_2;
+         this->d_E_[y_p1] += val_3*(this->sample_[y_m1].GetValue() + this->sample_[y_p2].GetValue()) + val_2;
+         this->d_E_[y_p2] += val_3*this->sample_[y_p1].GetValue();
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          const std::int32_t x_m2 = coo_y*x_size_ + coo_x - 2;
@@ -256,28 +256,28 @@ private:
          const double y_s_p1 = coo_y + 1 < y_size_ ? this->sample_[y_p1].GetValue() : 0;
          const double y_s_p2 = coo_y + 2 < y_size_ ? this->sample_[y_p2].GetValue() : 0;
          if (coo_x - 2 >= 0) {
-            this->d_E[x_m2] += val_3*x_s_m1;
+            this->d_E_[x_m2] += val_3*x_s_m1;
          }
          if (coo_x - 1 >= 0) {
-            this->d_E[x_m1] += val_3*(x_s_m2 + x_s_p1) + val_2;
+            this->d_E_[x_m1] += val_3*(x_s_m2 + x_s_p1) + val_2;
          }
          if (coo_x + 1 < x_size_) {
-            this->d_E[x_p1] += val_3*(x_s_m1 + x_s_p2) + val_2;
+            this->d_E_[x_p1] += val_3*(x_s_m1 + x_s_p2) + val_2;
          }
          if (coo_x + 2 < x_size_) {
-            this->d_E[x_p2] += val_3*x_s_p1;
+            this->d_E_[x_p2] += val_3*x_s_p1;
          }
          if (coo_y - 2 >= 0) {
-            this->d_E[y_m2] += val_3*y_s_m1;
+            this->d_E_[y_m2] += val_3*y_s_m1;
          }
          if (coo_y - 1 >= 0) {
-            this->d_E[y_m1] += val_3*(y_s_m2 + y_s_p1) + val_2;
+            this->d_E_[y_m1] += val_3*(y_s_m2 + y_s_p1) + val_2;
          }
          if (coo_y + 1 < y_size_) {
-            this->d_E[y_p1] += val_3*(y_s_m1 + y_s_p2) + val_2;
+            this->d_E_[y_p1] += val_3*(y_s_m1 + y_s_p2) + val_2;
          }
          if (coo_y + 1 < y_size_) {
-            this->d_E[y_p2] += val_3*y_s_p1;
+            this->d_E_[y_p2] += val_3*y_s_p1;
          }
       }
       else {
@@ -321,18 +321,18 @@ private:
          const double y_s_p1 = this->sample_[y_p1].GetValue();
          const double y_s_p2 = this->sample_[y_p2].GetValue();
          const double y_s_p3 = this->sample_[y_p3].GetValue();
-         this->d_E[x_m3] += val_4*x_s_m2*x_s_m1;
-         this->d_E[x_m2] += val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
-         this->d_E[x_m1] += val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
-         this->d_E[x_p1] += val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
-         this->d_E[x_p2] += val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
-         this->d_E[x_p3] += val_4*x_s_p1*x_s_p2;
-         this->d_E[y_m3] += val_4*y_s_m2*y_s_m1;
-         this->d_E[y_m2] += val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
-         this->d_E[y_m1] += val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
-         this->d_E[y_p1] += val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
-         this->d_E[y_p2] += val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
-         this->d_E[y_p3] += val_4*y_s_p1*y_s_p2;
+         this->d_E_[x_m3] += val_4*x_s_m2*x_s_m1;
+         this->d_E_[x_m2] += val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
+         this->d_E_[x_m1] += val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
+         this->d_E_[x_p1] += val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
+         this->d_E_[x_p2] += val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
+         this->d_E_[x_p3] += val_4*x_s_p1*x_s_p2;
+         this->d_E_[y_m3] += val_4*y_s_m2*y_s_m1;
+         this->d_E_[y_m2] += val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
+         this->d_E_[y_m1] += val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
+         this->d_E_[y_p1] += val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
+         this->d_E_[y_p2] += val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
+         this->d_E_[y_p3] += val_4*y_s_p1*y_s_p2;
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          const std::int32_t x_m3 = coo_y*x_size_ + coo_x - 3;
@@ -360,40 +360,40 @@ private:
          const double y_s_p2 = coo_y + 2 < y_size_ ? this->sample_[y_p2].GetValue() : 0;
          const double y_s_p3 = coo_y + 3 < y_size_ ? this->sample_[y_p3].GetValue() : 0;
          if (coo_x - 3 >= 0) {
-            this->d_E[x_m3] += val_4*x_s_m2*x_s_m1;
+            this->d_E_[x_m3] += val_4*x_s_m2*x_s_m1;
          }
          if (coo_x - 2 >= 0) {
-            this->d_E[x_m2] += val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
+            this->d_E_[x_m2] += val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
          }
          if (coo_x - 1 >= 0) {
-            this->d_E[x_m1] += val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
+            this->d_E_[x_m1] += val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
          }
          if (coo_x + 1 < x_size_) {
-            this->d_E[x_p1] += val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
+            this->d_E_[x_p1] += val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
          }
          if (coo_x + 2 < x_size_) {
-            this->d_E[x_p2] += val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
+            this->d_E_[x_p2] += val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
          }
          if (coo_x + 3 < x_size_) {
-            this->d_E[x_p3] += val_4*x_s_p1*x_s_p2;
+            this->d_E_[x_p3] += val_4*x_s_p1*x_s_p2;
          }
          if (coo_y - 3 >= 0) {
-            this->d_E[y_m3] += val_4*y_s_m2*y_s_m1;
+            this->d_E_[y_m3] += val_4*y_s_m2*y_s_m1;
          }
          if (coo_y - 2 >= 0) {
-            this->d_E[y_m2] += val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
+            this->d_E_[y_m2] += val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
          }
          if (coo_y - 1 >= 0) {
-            this->d_E[y_m1] += val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
+            this->d_E_[y_m1] += val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
          }
          if (coo_y + 1 < y_size_) {
-            this->d_E[y_p1] += val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
+            this->d_E_[y_p1] += val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
          }
          if (coo_y + 2 < y_size_) {
-            this->d_E[y_p2] += val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
+            this->d_E_[y_p2] += val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
          }
          if (coo_y + 3 < y_size_) {
-            this->d_E[y_p3] += val_4*y_s_p1*y_s_p2;
+            this->d_E_[y_p3] += val_4*y_s_p1*y_s_p2;
          }
       }
       else {
@@ -447,23 +447,23 @@ private:
          const double y_s_p3 = this->sample_[y_p3].GetValue();
          const double y_s_p4 = this->sample_[y_p4].GetValue();
          
-         this->d_E[x_m4] += val_5*x_s_m3*x_s_m2*x_s_m1;
-         this->d_E[x_m3] += val_5*(x_s_m4*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p1) + val_4*x_s_m2*x_s_m1;
-         this->d_E[x_m2] += val_5*(x_s_m4*x_s_m3*x_s_m1 + x_s_m3*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p2) + val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
-         this->d_E[x_m1] += val_5*(x_s_m4*x_s_m3*x_s_m2 + x_s_m3*x_s_m2*x_s_p1 + x_s_m2*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p3) + val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
-         this->d_E[x_p1] += val_5*(x_s_m3*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p2 + x_s_m1*x_s_p2*x_s_p3 + x_s_p2*x_s_p3*x_s_p4) + val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
-         this->d_E[x_p2] += val_5*(x_s_m2*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p3 + x_s_p1*x_s_p3*x_s_p4) + val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
-         this->d_E[x_p3] += val_5*(x_s_m1*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p4) + val_4*x_s_p1*x_s_p2;
-         this->d_E[x_p4] += val_5*x_s_p1*x_s_p2*x_s_p3;
+         this->d_E_[x_m4] += val_5*x_s_m3*x_s_m2*x_s_m1;
+         this->d_E_[x_m3] += val_5*(x_s_m4*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p1) + val_4*x_s_m2*x_s_m1;
+         this->d_E_[x_m2] += val_5*(x_s_m4*x_s_m3*x_s_m1 + x_s_m3*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p2) + val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
+         this->d_E_[x_m1] += val_5*(x_s_m4*x_s_m3*x_s_m2 + x_s_m3*x_s_m2*x_s_p1 + x_s_m2*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p3) + val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
+         this->d_E_[x_p1] += val_5*(x_s_m3*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p2 + x_s_m1*x_s_p2*x_s_p3 + x_s_p2*x_s_p3*x_s_p4) + val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
+         this->d_E_[x_p2] += val_5*(x_s_m2*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p3 + x_s_p1*x_s_p3*x_s_p4) + val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
+         this->d_E_[x_p3] += val_5*(x_s_m1*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p4) + val_4*x_s_p1*x_s_p2;
+         this->d_E_[x_p4] += val_5*x_s_p1*x_s_p2*x_s_p3;
          
-         this->d_E[y_m4] += val_5*y_s_m3*y_s_m2*y_s_m1;
-         this->d_E[y_m3] += val_5*(y_s_m4*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p1) + val_4*y_s_m2*y_s_m1;
-         this->d_E[y_m2] += val_5*(y_s_m4*y_s_m3*y_s_m1 + y_s_m3*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p2) + val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
-         this->d_E[y_m1] += val_5*(y_s_m4*y_s_m3*y_s_m2 + y_s_m3*y_s_m2*y_s_p1 + y_s_m2*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p3) + val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
-         this->d_E[y_p1] += val_5*(y_s_m3*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p2 + y_s_m1*y_s_p2*y_s_p3 + y_s_p2*y_s_p3*y_s_p4) + val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
-         this->d_E[y_p2] += val_5*(y_s_m2*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p3 + y_s_p1*y_s_p3*y_s_p4) + val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
-         this->d_E[y_p3] += val_5*(y_s_m1*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p4) + val_4*y_s_p1*y_s_p2;
-         this->d_E[y_p4] += val_5*y_s_p1*y_s_p2*y_s_p3;
+         this->d_E_[y_m4] += val_5*y_s_m3*y_s_m2*y_s_m1;
+         this->d_E_[y_m3] += val_5*(y_s_m4*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p1) + val_4*y_s_m2*y_s_m1;
+         this->d_E_[y_m2] += val_5*(y_s_m4*y_s_m3*y_s_m1 + y_s_m3*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p2) + val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
+         this->d_E_[y_m1] += val_5*(y_s_m4*y_s_m3*y_s_m2 + y_s_m3*y_s_m2*y_s_p1 + y_s_m2*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p3) + val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
+         this->d_E_[y_p1] += val_5*(y_s_m3*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p2 + y_s_m1*y_s_p2*y_s_p3 + y_s_p2*y_s_p3*y_s_p4) + val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
+         this->d_E_[y_p2] += val_5*(y_s_m2*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p3 + y_s_p1*y_s_p3*y_s_p4) + val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
+         this->d_E_[y_p3] += val_5*(y_s_m1*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p4) + val_4*y_s_p1*y_s_p2;
+         this->d_E_[y_p4] += val_5*y_s_p1*y_s_p2*y_s_p3;
 
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
@@ -500,23 +500,23 @@ private:
          const double y_s_p3 = coo_y + 3 < y_size_ ? this->sample_[y_p3].GetValue() : 0;
          const double y_s_p4 = coo_y + 4 < y_size_ ? this->sample_[y_p4].GetValue() : 0;
          
-         if (coo_x - 4 >= 0) this->d_E[x_m4] += val_5*x_s_m3*x_s_m2*x_s_m1;
-         if (coo_x - 3 >= 0) this->d_E[x_m3] += val_5*(x_s_m4*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p1) + val_4*x_s_m2*x_s_m1;
-         if (coo_x - 2 >= 0) this->d_E[x_m2] += val_5*(x_s_m4*x_s_m3*x_s_m1 + x_s_m3*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p2) + val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
-         if (coo_x - 1 >= 0) this->d_E[x_m1] += val_5*(x_s_m4*x_s_m3*x_s_m2 + x_s_m3*x_s_m2*x_s_p1 + x_s_m2*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p3) + val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
-         if (coo_x + 1 < x_size_) this->d_E[x_p1] += val_5*(x_s_m3*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p2 + x_s_m1*x_s_p2*x_s_p3 + x_s_p2*x_s_p3*x_s_p4) + val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
-         if (coo_x + 2 < x_size_) this->d_E[x_p2] += val_5*(x_s_m2*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p3 + x_s_p1*x_s_p3*x_s_p4) + val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
-         if (coo_x + 3 < x_size_) this->d_E[x_p3] += val_5*(x_s_m1*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p4) + val_4*x_s_p1*x_s_p2;
-         if (coo_x + 4 < x_size_) this->d_E[x_p4] += val_5*x_s_p1*x_s_p2*x_s_p3;
+         if (coo_x - 4 >= 0) this->d_E_[x_m4] += val_5*x_s_m3*x_s_m2*x_s_m1;
+         if (coo_x - 3 >= 0) this->d_E_[x_m3] += val_5*(x_s_m4*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p1) + val_4*x_s_m2*x_s_m1;
+         if (coo_x - 2 >= 0) this->d_E_[x_m2] += val_5*(x_s_m4*x_s_m3*x_s_m1 + x_s_m3*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p2) + val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
+         if (coo_x - 1 >= 0) this->d_E_[x_m1] += val_5*(x_s_m4*x_s_m3*x_s_m2 + x_s_m3*x_s_m2*x_s_p1 + x_s_m2*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p3) + val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
+         if (coo_x + 1 < x_size_) this->d_E_[x_p1] += val_5*(x_s_m3*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p2 + x_s_m1*x_s_p2*x_s_p3 + x_s_p2*x_s_p3*x_s_p4) + val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
+         if (coo_x + 2 < x_size_) this->d_E_[x_p2] += val_5*(x_s_m2*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p3 + x_s_p1*x_s_p3*x_s_p4) + val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
+         if (coo_x + 3 < x_size_) this->d_E_[x_p3] += val_5*(x_s_m1*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p4) + val_4*x_s_p1*x_s_p2;
+         if (coo_x + 4 < x_size_) this->d_E_[x_p4] += val_5*x_s_p1*x_s_p2*x_s_p3;
          
-         if (coo_y - 4 >= 0) this->d_E[y_m4] += val_5*y_s_m3*y_s_m2*y_s_m1;
-         if (coo_y - 3 >= 0) this->d_E[y_m3] += val_5*(y_s_m4*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p1) + val_4*y_s_m2*y_s_m1;
-         if (coo_y - 2 >= 0) this->d_E[y_m2] += val_5*(y_s_m4*y_s_m3*y_s_m1 + y_s_m3*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p2) + val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
-         if (coo_y - 1 >= 0) this->d_E[y_m1] += val_5*(y_s_m4*y_s_m3*y_s_m2 + y_s_m3*y_s_m2*y_s_p1 + y_s_m2*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p3) + val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
-         if (coo_y + 1 < y_size_) this->d_E[y_p1] += val_5*(y_s_m3*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p2 + y_s_m1*y_s_p2*y_s_p3 + y_s_p2*y_s_p3*y_s_p4) + val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
-         if (coo_y + 2 < y_size_) this->d_E[y_p2] += val_5*(y_s_m2*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p3 + y_s_p1*y_s_p3*y_s_p4) + val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
-         if (coo_y + 3 < y_size_) this->d_E[y_p3] += val_5*(y_s_m1*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p4) + val_4*y_s_p1*y_s_p2;
-         if (coo_y + 4 < y_size_) this->d_E[y_p4] += val_5*y_s_p1*y_s_p2*y_s_p3;
+         if (coo_y - 4 >= 0) this->d_E_[y_m4] += val_5*y_s_m3*y_s_m2*y_s_m1;
+         if (coo_y - 3 >= 0) this->d_E_[y_m3] += val_5*(y_s_m4*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p1) + val_4*y_s_m2*y_s_m1;
+         if (coo_y - 2 >= 0) this->d_E_[y_m2] += val_5*(y_s_m4*y_s_m3*y_s_m1 + y_s_m3*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p2) + val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
+         if (coo_y - 1 >= 0) this->d_E_[y_m1] += val_5*(y_s_m4*y_s_m3*y_s_m2 + y_s_m3*y_s_m2*y_s_p1 + y_s_m2*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p3) + val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
+         if (coo_y + 1 < y_size_) this->d_E_[y_p1] += val_5*(y_s_m3*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p2 + y_s_m1*y_s_p2*y_s_p3 + y_s_p2*y_s_p3*y_s_p4) + val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
+         if (coo_y + 2 < y_size_) this->d_E_[y_p2] += val_5*(y_s_m2*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p3 + y_s_p1*y_s_p3*y_s_p4) + val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
+         if (coo_y + 3 < y_size_) this->d_E_[y_p3] += val_5*(y_s_m1*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p4) + val_4*y_s_p1*y_s_p2;
+         if (coo_y + 4 < y_size_) this->d_E_[y_p4] += val_5*y_s_p1*y_s_p2*y_s_p3;
       }
       else {
          throw std::invalid_argument("Unsupported BoundaryCondition");
@@ -550,10 +550,10 @@ private:
                   const std::int32_t p_ind_x = coo_y*x_size_ + (coo_x - it.first + 1 + i + j + x_size_)%x_size_;
                   const std::int32_t p_ind_y = ((coo_y - it.first + 1 + i + j + y_size_)%y_size_)*x_size_ + coo_x;
                   if (p_ind_x != index) {
-                     this->d_E[p_ind_x] += val*spin_prod_x/this->sample_[p_ind_x].GetValue();
+                     this->d_E_[p_ind_x] += val*spin_prod_x/this->sample_[p_ind_x].GetValue();
                   }
                   if (p_ind_y != index) {
-                     this->d_E[p_ind_y] += val*spin_prod_y/this->sample_[p_ind_y].GetValue();
+                     this->d_E_[p_ind_y] += val*spin_prod_y/this->sample_[p_ind_y].GetValue();
                   }
                }
             }
@@ -576,7 +576,7 @@ private:
                }
                for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j != coo_x) {
-                     this->d_E[coo_y*x_size_ + j] += val*spin_prod/this->sample_[coo_y*x_size_ + j].GetValue();
+                     this->d_E_[coo_y*x_size_ + j] += val*spin_prod/this->sample_[coo_y*x_size_ + j].GetValue();
                   }
                }
             }
@@ -594,7 +594,7 @@ private:
                }
                for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j != coo_y) {
-                     this->d_E[j*x_size_ + coo_x] += val*spin_prod/this->sample_[j*x_size_ + coo_x].GetValue();
+                     this->d_E_[j*x_size_ + coo_x] += val*spin_prod/this->sample_[j*x_size_ + coo_x].GetValue();
                   }
                }
             }

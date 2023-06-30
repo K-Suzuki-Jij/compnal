@@ -35,7 +35,7 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnInfiniteRange) {
    const std::int32_t system_size = 8;
    std::vector<std::unordered_map<std::int32_t, double>> interaction_set = {
       {{1, -1.5}, {2, +1.0}},
-      {{1, -1.5}, {2, +1.0}, {3, -1.0}},
+      {{1, -1.5}, {2, +0.5}, {3, -1.0}},
       {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}},
       {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}, {5, +3.0}},
       {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}, {5, +3.0}, {6, -0.5}},

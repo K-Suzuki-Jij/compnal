@@ -49,7 +49,7 @@ public:
    BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
    linear_(model.GetLinear()),
    quadratic_(model.GetQuadratic()) {
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Set sample by states.
@@ -63,7 +63,7 @@ public:
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);
       }
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -72,15 +72,15 @@ public:
    void Flip(const std::int32_t index, const std::int32_t update_state) {
       const double diff = this->quadratic_*(this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue());
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
-         this->d_E[(index - 1 + this->system_size_)%this->system_size_] += diff;
-         this->d_E[(index + 1)%this->system_size_] += diff;
+         this->d_E_[(index - 1 + this->system_size_)%this->system_size_] += diff;
+         this->d_E_[(index + 1)%this->system_size_] += diff;
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          if (index < this->system_size_ - 1) {
-            this->d_E[index + 1] += diff;
+            this->d_E_[index + 1] += diff;
          }
          if (index > 0) {
-            this->d_E[index - 1] += diff;
+            this->d_E_[index - 1] += diff;
          }
       }
       else {
@@ -100,29 +100,29 @@ private:
    //! @param sample The spin configuration.
    //! @return The energy difference.
    std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> d_E(this->system_size_);
+      std::vector<double> d_E_(this->system_size_);
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
          for (std::int32_t index = 0; index < this->system_size_; ++index) {
             const auto v1 = sample[(index - 1 + this->system_size_)%this->system_size_].GetValue();
             const auto v2 = sample[(index + 1)%this->system_size_].GetValue();
-            d_E[index] += this->quadratic_*(v1 + v2) + this->linear_;
+            d_E_[index] += this->quadratic_*(v1 + v2) + this->linear_;
          }
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          for (std::int32_t index = 0; index < this->system_size_; ++index) {
             if (index < this->system_size_ - 1) {
-               d_E[index] += this->quadratic_*sample[index + 1].GetValue();
+               d_E_[index] += this->quadratic_*sample[index + 1].GetValue();
             }
             if (index > 0) {
-               d_E[index] += this->quadratic_*sample[index - 1].GetValue();
+               d_E_[index] += this->quadratic_*sample[index - 1].GetValue();
             }
-            d_E[index] += this->linear_;
+            d_E_[index] += this->linear_;
          }
       }
       else {
          throw std::invalid_argument("Unsupported BinaryCondition");
       }
-      return d_E;
+      return d_E_;
    }
    
 };

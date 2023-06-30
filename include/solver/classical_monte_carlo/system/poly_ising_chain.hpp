@@ -49,7 +49,7 @@ public:
    BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
    interaction_(model.GetInteraction()),
    degree_(model.GetDegree()) {
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Set sample by states.
@@ -63,7 +63,7 @@ public:
       for (std::size_t i = 0; i < this->sample_.size(); ++i) {
          this->sample_[i].SetState(state_list[i]);
       }
-      this->d_E = GenerateEnergyDifference(this->sample_);
+      this->d_E_ = GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -98,7 +98,7 @@ private:
    //! @param sample The spin configuration.
    //! @return The energy difference.
    std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> d_E(this->system_size_);
+      std::vector<double> d_E_(this->system_size_);
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
          for (std::int32_t index = 0; index < this->system_size_; ++index) {
             double val = 0;
@@ -114,7 +114,7 @@ private:
                   spin_prod = spin_prod*this->sample_[ind_2].GetValue()/this->sample_[ind_1].GetValue();
                }
             }
-            d_E[index] += val;
+            d_E_[index] += val;
          }
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
@@ -134,13 +134,13 @@ private:
                   spin_prod = spin_prod*this->sample_[ind_2].GetValue()/this->sample_[ind_1].GetValue();
                }
             }
-            d_E[index] += val;
+            d_E_[index] += val;
          }
       }
       else {
          throw std::invalid_argument("Unsupported BinaryCondition");
       }
-      return d_E;
+      return d_E_;
    }
    
    //! @brief Flip a variable.
@@ -152,17 +152,17 @@ private:
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
          const std::int32_t m1 = (index - 1 + this->system_size_)%this->system_size_;
          const std::int32_t p1 = (index + 1)%this->system_size_;
-         this->d_E[m1] += val_2;
-         this->d_E[p1] += val_2;
+         this->d_E_[m1] += val_2;
+         this->d_E_[p1] += val_2;
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          const std::int32_t m1 = index - 1;
          const std::int32_t p1 = index + 1;
          if (m1 >= 0) {
-            this->d_E[m1] += val_2;
+            this->d_E_[m1] += val_2;
          }
          if (p1 < this->system_size_) {
-            this->d_E[p1] += val_2;
+            this->d_E_[p1] += val_2;
          }
       }
       else {
@@ -183,10 +183,10 @@ private:
          const std::int32_t m1 = (index - 1 + this->system_size_)%this->system_size_;
          const std::int32_t p1 = (index + 1)%this->system_size_;
          const std::int32_t p2 = (index + 2)%this->system_size_;
-         this->d_E[m2] += val_3*this->sample_[m1].GetValue();
-         this->d_E[m1] += val_3*(this->sample_[m2].GetValue() + this->sample_[p1].GetValue()) + val_2;
-         this->d_E[p1] += val_3*(this->sample_[m1].GetValue() + this->sample_[p2].GetValue()) + val_2;
-         this->d_E[p2] += val_3*this->sample_[p1].GetValue();
+         this->d_E_[m2] += val_3*this->sample_[m1].GetValue();
+         this->d_E_[m1] += val_3*(this->sample_[m2].GetValue() + this->sample_[p1].GetValue()) + val_2;
+         this->d_E_[p1] += val_3*(this->sample_[m1].GetValue() + this->sample_[p2].GetValue()) + val_2;
+         this->d_E_[p2] += val_3*this->sample_[p1].GetValue();
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          const std::int32_t m2 = index - 2;
@@ -198,16 +198,16 @@ private:
          const double s_p1 = p1 < this->system_size_ ? this->sample_[p1].GetValue() : 0;
          const double s_p2 = p2 < this->system_size_ ? this->sample_[p2].GetValue() : 0;
          if (m2 >= 0) {
-            this->d_E[m2] += val_3*s_m1;
+            this->d_E_[m2] += val_3*s_m1;
          }
          if (m1 >= 0) {
-            this->d_E[m1] += val_3*(s_m2 + s_p1) + val_2;
+            this->d_E_[m1] += val_3*(s_m2 + s_p1) + val_2;
          }
          if (p1 < this->system_size_) {
-            this->d_E[p1] += val_3*(s_m1 + s_p2) + val_2;
+            this->d_E_[p1] += val_3*(s_m1 + s_p2) + val_2;
          }
          if (p2 < this->system_size_) {
-            this->d_E[p2] += val_3*s_p1;
+            this->d_E_[p2] += val_3*s_p1;
          }
       }
       else {
@@ -237,12 +237,12 @@ private:
          const double s_p1 = this->sample_[p1].GetValue();
          const double s_p2 = this->sample_[p2].GetValue();
          const double s_p3 = this->sample_[p3].GetValue();
-         this->d_E[m3] += val_4*s_m2*s_m1;
-         this->d_E[m2] += val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
-         this->d_E[m1] += val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
-         this->d_E[p1] += val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
-         this->d_E[p2] += val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
-         this->d_E[p3] += val_4*s_p1*s_p2;
+         this->d_E_[m3] += val_4*s_m2*s_m1;
+         this->d_E_[m2] += val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
+         this->d_E_[m1] += val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
+         this->d_E_[p1] += val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
+         this->d_E_[p2] += val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
+         this->d_E_[p3] += val_4*s_p1*s_p2;
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          const std::int32_t m3 = index - 3;
@@ -258,22 +258,22 @@ private:
          const double s_p2 = p2 < this->system_size_ ? this->sample_[p2].GetValue() : 0;
          const double s_p3 = p3 < this->system_size_ ? this->sample_[p3].GetValue() : 0;
          if (m3 >= 0) {
-            this->d_E[m3] += val_4*s_m2*s_m1;
+            this->d_E_[m3] += val_4*s_m2*s_m1;
          }
          if (m2 >= 0) {
-            this->d_E[m2] += val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
+            this->d_E_[m2] += val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
          }
          if (m1 >= 0) {
-            this->d_E[m1] += val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
+            this->d_E_[m1] += val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
          }
          if (p1 < this->system_size_) {
-            this->d_E[p1] += val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
+            this->d_E_[p1] += val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
          }
          if (p2 < this->system_size_) {
-            this->d_E[p2] += val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
+            this->d_E_[p2] += val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
          }
          if (p3 < this->system_size_) {
-            this->d_E[p3] += val_4*s_p1*s_p2;
+            this->d_E_[p3] += val_4*s_p1*s_p2;
          }
       }
       else {
@@ -308,14 +308,14 @@ private:
          const double s_p2 = this->sample_[p2].GetValue();
          const double s_p3 = this->sample_[p3].GetValue();
          const double s_p4 = this->sample_[p4].GetValue();
-         this->d_E[m4] += val_5*s_m3*s_m2*s_m1;
-         this->d_E[m3] += val_5*(s_m4*s_m2*s_m1 + s_m2*s_m1*s_p1) + val_4*s_m2*s_m1;
-         this->d_E[m2] += val_5*(s_m4*s_m3*s_m1 + s_m3*s_m1*s_p1 + s_m1*s_p1*s_p2) + val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
-         this->d_E[m1] += val_5*(s_m4*s_m3*s_m2 + s_m3*s_m2*s_p1 + s_m2*s_p1*s_p2 + s_p1*s_p2*s_p3) + val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
-         this->d_E[p1] += val_5*(s_m3*s_m2*s_m1 + s_m2*s_m1*s_p2 + s_m1*s_p2*s_p3 + s_p2*s_p3*s_p4) + val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
-         this->d_E[p2] += val_5*(s_m2*s_m1*s_p1 + s_m1*s_p1*s_p3 + s_p1*s_p3*s_p4) + val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
-         this->d_E[p3] += val_5*(s_m1*s_p1*s_p2 + s_p1*s_p2*s_p4) + val_4*s_p1*s_p2;
-         this->d_E[p4] += val_5*s_p1*s_p2*s_p3;
+         this->d_E_[m4] += val_5*s_m3*s_m2*s_m1;
+         this->d_E_[m3] += val_5*(s_m4*s_m2*s_m1 + s_m2*s_m1*s_p1) + val_4*s_m2*s_m1;
+         this->d_E_[m2] += val_5*(s_m4*s_m3*s_m1 + s_m3*s_m1*s_p1 + s_m1*s_p1*s_p2) + val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
+         this->d_E_[m1] += val_5*(s_m4*s_m3*s_m2 + s_m3*s_m2*s_p1 + s_m2*s_p1*s_p2 + s_p1*s_p2*s_p3) + val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
+         this->d_E_[p1] += val_5*(s_m3*s_m2*s_m1 + s_m2*s_m1*s_p2 + s_m1*s_p2*s_p3 + s_p2*s_p3*s_p4) + val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
+         this->d_E_[p2] += val_5*(s_m2*s_m1*s_p1 + s_m1*s_p1*s_p3 + s_p1*s_p3*s_p4) + val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
+         this->d_E_[p3] += val_5*(s_m1*s_p1*s_p2 + s_p1*s_p2*s_p4) + val_4*s_p1*s_p2;
+         this->d_E_[p4] += val_5*s_p1*s_p2*s_p3;
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          const std::int32_t m4 = index - 4;
@@ -335,28 +335,28 @@ private:
          const double s_p3 = p3 < this->system_size_ ? this->sample_[p3].GetValue() : 0;
          const double s_p4 = p4 < this->system_size_ ? this->sample_[p4].GetValue() : 0;
          if (m4 >= 0) {
-            this->d_E[m4] += val_5*s_m3*s_m2*s_m1;
+            this->d_E_[m4] += val_5*s_m3*s_m2*s_m1;
          }
          if (m3 >= 0) {
-            this->d_E[m3] += val_5*(s_m4*s_m2*s_m1 + s_m2*s_m1*s_p1) + val_4*s_m2*s_m1;
+            this->d_E_[m3] += val_5*(s_m4*s_m2*s_m1 + s_m2*s_m1*s_p1) + val_4*s_m2*s_m1;
          }
          if (m2 >= 0) {
-            this->d_E[m2] += val_5*(s_m4*s_m3*s_m1 + s_m3*s_m1*s_p1 + s_m1*s_p1*s_p2) + val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
+            this->d_E_[m2] += val_5*(s_m4*s_m3*s_m1 + s_m3*s_m1*s_p1 + s_m1*s_p1*s_p2) + val_4*(s_m3*s_m1 + s_m1*s_p1) + val_3*s_m1;
          }
          if (m1 >= 0) {
-            this->d_E[m1] += val_5*(s_m4*s_m3*s_m2 + s_m3*s_m2*s_p1 + s_m2*s_p1*s_p2 + s_p1*s_p2*s_p3) + val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
+            this->d_E_[m1] += val_5*(s_m4*s_m3*s_m2 + s_m3*s_m2*s_p1 + s_m2*s_p1*s_p2 + s_p1*s_p2*s_p3) + val_4*(s_m3*s_m2 + s_m2*s_p1 + s_p1*s_p2) + val_3*(s_m2 + s_p1) + val_2;
          }
          if (p1 < this->system_size_) {
-            this->d_E[p1] += val_5*(s_m3*s_m2*s_m1 + s_m2*s_m1*s_p2 + s_m1*s_p2*s_p3 + s_p2*s_p3*s_p4) + val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
+            this->d_E_[p1] += val_5*(s_m3*s_m2*s_m1 + s_m2*s_m1*s_p2 + s_m1*s_p2*s_p3 + s_p2*s_p3*s_p4) + val_4*(s_m2*s_m1 + s_m1*s_p2 + s_p2*s_p3) + val_3*(s_m1 + s_p2) + val_2;
          }
          if (p2 < this->system_size_) {
-            this->d_E[p2] += val_5*(s_m2*s_m1*s_p1 + s_m1*s_p1*s_p3 + s_p1*s_p3*s_p4) + val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
+            this->d_E_[p2] += val_5*(s_m2*s_m1*s_p1 + s_m1*s_p1*s_p3 + s_p1*s_p3*s_p4) + val_4*(s_m1*s_p1 + s_p1*s_p3) + val_3*s_p1;
          }
          if (p3 < this->system_size_) {
-            this->d_E[p3] += val_5*(s_m1*s_p1*s_p2 + s_p1*s_p2*s_p4) + val_4*s_p1*s_p2;
+            this->d_E_[p3] += val_5*(s_m1*s_p1*s_p2 + s_p1*s_p2*s_p4) + val_4*s_p1*s_p2;
          }
          if (p4 < this->system_size_) {
-            this->d_E[p4] += val_5*s_p1*s_p2*s_p3;
+            this->d_E_[p4] += val_5*s_p1*s_p2*s_p3;
          }
       }
       else {
@@ -383,7 +383,7 @@ private:
                for (std::int32_t j = 0; j < it.first; ++j) {
                   const std::int32_t p_ind = (index - it.first + 1 + i + j + this->system_size_)%this->system_size_;
                   if (p_ind != index) {
-                     this->d_E[p_ind] += val*spin_prod/this->sample_[p_ind].GetValue();
+                     this->d_E_[p_ind] += val*spin_prod/this->sample_[p_ind].GetValue();
                   }
                }
             }
@@ -404,7 +404,7 @@ private:
                }
                for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j != index) {
-                     this->d_E[j] += val*spin_prod/this->sample_[j].GetValue();
+                     this->d_E_[j] += val*spin_prod/this->sample_[j].GetValue();
                   }
                }
             }

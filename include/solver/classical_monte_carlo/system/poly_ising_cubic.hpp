@@ -68,7 +68,15 @@ public:
    //! @param index The index of the variable to be flipped.
    //! @param update_state The state number to be updated.
    void Flip(const std::int32_t index, const std::int32_t update_state) {
-      FlipAny(index, update_state);
+      if (degree_ == 2) {
+         Flip2Body(index, update_state);
+      }
+      else if (degree_ == 3) {
+         Flip3Body(index, update_state);
+      }
+      else {
+         FlipAny(index, update_state);
+      }
    }
    
 private:
@@ -186,6 +194,153 @@ private:
       return d_E_;
    }
    
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip2Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = interaction_.at(2)*diff;
+      const std::int32_t coo_x = index%x_size_;
+      const std::int32_t coo_y = (index%(x_size_*y_size_))/x_size_;
+      const std::int32_t coo_z = index/(x_size_*y_size_);
+      if (this->bc_ == lattice::BoundaryCondition::PBC) {
+         this->d_E_[coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_] += val_2;
+         this->d_E_[coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 1)%x_size_] += val_2;
+         this->d_E_[coo_z*x_size_*y_size_ + ((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x] += val_2;
+         this->d_E_[coo_z*x_size_*y_size_ + ((coo_y + 1)%y_size_)*x_size_ + coo_x] += val_2;
+         this->d_E_[((coo_z - 1 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += val_2;
+         this->d_E_[((coo_z + 1)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += val_2;
+      }
+      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
+         if (coo_x - 1 >= 0) {
+            this->d_E_[coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 1] += val_2;
+         }
+         if (coo_y - 1 >= 0) {
+            this->d_E_[coo_z*x_size_*y_size_ + (coo_y - 1)*x_size_ + coo_x] += val_2;
+         }
+         if (coo_z - 1 >= 0) {
+            this->d_E_[(coo_z - 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += val_2;
+         }
+         if (coo_x + 1 < x_size_) {
+            this->d_E_[coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 1] += val_2;
+         }
+         if (coo_y + 1 < y_size_) {
+            this->d_E_[coo_z*x_size_*y_size_ + (coo_y + 1)*x_size_ + coo_x] += val_2;
+         }
+         if (coo_z + 1 < z_size_) {
+            this->d_E_[(coo_z + 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x] += val_2;
+         }
+      }
+      else {
+         throw std::invalid_argument("Unsupported BoundaryCondition");
+      }
+      this->sample_[index].SetState(update_state);
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip3Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = (interaction_.count(2) == 1 ? interaction_.at(2) : 0)*diff;
+      const double val_3 = interaction_.at(3)*diff;
+      const std::int32_t coo_x = index%x_size_;
+      const std::int32_t coo_y = (index%(x_size_*y_size_))/x_size_;
+      const std::int32_t coo_z = index/(x_size_*y_size_);
+      if (this->bc_ == lattice::BoundaryCondition::PBC) {
+         const std::int32_t x_m2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 2 + x_size_)%x_size_;
+         const std::int32_t x_m1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_;
+         const std::int32_t x_p1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 1)%x_size_;
+         const std::int32_t x_p2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 2)%x_size_;
+         const std::int32_t y_m2 = coo_z*x_size_*y_size_ + ((coo_y - 2 + y_size_)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_m1 = coo_z*x_size_*y_size_ + ((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_p1 = coo_z*x_size_*y_size_ + ((coo_y + 1)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_p2 = coo_z*x_size_*y_size_ + ((coo_y + 2)%y_size_)*x_size_ + coo_x;
+         const std::int32_t z_m2 = ((coo_z - 2 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m1 = ((coo_z - 1 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p1 = ((coo_z + 1)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p2 = ((coo_z + 2)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         this->d_E_[x_m2] += val_3*this->sample_[x_m1].GetValue();
+         this->d_E_[x_m1] += val_3*(this->sample_[x_m2].GetValue() + this->sample_[x_p1].GetValue()) + val_2;
+         this->d_E_[x_p1] += val_3*(this->sample_[x_m1].GetValue() + this->sample_[x_p2].GetValue()) + val_2;
+         this->d_E_[x_p2] += val_3*this->sample_[x_p1].GetValue();
+         this->d_E_[y_m2] += val_3*this->sample_[y_m1].GetValue();
+         this->d_E_[y_m1] += val_3*(this->sample_[y_m2].GetValue() + this->sample_[y_p1].GetValue()) + val_2;
+         this->d_E_[y_p1] += val_3*(this->sample_[y_m1].GetValue() + this->sample_[y_p2].GetValue()) + val_2;
+         this->d_E_[y_p2] += val_3*this->sample_[y_p1].GetValue();
+         this->d_E_[z_m2] += val_3*this->sample_[z_m1].GetValue();
+         this->d_E_[z_m1] += val_3*(this->sample_[z_m2].GetValue() + this->sample_[z_p1].GetValue()) + val_2;
+         this->d_E_[z_p1] += val_3*(this->sample_[z_m1].GetValue() + this->sample_[z_p2].GetValue()) + val_2;
+         this->d_E_[z_p2] += val_3*this->sample_[z_p1].GetValue();
+      }
+      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
+         const std::int32_t x_m2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 2;
+         const std::int32_t x_m1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 1;
+         const std::int32_t x_p1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 1;
+         const std::int32_t x_p2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 2;
+         const std::int32_t y_m2 = coo_z*x_size_*y_size_ + (coo_y - 2)*x_size_ + coo_x;
+         const std::int32_t y_m1 = coo_z*x_size_*y_size_ + (coo_y - 1)*x_size_ + coo_x;
+         const std::int32_t y_p1 = coo_z*x_size_*y_size_ + (coo_y + 1)*x_size_ + coo_x;
+         const std::int32_t y_p2 = coo_z*x_size_*y_size_ + (coo_y + 2)*x_size_ + coo_x;
+         const std::int32_t z_m2 = (coo_z - 2)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m1 = (coo_z - 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p1 = (coo_z + 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p2 = (coo_z + 2)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const double x_s_m2 = coo_x - 2 >= 0 ? this->sample_[x_m2].GetValue() : 0;
+         const double x_s_m1 = coo_x - 1 >= 0 ? this->sample_[x_m1].GetValue() : 0;
+         const double x_s_p1 = coo_x + 1 < x_size_ ? this->sample_[x_p1].GetValue() : 0;
+         const double x_s_p2 = coo_x + 2 < x_size_ ? this->sample_[x_p2].GetValue() : 0;
+         const double y_s_m2 = coo_y - 2 >= 0 ? this->sample_[y_m2].GetValue() : 0;
+         const double y_s_m1 = coo_y - 1 >= 0 ? this->sample_[y_m1].GetValue() : 0;
+         const double y_s_p1 = coo_y + 1 < y_size_ ? this->sample_[y_p1].GetValue() : 0;
+         const double y_s_p2 = coo_y + 2 < y_size_ ? this->sample_[y_p2].GetValue() : 0;
+         const double z_s_m2 = coo_z - 2 >= 0 ? this->sample_[z_m2].GetValue() : 0;
+         const double z_s_m1 = coo_z - 1 >= 0 ? this->sample_[z_m1].GetValue() : 0;
+         const double z_s_p1 = coo_z + 1 < z_size_ ? this->sample_[z_p1].GetValue() : 0;
+         const double z_s_p2 = coo_z + 2 < z_size_ ? this->sample_[z_p2].GetValue() : 0;
+         if (coo_x - 2 >= 0) {
+            this->d_E_[x_m2] += val_3*x_s_m1;
+         }
+         if (coo_x - 1 >= 0) {
+            this->d_E_[x_m1] += val_3*(x_s_m2 + x_s_p1) + val_2;
+         }
+         if (coo_x + 1 < x_size_) {
+            this->d_E_[x_p1] += val_3*(x_s_m1 + x_s_p2) + val_2;
+         }
+         if (coo_x + 2 < x_size_) {
+            this->d_E_[x_p2] += val_3*x_s_p1;
+         }
+         if (coo_y - 2 >= 0) {
+            this->d_E_[y_m2] += val_3*y_s_m1;
+         }
+         if (coo_y - 1 >= 0) {
+            this->d_E_[y_m1] += val_3*(y_s_m2 + y_s_p1) + val_2;
+         }
+         if (coo_y + 1 < y_size_) {
+            this->d_E_[y_p1] += val_3*(y_s_m1 + y_s_p2) + val_2;
+         }
+         if (coo_y + 2 < y_size_) {
+            this->d_E_[y_p2] += val_3*y_s_p1;
+         }
+         if (coo_z - 2 >= 0) {
+            this->d_E_[z_m2] += val_3*z_s_m1;
+         }
+         if (coo_z - 1 >= 0) {
+            this->d_E_[z_m1] += val_3*(z_s_m2 + z_s_p1) + val_2;
+         }
+         if (coo_z + 1 < z_size_) {
+            this->d_E_[z_p1] += val_3*(z_s_m1 + z_s_p2) + val_2;
+         }
+         if (coo_z + 2 < z_size_) {
+            this->d_E_[z_p2] += val_3*z_s_p1;
+         }
+         
+      }
+      else {
+         throw std::invalid_argument("Unsupported BoundaryCondition");
+      }
+      this->sample_[index].SetState(update_state);
+   }
    
    //! @brief Flip a variable.
    //! @param index The index of the variable to be flipped.

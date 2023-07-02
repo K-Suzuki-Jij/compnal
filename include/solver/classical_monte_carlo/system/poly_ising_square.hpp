@@ -276,7 +276,7 @@ private:
          if (coo_y + 1 < y_size_) {
             this->d_E_[y_p1] += val_3*(y_s_m1 + y_s_p2) + val_2;
          }
-         if (coo_y + 1 < y_size_) {
+         if (coo_y + 2 < y_size_) {
             this->d_E_[y_p2] += val_3*y_s_p1;
          }
       }

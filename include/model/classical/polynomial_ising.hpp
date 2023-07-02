@@ -335,7 +335,7 @@ private:
                for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
                   for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
                      for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
-                        const std::int32_t index = coo_y*x_size + coo_x;
+                        const std::int32_t index = coo_z*x_size*y_size + coo_y*x_size + coo_x;
                         PHQType spin_prod_x = state[index];
                         PHQType spin_prod_y = state[index];
                         PHQType spin_prod_z = state[index];

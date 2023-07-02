@@ -31,7 +31,7 @@
 
 #include "system/test_system_poly_ising_chain.hpp"
 #include "system/test_system_poly_ising_square.hpp"
-
+#include "system/test_system_poly_ising_cubic.hpp"
 #include "system/test_system_poly_ising_infinite_range.hpp"
 
 

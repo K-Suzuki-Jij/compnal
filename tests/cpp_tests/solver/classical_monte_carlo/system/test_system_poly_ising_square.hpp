@@ -89,8 +89,8 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnSquare) {
                                 poly_ising.CalculateEnergy(system.ExtractSample()));
                
                
-               system.Flip(30, 1);
-               initial_state[30] = 0.5;
+               system.Flip(29, 1);
+               initial_state[29] = 0.5;
                EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
                                 poly_ising.CalculateEnergy(initial_state) -
                                 poly_ising.CalculateEnergy(system.ExtractSample()));
@@ -103,10 +103,10 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnSquare) {
                
                initial_state[j*x_size + i] = -0.5;
                initial_state[y_size*x_size - 1] = -0.5;
-               initial_state[30] = -0.5;
+               initial_state[29] = -0.5;
                initial_state[0] = -0.5;
                system.Flip(0, 0);
-               system.Flip(30, 0);
+               system.Flip(29, 0);
                system.Flip(y_size*x_size - 1, 0);
             }
          }

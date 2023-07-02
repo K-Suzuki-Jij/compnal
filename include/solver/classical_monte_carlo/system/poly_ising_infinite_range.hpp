@@ -84,6 +84,12 @@ public:
       else if (degree_ == 5) {
          Flip5Body(index, update_state);
       }
+      else if (degree_ == 6) {
+         Flip6Body(index, update_state);
+      }
+      else if (degree_ == 7) {
+         Flip7Body(index, update_state);
+      }
       else {
          FlipAny(index, update_state);
       }
@@ -227,6 +233,87 @@ private:
          const double a2 = square_sum - s*s;
          const double a3 = cubic_sum - s*s*s;
          this->d_E_[i] += val_5*(a1*a1*a1 - 3*a2*a1 + 2*a3)/6 + val_4*(a1*a1 - a2)/2 + val_3*a1 + val_2;
+      }
+      this->sample_[index].SetState(update_state);
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip6Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = (interaction_.count(2) == 1 ? interaction_.at(2) : 0)*diff;
+      const double val_3 = (interaction_.count(3) == 1 ? interaction_.at(3) : 0)*diff;
+      const double val_4 = (interaction_.count(4) == 1 ? interaction_.at(4) : 0)*diff;
+      const double val_5 = (interaction_.count(5) == 1 ? interaction_.at(5) : 0)*diff;
+      const double val_6 = interaction_.at(6)*diff;
+      double m1 = 0;
+      double m2 = 0;
+      double m3 = 0;
+      double m4 = 0;
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         const double s = this->sample_[i].GetValue();
+         m1 += s;
+         m2 += s*s;
+         m3 += s*s*s;
+         m4 += s*s*s*s;
+      }
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         const double s = this->sample_[i].GetValue();
+         const double a1 = m1 - s;
+         const double a2 = m2 - s*s;
+         const double a3 = m3 - s*s*s;
+         const double a4 = m4 - s*s*s*s;
+         const double diff1 = val_3*a1;
+         const double diff2 = val_4*(a1*a1 - a2)/2.0;
+         const double diff3 = val_5*(a1*a1*a1 - 3*a2*a1 + 2*a3)/6.0;
+         const double diff4 = val_6*(a1*a1*a1*a1 - 6*a4 + 3*a2*a2 + 8*a3*a1 - 6*a2*a1*a1)/24.0;
+         this->d_E_[i] += diff4 + diff3 + diff2 + diff1 + val_2;
+      }
+      this->sample_[index].SetState(update_state);
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip7Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = (interaction_.count(2) == 1 ? interaction_.at(2) : 0)*diff;
+      const double val_3 = (interaction_.count(3) == 1 ? interaction_.at(3) : 0)*diff;
+      const double val_4 = (interaction_.count(4) == 1 ? interaction_.at(4) : 0)*diff;
+      const double val_5 = (interaction_.count(5) == 1 ? interaction_.at(5) : 0)*diff;
+      const double val_6 = (interaction_.count(6) == 1 ? interaction_.at(6) : 0)*diff;
+      const double val_7 = interaction_.at(7)*diff;
+      double m1 = 0;
+      double m2 = 0;
+      double m3 = 0;
+      double m4 = 0;
+      double m5 = 0;
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         const double s = this->sample_[i].GetValue();
+         m1 += s;
+         m2 += s*s;
+         m3 += s*s*s;
+         m4 += s*s*s*s;
+         m5 += s*s*s*s*s;
+      }
+      for (std::int32_t i = 0; i < this->system_size_; ++i) {
+         if (i == index) {continue;}
+         const double s = this->sample_[i].GetValue();
+         const double a1 = m1 - s;
+         const double a2 = m2 - s*s;
+         const double a3 = m3 - s*s*s;
+         const double a4 = m4 - s*s*s*s;
+         const double a5 = m5 - s*s*s*s*s;
+         const double diff1 = val_3*a1;
+         const double diff2 = val_4*(a1*a1 - a2)/2.0;
+         const double diff3 = val_5*(a1*a1*a1 - 3*a2*a1 + 2*a3)/6.0;
+         const double diff4 = val_6*(a1*a1*a1*a1 - 6*a4 + 3*a2*a2 + 8*a3*a1 - 6*a2*a1*a1)/24.0;
+         const double diff5 = val_7*(a1*a1*a1*a1*a1 + 24*a5 - 30*a1*a4 + 20*a1*a1*a3 + 15*a1*a2*a2 - 10*a1*a1*a1*a2 - 20*a2*a3)/120.0;
+         this->d_E_[i] += diff5 + diff4 + diff3 + diff2 + diff1 + val_2;
       }
       this->sample_[index].SetState(update_state);
    }

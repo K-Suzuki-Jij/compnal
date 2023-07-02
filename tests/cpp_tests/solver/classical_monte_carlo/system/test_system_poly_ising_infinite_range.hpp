@@ -32,13 +32,15 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnInfiniteRange) {
    using InfiniteRange = lattice::InfiniteRange;
    using PolyIsing = model::classical::PolynomialIsing<InfiniteRange>;
    
-   const std::int32_t system_size = 8;
+   const std::int32_t system_size = 10;
    std::vector<std::unordered_map<std::int32_t, double>> interaction_set = {
       {{1, -1.5}, {2, +1.0}},
       {{1, -1.5}, {2, +0.5}, {3, -1.0}},
       {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}},
       {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}, {5, +3.0}},
-      {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}, {5, +3.0}, {6, -0.5}},
+      {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}, {5, +3.0}, {6, -10}},
+      {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}, {5, +3.0}, {6, -10}, {7, -3.5}},
+      {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}, {5, +3.0}, {6, -10}, {7, -3.5}, {8, -1.5}},
    };
    
    std::vector<std::int32_t> initial_state_level(system_size);

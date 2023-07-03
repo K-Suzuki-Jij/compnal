@@ -74,6 +74,12 @@ public:
       else if (degree_ == 3) {
          Flip3Body(index, update_state);
       }
+      else if (degree_ == 4) {
+         Flip4Body(index, update_state);
+      }
+      else if (degree_ == 5) {
+         Flip5Body(index, update_state);
+      }
       else {
          FlipAny(index, update_state);
       }
@@ -335,6 +341,339 @@ private:
             this->d_E_[z_p2] += val_3*z_s_p1;
          }
          
+      }
+      else {
+         throw std::invalid_argument("Unsupported BoundaryCondition");
+      }
+      this->sample_[index].SetState(update_state);
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip4Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = (interaction_.count(2) == 1 ? interaction_.at(2) : 0)*diff;
+      const double val_3 = (interaction_.count(3) == 1 ? interaction_.at(3) : 0)*diff;
+      const double val_4 = interaction_.at(4)*diff;
+      const std::int32_t coo_x = index%x_size_;
+      const std::int32_t coo_y = (index%(x_size_*y_size_))/x_size_;
+      const std::int32_t coo_z = index/(x_size_*y_size_);
+      if (this->bc_ == lattice::BoundaryCondition::PBC) {
+         const std::int32_t x_m3 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 3 + x_size_)%x_size_;
+         const std::int32_t x_m2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 2 + x_size_)%x_size_;
+         const std::int32_t x_m1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_;
+         const std::int32_t x_p1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 1)%x_size_;
+         const std::int32_t x_p2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 2)%x_size_;
+         const std::int32_t x_p3 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 3)%x_size_;
+         const std::int32_t y_m3 = coo_z*x_size_*y_size_ + ((coo_y - 3 + y_size_)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_m2 = coo_z*x_size_*y_size_ + ((coo_y - 2 + y_size_)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_m1 = coo_z*x_size_*y_size_ + ((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_p1 = coo_z*x_size_*y_size_ + ((coo_y + 1)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_p2 = coo_z*x_size_*y_size_ + ((coo_y + 2)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_p3 = coo_z*x_size_*y_size_ + ((coo_y + 3)%y_size_)*x_size_ + coo_x;
+         const std::int32_t z_m3 = ((coo_z - 3 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m2 = ((coo_z - 2 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m1 = ((coo_z - 1 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p1 = ((coo_z + 1)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p2 = ((coo_z + 2)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p3 = ((coo_z + 3)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const double x_s_m3 = this->sample_[x_m3].GetValue();
+         const double x_s_m2 = this->sample_[x_m2].GetValue();
+         const double x_s_m1 = this->sample_[x_m1].GetValue();
+         const double x_s_p1 = this->sample_[x_p1].GetValue();
+         const double x_s_p2 = this->sample_[x_p2].GetValue();
+         const double x_s_p3 = this->sample_[x_p3].GetValue();
+         const double y_s_m3 = this->sample_[y_m3].GetValue();
+         const double y_s_m2 = this->sample_[y_m2].GetValue();
+         const double y_s_m1 = this->sample_[y_m1].GetValue();
+         const double y_s_p1 = this->sample_[y_p1].GetValue();
+         const double y_s_p2 = this->sample_[y_p2].GetValue();
+         const double y_s_p3 = this->sample_[y_p3].GetValue();
+         const double z_s_m3 = this->sample_[z_m3].GetValue();
+         const double z_s_m2 = this->sample_[z_m2].GetValue();
+         const double z_s_m1 = this->sample_[z_m1].GetValue();
+         const double z_s_p1 = this->sample_[z_p1].GetValue();
+         const double z_s_p2 = this->sample_[z_p2].GetValue();
+         const double z_s_p3 = this->sample_[z_p3].GetValue();
+         this->d_E_[x_m3] += val_4*x_s_m2*x_s_m1;
+         this->d_E_[x_m2] += val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
+         this->d_E_[x_m1] += val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
+         this->d_E_[x_p1] += val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
+         this->d_E_[x_p2] += val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
+         this->d_E_[x_p3] += val_4*x_s_p1*x_s_p2;
+         this->d_E_[y_m3] += val_4*y_s_m2*y_s_m1;
+         this->d_E_[y_m2] += val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
+         this->d_E_[y_m1] += val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
+         this->d_E_[y_p1] += val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
+         this->d_E_[y_p2] += val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
+         this->d_E_[y_p3] += val_4*y_s_p1*y_s_p2;
+         this->d_E_[z_m3] += val_4*z_s_m2*z_s_m1;
+         this->d_E_[z_m2] += val_4*(z_s_m3*z_s_m1 + z_s_m1*z_s_p1) + val_3*z_s_m1;
+         this->d_E_[z_m1] += val_4*(z_s_m3*z_s_m2 + z_s_m2*z_s_p1 + z_s_p1*z_s_p2) + val_3*(z_s_m2 + z_s_p1) + val_2;
+         this->d_E_[z_p1] += val_4*(z_s_m2*z_s_m1 + z_s_m1*z_s_p2 + z_s_p2*z_s_p3) + val_3*(z_s_m1 + z_s_p2) + val_2;
+         this->d_E_[z_p2] += val_4*(z_s_m1*z_s_p1 + z_s_p1*z_s_p3) + val_3*z_s_p1;
+         this->d_E_[z_p3] += val_4*z_s_p1*z_s_p2;
+      }
+      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
+         const std::int32_t x_m3 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 3;
+         const std::int32_t x_m2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 2;
+         const std::int32_t x_m1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 1;
+         const std::int32_t x_p1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 1;
+         const std::int32_t x_p2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 2;
+         const std::int32_t x_p3 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 3;
+         const std::int32_t y_m3 = coo_z*x_size_*y_size_ + (coo_y - 3)*x_size_ + coo_x;
+         const std::int32_t y_m2 = coo_z*x_size_*y_size_ + (coo_y - 2)*x_size_ + coo_x;
+         const std::int32_t y_m1 = coo_z*x_size_*y_size_ + (coo_y - 1)*x_size_ + coo_x;
+         const std::int32_t y_p1 = coo_z*x_size_*y_size_ + (coo_y + 1)*x_size_ + coo_x;
+         const std::int32_t y_p2 = coo_z*x_size_*y_size_ + (coo_y + 2)*x_size_ + coo_x;
+         const std::int32_t y_p3 = coo_z*x_size_*y_size_ + (coo_y + 3)*x_size_ + coo_x;
+         const std::int32_t z_m3 = (coo_z - 3)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m2 = (coo_z - 2)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m1 = (coo_z - 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p1 = (coo_z + 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p2 = (coo_z + 2)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p3 = (coo_z + 3)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const double x_s_m3 = coo_x - 3 >= 0 ? this->sample_[x_m3].GetValue() : 0;
+         const double x_s_m2 = coo_x - 2 >= 0 ? this->sample_[x_m2].GetValue() : 0;
+         const double x_s_m1 = coo_x - 1 >= 0 ? this->sample_[x_m1].GetValue() : 0;
+         const double x_s_p1 = coo_x + 1 < x_size_ ? this->sample_[x_p1].GetValue() : 0;
+         const double x_s_p2 = coo_x + 2 < x_size_ ? this->sample_[x_p2].GetValue() : 0;
+         const double x_s_p3 = coo_x + 3 < x_size_ ? this->sample_[x_p3].GetValue() : 0;
+         const double y_s_m3 = coo_y - 3 >= 0 ? this->sample_[y_m3].GetValue() : 0;
+         const double y_s_m2 = coo_y - 2 >= 0 ? this->sample_[y_m2].GetValue() : 0;
+         const double y_s_m1 = coo_y - 1 >= 0 ? this->sample_[y_m1].GetValue() : 0;
+         const double y_s_p1 = coo_y + 1 < y_size_ ? this->sample_[y_p1].GetValue() : 0;
+         const double y_s_p2 = coo_y + 2 < y_size_ ? this->sample_[y_p2].GetValue() : 0;
+         const double y_s_p3 = coo_y + 3 < y_size_ ? this->sample_[y_p3].GetValue() : 0;
+         const double z_s_m3 = coo_z - 3 >= 0 ? this->sample_[z_m3].GetValue() : 0;
+         const double z_s_m2 = coo_z - 2 >= 0 ? this->sample_[z_m2].GetValue() : 0;
+         const double z_s_m1 = coo_z - 1 >= 0 ? this->sample_[z_m1].GetValue() : 0;
+         const double z_s_p1 = coo_z + 1 < z_size_ ? this->sample_[z_p1].GetValue() : 0;
+         const double z_s_p2 = coo_z + 2 < z_size_ ? this->sample_[z_p2].GetValue() : 0;
+         const double z_s_p3 = coo_z + 3 < z_size_ ? this->sample_[z_p3].GetValue() : 0;
+         if (coo_x - 3 >= 0) {
+            this->d_E_[x_m3] += val_4*x_s_m2*x_s_m1;
+         }
+         if (coo_x - 2 >= 0) {
+            this->d_E_[x_m2] += val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
+         }
+         if (coo_x - 1 >= 0) {
+            this->d_E_[x_m1] += val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
+         }
+         if (coo_x + 1 < x_size_) {
+            this->d_E_[x_p1] += val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
+         }
+         if (coo_x + 2 < x_size_) {
+            this->d_E_[x_p2] += val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
+         }
+         if (coo_x + 3 < x_size_) {
+            this->d_E_[x_p3] += val_4*x_s_p1*x_s_p2;
+         }
+         if (coo_y - 3 >= 0) {
+            this->d_E_[y_m3] += val_4*y_s_m2*y_s_m1;
+         }
+         if (coo_y - 2 >= 0) {
+            this->d_E_[y_m2] += val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
+         }
+         if (coo_y - 1 >= 0) {
+            this->d_E_[y_m1] += val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
+         }
+         if (coo_y + 1 < y_size_) {
+            this->d_E_[y_p1] += val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
+         }
+         if (coo_y + 2 < y_size_) {
+            this->d_E_[y_p2] += val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
+         }
+         if (coo_y + 3 < y_size_) {
+            this->d_E_[y_p3] += val_4*y_s_p1*y_s_p2;
+         }
+         if (coo_z - 3 >= 0) {
+            this->d_E_[z_m3] += val_4*z_s_m2*z_s_m1;
+         }
+         if (coo_z - 2 >= 0) {
+            this->d_E_[z_m2] += val_4*(z_s_m3*z_s_m1 + z_s_m1*z_s_p1) + val_3*z_s_m1;
+         }
+         if (coo_z - 1 >= 0) {
+            this->d_E_[z_m1] += val_4*(z_s_m3*z_s_m2 + z_s_m2*z_s_p1 + z_s_p1*z_s_p2) + val_3*(z_s_m2 + z_s_p1) + val_2;
+         }
+         if (coo_z + 1 < y_size_) {
+            this->d_E_[z_p1] += val_4*(z_s_m2*z_s_m1 + z_s_m1*z_s_p2 + z_s_p2*z_s_p3) + val_3*(z_s_m1 + z_s_p2) + val_2;
+         }
+         if (coo_z + 2 < y_size_) {
+            this->d_E_[z_p2] += val_4*(z_s_m1*z_s_p1 + z_s_p1*z_s_p3) + val_3*z_s_p1;
+         }
+         if (coo_z + 3 < y_size_) {
+            this->d_E_[z_p3] += val_4*z_s_p1*z_s_p2;
+         }
+      }
+      else {
+         throw std::invalid_argument("Unsupported BoundaryCondition");
+      }
+      this->sample_[index].SetState(update_state);
+   }
+   
+   //! @brief Flip a variable.
+   //! @param index The index of the variable to be flipped.
+   //! @param update_state The state number to be updated.
+   void Flip5Body(const std::int32_t index, const std::int32_t update_state) {
+      const double diff = this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue();
+      const double val_2 = (interaction_.count(2) == 1 ? interaction_.at(2) : 0)*diff;
+      const double val_3 = (interaction_.count(3) == 1 ? interaction_.at(3) : 0)*diff;
+      const double val_4 = (interaction_.count(4) == 1 ? interaction_.at(4) : 0)*diff;
+      const double val_5 = interaction_.at(5)*diff;
+      const std::int32_t coo_x = index%x_size_;
+      const std::int32_t coo_y = (index%(x_size_*y_size_))/x_size_;
+      const std::int32_t coo_z = index/(x_size_*y_size_);
+      if (this->bc_ == lattice::BoundaryCondition::PBC) {
+         const std::int32_t x_m4 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 4 + x_size_)%x_size_;
+         const std::int32_t x_m3 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 3 + x_size_)%x_size_;
+         const std::int32_t x_m2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 2 + x_size_)%x_size_;
+         const std::int32_t x_m1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_;
+         const std::int32_t x_p1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 1)%x_size_;
+         const std::int32_t x_p2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 2)%x_size_;
+         const std::int32_t x_p3 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 3)%x_size_;
+         const std::int32_t x_p4 = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x + 4)%x_size_;
+         const std::int32_t y_m4 = coo_z*x_size_*y_size_ + ((coo_y - 4 + y_size_)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_m3 = coo_z*x_size_*y_size_ + ((coo_y - 3 + y_size_)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_m2 = coo_z*x_size_*y_size_ + ((coo_y - 2 + y_size_)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_m1 = coo_z*x_size_*y_size_ + ((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_p1 = coo_z*x_size_*y_size_ + ((coo_y + 1)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_p2 = coo_z*x_size_*y_size_ + ((coo_y + 2)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_p3 = coo_z*x_size_*y_size_ + ((coo_y + 3)%y_size_)*x_size_ + coo_x;
+         const std::int32_t y_p4 = coo_z*x_size_*y_size_ + ((coo_y + 4)%y_size_)*x_size_ + coo_x;
+         const std::int32_t z_m4 = ((coo_z - 4 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m3 = ((coo_z - 3 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m2 = ((coo_z - 2 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m1 = ((coo_z - 1 + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p1 = ((coo_z + 1)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p2 = ((coo_z + 2)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p3 = ((coo_z + 3)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p4 = ((coo_z + 4)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const double x_s_m4 = this->sample_[x_m4].GetValue();
+         const double x_s_m3 = this->sample_[x_m3].GetValue();
+         const double x_s_m2 = this->sample_[x_m2].GetValue();
+         const double x_s_m1 = this->sample_[x_m1].GetValue();
+         const double x_s_p1 = this->sample_[x_p1].GetValue();
+         const double x_s_p2 = this->sample_[x_p2].GetValue();
+         const double x_s_p3 = this->sample_[x_p3].GetValue();
+         const double x_s_p4 = this->sample_[x_p4].GetValue();
+         const double y_s_m4 = this->sample_[y_m4].GetValue();
+         const double y_s_m3 = this->sample_[y_m3].GetValue();
+         const double y_s_m2 = this->sample_[y_m2].GetValue();
+         const double y_s_m1 = this->sample_[y_m1].GetValue();
+         const double y_s_p1 = this->sample_[y_p1].GetValue();
+         const double y_s_p2 = this->sample_[y_p2].GetValue();
+         const double y_s_p3 = this->sample_[y_p3].GetValue();
+         const double y_s_p4 = this->sample_[y_p4].GetValue();
+         const double z_s_m4 = this->sample_[z_m4].GetValue();
+         const double z_s_m3 = this->sample_[z_m3].GetValue();
+         const double z_s_m2 = this->sample_[z_m2].GetValue();
+         const double z_s_m1 = this->sample_[z_m1].GetValue();
+         const double z_s_p1 = this->sample_[z_p1].GetValue();
+         const double z_s_p2 = this->sample_[z_p2].GetValue();
+         const double z_s_p3 = this->sample_[z_p3].GetValue();
+         const double z_s_p4 = this->sample_[z_p4].GetValue();
+         this->d_E_[x_m4] += val_5*x_s_m3*x_s_m2*x_s_m1;
+         this->d_E_[x_m3] += val_5*(x_s_m4*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p1) + val_4*x_s_m2*x_s_m1;
+         this->d_E_[x_m2] += val_5*(x_s_m4*x_s_m3*x_s_m1 + x_s_m3*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p2) + val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
+         this->d_E_[x_m1] += val_5*(x_s_m4*x_s_m3*x_s_m2 + x_s_m3*x_s_m2*x_s_p1 + x_s_m2*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p3) + val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
+         this->d_E_[x_p1] += val_5*(x_s_m3*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p2 + x_s_m1*x_s_p2*x_s_p3 + x_s_p2*x_s_p3*x_s_p4) + val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
+         this->d_E_[x_p2] += val_5*(x_s_m2*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p3 + x_s_p1*x_s_p3*x_s_p4) + val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
+         this->d_E_[x_p3] += val_5*(x_s_m1*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p4) + val_4*x_s_p1*x_s_p2;
+         this->d_E_[x_p4] += val_5*x_s_p1*x_s_p2*x_s_p3;
+         this->d_E_[y_m4] += val_5*y_s_m3*y_s_m2*y_s_m1;
+         this->d_E_[y_m3] += val_5*(y_s_m4*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p1) + val_4*y_s_m2*y_s_m1;
+         this->d_E_[y_m2] += val_5*(y_s_m4*y_s_m3*y_s_m1 + y_s_m3*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p2) + val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
+         this->d_E_[y_m1] += val_5*(y_s_m4*y_s_m3*y_s_m2 + y_s_m3*y_s_m2*y_s_p1 + y_s_m2*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p3) + val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
+         this->d_E_[y_p1] += val_5*(y_s_m3*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p2 + y_s_m1*y_s_p2*y_s_p3 + y_s_p2*y_s_p3*y_s_p4) + val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
+         this->d_E_[y_p2] += val_5*(y_s_m2*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p3 + y_s_p1*y_s_p3*y_s_p4) + val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
+         this->d_E_[y_p3] += val_5*(y_s_m1*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p4) + val_4*y_s_p1*y_s_p2;
+         this->d_E_[y_p4] += val_5*y_s_p1*y_s_p2*y_s_p3;
+         this->d_E_[z_m4] += val_5*z_s_m3*z_s_m2*z_s_m1;
+         this->d_E_[z_m3] += val_5*(z_s_m4*z_s_m2*z_s_m1 + z_s_m2*z_s_m1*z_s_p1) + val_4*z_s_m2*z_s_m1;
+         this->d_E_[z_m2] += val_5*(z_s_m4*z_s_m3*z_s_m1 + z_s_m3*z_s_m1*z_s_p1 + z_s_m1*z_s_p1*z_s_p2) + val_4*(z_s_m3*z_s_m1 + z_s_m1*z_s_p1) + val_3*z_s_m1;
+         this->d_E_[z_m1] += val_5*(z_s_m4*z_s_m3*z_s_m2 + z_s_m3*z_s_m2*z_s_p1 + z_s_m2*z_s_p1*z_s_p2 + z_s_p1*z_s_p2*z_s_p3) + val_4*(z_s_m3*z_s_m2 + z_s_m2*z_s_p1 + z_s_p1*z_s_p2) + val_3*(z_s_m2 + z_s_p1) + val_2;
+         this->d_E_[z_p1] += val_5*(z_s_m3*z_s_m2*z_s_m1 + z_s_m2*z_s_m1*z_s_p2 + z_s_m1*z_s_p2*z_s_p3 + z_s_p2*z_s_p3*z_s_p4) + val_4*(z_s_m2*z_s_m1 + z_s_m1*z_s_p2 + z_s_p2*z_s_p3) + val_3*(z_s_m1 + z_s_p2) + val_2;
+         this->d_E_[z_p2] += val_5*(z_s_m2*z_s_m1*z_s_p1 + z_s_m1*z_s_p1*z_s_p3 + z_s_p1*z_s_p3*z_s_p4) + val_4*(z_s_m1*z_s_p1 + z_s_p1*z_s_p3) + val_3*z_s_p1;
+         this->d_E_[z_p3] += val_5*(z_s_m1*z_s_p1*z_s_p2 + z_s_p1*z_s_p2*z_s_p4) + val_4*z_s_p1*z_s_p2;
+         this->d_E_[z_p4] += val_5*z_s_p1*z_s_p2*z_s_p3;
+      }
+      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
+         const std::int32_t x_m4 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 4;
+         const std::int32_t x_m3 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 3;
+         const std::int32_t x_m2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 2;
+         const std::int32_t x_m1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x - 1;
+         const std::int32_t x_p1 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 1;
+         const std::int32_t x_p2 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 2;
+         const std::int32_t x_p3 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 3;
+         const std::int32_t x_p4 = coo_z*x_size_*y_size_ + coo_y*x_size_ + coo_x + 4;
+         const std::int32_t y_m4 = coo_z*x_size_*y_size_ + (coo_y - 4)*x_size_ + coo_x;
+         const std::int32_t y_m3 = coo_z*x_size_*y_size_ + (coo_y - 3)*x_size_ + coo_x;
+         const std::int32_t y_m2 = coo_z*x_size_*y_size_ + (coo_y - 2)*x_size_ + coo_x;
+         const std::int32_t y_m1 = coo_z*x_size_*y_size_ + (coo_y - 1)*x_size_ + coo_x;
+         const std::int32_t y_p1 = coo_z*x_size_*y_size_ + (coo_y + 1)*x_size_ + coo_x;
+         const std::int32_t y_p2 = coo_z*x_size_*y_size_ + (coo_y + 2)*x_size_ + coo_x;
+         const std::int32_t y_p3 = coo_z*x_size_*y_size_ + (coo_y + 3)*x_size_ + coo_x;
+         const std::int32_t y_p4 = coo_z*x_size_*y_size_ + (coo_y + 4)*x_size_ + coo_x;
+         const std::int32_t z_m4 = (coo_z - 4)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m3 = (coo_z - 3)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m2 = (coo_z - 2)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_m1 = (coo_z - 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p1 = (coo_z + 1)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p2 = (coo_z + 2)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p3 = (coo_z + 3)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const std::int32_t z_p4 = (coo_z + 4)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
+         const double x_s_m4 = coo_x - 4 >= 0 ? this->sample_[x_m4].GetValue() : 0;
+         const double x_s_m3 = coo_x - 3 >= 0 ? this->sample_[x_m3].GetValue() : 0;
+         const double x_s_m2 = coo_x - 2 >= 0 ? this->sample_[x_m2].GetValue() : 0;
+         const double x_s_m1 = coo_x - 1 >= 0 ? this->sample_[x_m1].GetValue() : 0;
+         const double x_s_p1 = coo_x + 1 < x_size_ ? this->sample_[x_p1].GetValue() : 0;
+         const double x_s_p2 = coo_x + 2 < x_size_ ? this->sample_[x_p2].GetValue() : 0;
+         const double x_s_p3 = coo_x + 3 < x_size_ ? this->sample_[x_p3].GetValue() : 0;
+         const double x_s_p4 = coo_x + 4 < x_size_ ? this->sample_[x_p4].GetValue() : 0;
+         const double y_s_m4 = coo_y - 4 >= 0 ? this->sample_[y_m4].GetValue() : 0;
+         const double y_s_m3 = coo_y - 3 >= 0 ? this->sample_[y_m3].GetValue() : 0;
+         const double y_s_m2 = coo_y - 2 >= 0 ? this->sample_[y_m2].GetValue() : 0;
+         const double y_s_m1 = coo_y - 1 >= 0 ? this->sample_[y_m1].GetValue() : 0;
+         const double y_s_p1 = coo_y + 1 < y_size_ ? this->sample_[y_p1].GetValue() : 0;
+         const double y_s_p2 = coo_y + 2 < y_size_ ? this->sample_[y_p2].GetValue() : 0;
+         const double y_s_p3 = coo_y + 3 < y_size_ ? this->sample_[y_p3].GetValue() : 0;
+         const double y_s_p4 = coo_y + 4 < y_size_ ? this->sample_[y_p4].GetValue() : 0;
+         const double z_s_m4 = coo_z - 4 >= 0 ? this->sample_[z_m4].GetValue() : 0;
+         const double z_s_m3 = coo_z - 3 >= 0 ? this->sample_[z_m3].GetValue() : 0;
+         const double z_s_m2 = coo_z - 2 >= 0 ? this->sample_[z_m2].GetValue() : 0;
+         const double z_s_m1 = coo_z - 1 >= 0 ? this->sample_[z_m1].GetValue() : 0;
+         const double z_s_p1 = coo_z + 1 < z_size_ ? this->sample_[z_p1].GetValue() : 0;
+         const double z_s_p2 = coo_z + 2 < z_size_ ? this->sample_[z_p2].GetValue() : 0;
+         const double z_s_p3 = coo_z + 3 < z_size_ ? this->sample_[z_p3].GetValue() : 0;
+         const double z_s_p4 = coo_z + 4 < z_size_ ? this->sample_[z_p4].GetValue() : 0;
+         if (coo_x - 4 >= 0) this->d_E_[x_m4] += val_5*x_s_m3*x_s_m2*x_s_m1;
+         if (coo_x - 3 >= 0) this->d_E_[x_m3] += val_5*(x_s_m4*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p1) + val_4*x_s_m2*x_s_m1;
+         if (coo_x - 2 >= 0) this->d_E_[x_m2] += val_5*(x_s_m4*x_s_m3*x_s_m1 + x_s_m3*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p2) + val_4*(x_s_m3*x_s_m1 + x_s_m1*x_s_p1) + val_3*x_s_m1;
+         if (coo_x - 1 >= 0) this->d_E_[x_m1] += val_5*(x_s_m4*x_s_m3*x_s_m2 + x_s_m3*x_s_m2*x_s_p1 + x_s_m2*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p3) + val_4*(x_s_m3*x_s_m2 + x_s_m2*x_s_p1 + x_s_p1*x_s_p2) + val_3*(x_s_m2 + x_s_p1) + val_2;
+         if (coo_x + 1 < x_size_) this->d_E_[x_p1] += val_5*(x_s_m3*x_s_m2*x_s_m1 + x_s_m2*x_s_m1*x_s_p2 + x_s_m1*x_s_p2*x_s_p3 + x_s_p2*x_s_p3*x_s_p4) + val_4*(x_s_m2*x_s_m1 + x_s_m1*x_s_p2 + x_s_p2*x_s_p3) + val_3*(x_s_m1 + x_s_p2) + val_2;
+         if (coo_x + 2 < x_size_) this->d_E_[x_p2] += val_5*(x_s_m2*x_s_m1*x_s_p1 + x_s_m1*x_s_p1*x_s_p3 + x_s_p1*x_s_p3*x_s_p4) + val_4*(x_s_m1*x_s_p1 + x_s_p1*x_s_p3) + val_3*x_s_p1;
+         if (coo_x + 3 < x_size_) this->d_E_[x_p3] += val_5*(x_s_m1*x_s_p1*x_s_p2 + x_s_p1*x_s_p2*x_s_p4) + val_4*x_s_p1*x_s_p2;
+         if (coo_x + 4 < x_size_) this->d_E_[x_p4] += val_5*x_s_p1*x_s_p2*x_s_p3;
+         
+         if (coo_y - 4 >= 0) this->d_E_[y_m4] += val_5*y_s_m3*y_s_m2*y_s_m1;
+         if (coo_y - 3 >= 0) this->d_E_[y_m3] += val_5*(y_s_m4*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p1) + val_4*y_s_m2*y_s_m1;
+         if (coo_y - 2 >= 0) this->d_E_[y_m2] += val_5*(y_s_m4*y_s_m3*y_s_m1 + y_s_m3*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p2) + val_4*(y_s_m3*y_s_m1 + y_s_m1*y_s_p1) + val_3*y_s_m1;
+         if (coo_y - 1 >= 0) this->d_E_[y_m1] += val_5*(y_s_m4*y_s_m3*y_s_m2 + y_s_m3*y_s_m2*y_s_p1 + y_s_m2*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p3) + val_4*(y_s_m3*y_s_m2 + y_s_m2*y_s_p1 + y_s_p1*y_s_p2) + val_3*(y_s_m2 + y_s_p1) + val_2;
+         if (coo_y + 1 < y_size_) this->d_E_[y_p1] += val_5*(y_s_m3*y_s_m2*y_s_m1 + y_s_m2*y_s_m1*y_s_p2 + y_s_m1*y_s_p2*y_s_p3 + y_s_p2*y_s_p3*y_s_p4) + val_4*(y_s_m2*y_s_m1 + y_s_m1*y_s_p2 + y_s_p2*y_s_p3) + val_3*(y_s_m1 + y_s_p2) + val_2;
+         if (coo_y + 2 < y_size_) this->d_E_[y_p2] += val_5*(y_s_m2*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p3 + y_s_p1*y_s_p3*y_s_p4) + val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
+         if (coo_y + 3 < y_size_) this->d_E_[y_p3] += val_5*(y_s_m1*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p4) + val_4*y_s_p1*y_s_p2;
+         if (coo_y + 4 < y_size_) this->d_E_[y_p4] += val_5*y_s_p1*y_s_p2*y_s_p3;
+
+         if (coo_z - 4 >= 0) this->d_E_[z_m4] += val_5*z_s_m3*z_s_m2*z_s_m1;
+         if (coo_z - 3 >= 0) this->d_E_[z_m3] += val_5*(z_s_m4*z_s_m2*z_s_m1 + z_s_m2*z_s_m1*z_s_p1) + val_4*z_s_m2*z_s_m1;
+         if (coo_z - 2 >= 0) this->d_E_[z_m2] += val_5*(z_s_m4*z_s_m3*z_s_m1 + z_s_m3*z_s_m1*z_s_p1 + z_s_m1*z_s_p1*z_s_p2) + val_4*(z_s_m3*z_s_m1 + z_s_m1*z_s_p1) + val_3*z_s_m1;
+         if (coo_z - 1 >= 0) this->d_E_[z_m1] += val_5*(z_s_m4*z_s_m3*z_s_m2 + z_s_m3*z_s_m2*z_s_p1 + z_s_m2*z_s_p1*z_s_p2 + z_s_p1*z_s_p2*z_s_p3) + val_4*(z_s_m3*z_s_m2 + z_s_m2*z_s_p1 + z_s_p1*z_s_p2) + val_3*(z_s_m2 + z_s_p1) + val_2;
+         if (coo_z + 1 < z_size_) this->d_E_[z_p1] += val_5*(z_s_m3*z_s_m2*z_s_m1 + z_s_m2*z_s_m1*z_s_p2 + z_s_m1*z_s_p2*z_s_p3 + z_s_p2*z_s_p3*z_s_p4) + val_4*(z_s_m2*z_s_m1 + z_s_m1*z_s_p2 + z_s_p2*z_s_p3) + val_3*(z_s_m1 + z_s_p2) + val_2;
+         if (coo_z + 2 < z_size_) this->d_E_[z_p2] += val_5*(z_s_m2*z_s_m1*z_s_p1 + z_s_m1*z_s_p1*z_s_p3 + z_s_p1*z_s_p3*z_s_p4) + val_4*(z_s_m1*z_s_p1 + z_s_p1*z_s_p3) + val_3*z_s_p1;
+         if (coo_z + 3 < z_size_) this->d_E_[z_p3] += val_5*(z_s_m1*z_s_p1*z_s_p2 + z_s_p1*z_s_p2*z_s_p4) + val_4*z_s_p1*z_s_p2;
+         if (coo_z + 4 < z_size_) this->d_E_[z_p4] += val_5*z_s_p1*z_s_p2*z_s_p3;
       }
       else {
          throw std::invalid_argument("Unsupported BoundaryCondition");

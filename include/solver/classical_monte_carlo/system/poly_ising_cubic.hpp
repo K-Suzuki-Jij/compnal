@@ -497,13 +497,13 @@ private:
          if (coo_z - 1 >= 0) {
             this->d_E_[z_m1] += val_4*(z_s_m3*z_s_m2 + z_s_m2*z_s_p1 + z_s_p1*z_s_p2) + val_3*(z_s_m2 + z_s_p1) + val_2;
          }
-         if (coo_z + 1 < y_size_) {
+         if (coo_z + 1 < z_size_) {
             this->d_E_[z_p1] += val_4*(z_s_m2*z_s_m1 + z_s_m1*z_s_p2 + z_s_p2*z_s_p3) + val_3*(z_s_m1 + z_s_p2) + val_2;
          }
-         if (coo_z + 2 < y_size_) {
+         if (coo_z + 2 < z_size_) {
             this->d_E_[z_p2] += val_4*(z_s_m1*z_s_p1 + z_s_p1*z_s_p3) + val_3*z_s_p1;
          }
-         if (coo_z + 3 < y_size_) {
+         if (coo_z + 3 < z_size_) {
             this->d_E_[z_p3] += val_4*z_s_p1*z_s_p2;
          }
       }

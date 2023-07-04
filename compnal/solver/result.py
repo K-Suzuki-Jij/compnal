@@ -22,6 +22,7 @@ from compnal.solver.parameters import (
     SpinSelectionMethod
 )
 import numpy as np
+import uuid
 
 
 @dataclass
@@ -226,3 +227,69 @@ class CMCResult:
             hard_info=CMCHardwareInfo.from_serializable(obj["hard_info"]),
             params=CMCParams.from_serializable(obj["params"])
         )
+    
+@dataclass
+class CMCResultSet:
+    results: dict[uuid.UUID, CMCResult] = field(default_factory=dict)
+    index_to_uuid: list[uuid.UUID] = field(default_factory=list)
+
+    def append(self, result: CMCResult) -> None:
+        """Append the result.
+
+        Args:
+            result (CMCResult): Result.
+        """
+        new_uuid = uuid.uuid4()
+        self.index_to_uuid.append(new_uuid)
+        self.results[new_uuid] = result
+
+    def to_serializable(self) -> dict:
+        """Convert to a serializable object.
+
+        Returns:
+            dict: Serializable object.
+        """
+        return {
+            "results": {str(key): value.to_serializable() for key, value in self.results.items()},
+            "index_to_uuid": [str(value) for value in self.index_to_uuid]
+        }
+    
+    @classmethod
+    def from_serializable(cls, obj: dict) -> None:
+        """Convert from a serializable object.
+
+        Args:
+            obj (dict): Serializable object.
+
+        Returns:
+            CMCResultSet: Results.
+        """
+        return cls(
+            results={uuid.UUID(key): CMCResult.from_serializable(value) for key, value in obj["results"].items()},
+            index_to_uuid=[uuid.UUID(value) for value in obj["index_to_uuid"]]
+        )
+    
+    def __len__(self) -> int:
+        """Return the number of results.
+
+        Returns:
+            int: The number of results.
+        """
+        return len(self.results)
+    
+    def __getitem__(self, index: int) -> CMCResult:
+        """Return the result.
+
+        Args:
+            index (int): Index.
+
+        Returns:
+            CMCResult: Result.
+        """
+        return self.results[self.index_to_uuid[index]]
+    
+    def __iter__(self):
+        return iter(self.results.values())
+    
+    def __next__(self):
+        return next(self.results.values())

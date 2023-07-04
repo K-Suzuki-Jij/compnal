@@ -33,6 +33,7 @@ import time
 import datetime
 import psutil
 import platform
+import random
 
 
 class CMC:
@@ -42,7 +43,7 @@ class CMC:
         pass
     
     @staticmethod
-    def run_sampling(
+    def run_single_flip(
         model: Union[Ising, PolyIsing],
         temperature: float,     
         num_sweeps: int = 1000,
@@ -69,41 +70,38 @@ class CMC:
         Returns:
             CMCResult: Results.
         """
+        if seed is None:
+            seed = random.randint(0, 9223372036854775807)
+
         start_total_time = time.time()
         _base_solver = base_solver.make_classical_monte_carlo(model._base_model)
 
-        _base_solver.set_temperature(temperature)
-        _base_solver.set_num_sweeps(num_sweeps)
-        _base_solver.set_num_samples(num_samples)
-        _base_solver.set_num_threads(num_threads)
-        _base_solver.set_state_update_method(
-            _cast_state_update_method(state_update_method)
-        )
-        _base_solver.set_random_number_engine(
-            _cast_random_number_engine(random_number_engine)
-        )
-        _base_solver.set_spin_selection_method(
-            _cast_spin_selection_method(spin_selection_method)
-        )
-
         start_sampling_time = time.time()
-        if seed is not None:
-            _base_solver.run_sampling(seed)
-        else:
-            _base_solver.run_sampling()
+        samples = _base_solver.run_single_flip(
+            model=model._base_model,
+            num_sweeps=num_sweeps,
+            num_samples=num_samples,
+            num_threads=num_threads,
+            temperature=temperature,
+            seed=seed,
+            updater=_cast_state_update_method(state_update_method),
+            random_number_engine=_cast_random_number_engine(random_number_engine),
+            spin_selector=_cast_spin_selection_method(spin_selection_method)
+        )
         end_sampling_time = time.time()
 
+        energies = _base_solver.calculate_energies(model._base_model, samples, num_threads)
+
         coordinate_list = {coo: i for i, coo in enumerate(model._lattice.generate_coordinate_list())}
-        samples = _base_solver.get_samples()
-        energies = _base_solver.calculate_energies()
+
         cmc_params = CMCParams(
             num_sweeps=num_sweeps,
             num_samples=num_samples,
             num_threads=num_threads,
-            state_update_method=_cast_base_state_update_method(_base_solver.get_state_update_method()),
-            random_number_engine=_cast_base_random_number_engine(_base_solver.get_random_number_engine()),
-            spin_selection_method=_cast_base_spin_selection_method(_base_solver.get_spin_selection_method()),
-            seed=_base_solver.get_seed()
+            state_update_method=state_update_method,
+            random_number_engine=random_number_engine,
+            spin_selection_method=spin_selection_method,
+            seed=seed
         )
 
         cmc_info = CMCHardwareInfo(

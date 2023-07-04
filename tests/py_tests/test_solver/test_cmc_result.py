@@ -61,7 +61,7 @@ def test_cmc_result():
         CMCResult(
             samples=np.full((2, 2), -1),
             energies=np.array([1,2,3,4]),
-            coordinate=[(0, 0), (0, 1), (1, 0), (1, 1)],
+            coordinate_to_index={(0, 0): 0, (0, 1): 1, (1, 0): 2, (1, 1): 3},
             temperature=1.0,
             model_info=ClassicalModelInfo(
                 model_type=ClassicalModelType.ISING,
@@ -99,6 +99,6 @@ def test_cmc_result():
 
     assert (result.samples == np.full((2, 2), -1)).all()
     assert (result.energies == np.array([1,2,3,4])).all()
-    assert result.coordinate == [(0, 0), (0, 1), (1, 0), (1, 1)]
+    assert result.coordinate_to_index == {(0, 0): 0, (0, 1): 1, (1, 0): 2, (1, 1): 3}
     assert result.temperature == 1.0
     

@@ -25,7 +25,7 @@ def test_cmc_ising_chain():
                     ising = Ising(
                         lattice=chain, linear=1.0, quadratic=-1.0, spin_magnitude=0.5, spin_scale_factor=2
                     )
-                    results = CMC.run_sampling(
+                    results = CMC.run_single_flip(
                         model=ising,
                         temperature=1.0, 
                         num_sweeps=1000, 
@@ -65,7 +65,7 @@ def test_cmc_ising_square():
                     ising = Ising(
                         lattice=square, linear=1.0, quadratic=-1.0, spin_magnitude=1, spin_scale_factor=1
                     )
-                    results = CMC.run_sampling(
+                    results = CMC.run_single_flip(
                         model=ising,
                         temperature=0.5, 
                         num_sweeps=2000, 
@@ -105,7 +105,7 @@ def test_cmc_ising_cubic():
                     ising = Ising(
                         lattice=cubic, linear=10.0, quadratic=-1.0, spin_magnitude=1, spin_scale_factor=1
                     )
-                    results = CMC.run_sampling(
+                    results = CMC.run_single_flip(
                         model=ising,
                         temperature=0.8, 
                         num_sweeps=4000, 
@@ -143,7 +143,7 @@ def test_cmc_ising_infinite_range():
                 ising = Ising(
                     lattice=infinite_range, linear=1.0, quadratic=-1.0, spin_magnitude=1, spin_scale_factor=1
                 )
-                results = CMC.run_sampling(
+                results = CMC.run_single_flip(
                     model=ising,
                     temperature=1.0, 
                     num_sweeps=1000, 

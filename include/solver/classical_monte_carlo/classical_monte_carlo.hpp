@@ -142,7 +142,14 @@ private:
    
 };
 
-
+//! @brief Make ClassicalMonteCarlo class.
+//! @tparam ModelType Model class.
+//! @param model The model.
+//! @return The ClassicalMonteCarlo class.
+template<class ModelType>
+auto make_classical_monte_carlo() {
+   return ClassicalMonteCarlo<ModelType>();
+}
 
 } // namespace classical_monte_carlo
 } // namespace solver

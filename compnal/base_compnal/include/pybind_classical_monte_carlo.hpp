@@ -41,34 +41,17 @@ void PyBindClassicalMonteCarlo(py::module &m, const std::string &post_name = "")
    auto py_class = py::class_<CMC>(m, name.c_str(), py::module_local());
 
    //Constructors
-   py_class.def(py::init<const ModelType&>(), "model"_a);
+   py_class.def(py::init<>());
 
-   //Public Member Functions
-   py_class.def("set_num_sweeps", &CMC::SetNumSweeps, "num_sweeps"_a);
-   py_class.def("set_num_samples", &CMC::SetNumSamples, "num_samples"_a);
-   py_class.def("set_num_threads", &CMC::SetNumThreads, "num_threads"_a);
-   py_class.def("set_temperature", &CMC::SetTemperature, "temperature"_a);
-   py_class.def("set_state_update_method", &CMC::SetStateUpdateMethod, "state_update_method"_a);
-   py_class.def("set_random_number_engine", &CMC::SetRandomNumberEngine, "random_number_engine"_a);
-   py_class.def("set_spin_selection_method", &CMC::SetSpinSelectionMethod, "spin_selection_method"_a);
-   
-   py_class.def("get_num_sweeps", &CMC::GetNumSweeps);
-   py_class.def("get_num_samples", &CMC::GetNumSamples);
-   py_class.def("get_num_threads", &CMC::GetNumThreads);
-   py_class.def("get_temperature", &CMC::GetTemperature);
-   py_class.def("get_state_update_method", &CMC::GetStateUpdateMethod);
-   py_class.def("get_random_number_engine", &CMC::GetRandomNumberEngine);
-   py_class.def("get_spin_selection_method", &CMC::GetSpinSelectionMethod);
-   py_class.def("get_seed", &CMC::GetSeed);
-   py_class.def("get_samples", &CMC::GetSamples);
-   py_class.def("get_model", &CMC::GetModel);
-   py_class.def("calculate_energies", &CMC::CalculateEnergies);
-   py_class.def("run_sampling", py::overload_cast<>(&CMC::RunSampling));
-   py_class.def("run_sampling", py::overload_cast<const std::uint64_t>(&CMC::RunSampling), "seed"_a);
+   py_class.def("run_single_flip", &CMC::RunSingleFlip, 
+                "model"_a, "num_sweeps"_a, "num_samples"_a, "num_threads"_a, "temperature"_a,
+                "seed"_a, "updater"_a, "random_number_engine"_a, "spin_selector"_a);
+   py_class.def("calculate_energies", &CMC::CalculateEnergies, 
+                "model"_a, "samples"_a, "num_threads"_a);
 
    m.def("make_classical_monte_carlo", [](const ModelType &model) {
-      return solver::classical_monte_carlo::make_classical_monte_carlo<ModelType>(model);
-   }, "model"_a);
+      return solver::classical_monte_carlo::make_classical_monte_carlo<ModelType>();
+   });
 }
 
 

@@ -36,7 +36,7 @@ namespace lattice {
 class Chain {
 public:
    //! @brief Coordinate type.
-   using CoordinateType = std::int32_t;
+   using CoordinateType = std::tuple<std::int32_t>;
    
    //! @brief Constructor.
    //! @param system_size System size.
@@ -72,14 +72,14 @@ public:
    //! @param coordinate The coordinate.
    //! @return Corresponding integer.
    std::int32_t CoordinateToInteger(const CoordinateType coordinate) const {
-      return coordinate;
+      return std::get<0>(coordinate);
    }
    
    //! @brief Check if input coordinate is in the system.
    //! @param coordinate The coordinate.
    //! @return True if the coordinate is in the system, otherwise false.
    bool ValidateCoordinate(const CoordinateType coordinate) const {
-      if ((0 <= coordinate) && (coordinate < system_size_)) {
+      if ((0 <= std::get<0>(coordinate)) && (std::get<0>(coordinate) < system_size_)) {
          return true;
       }
       else {

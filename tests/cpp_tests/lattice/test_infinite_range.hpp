@@ -33,7 +33,7 @@ TEST(Lattice, InfiniteRange) {
    EXPECT_EQ(infinite_range.GetSystemSize(), 4);
    EXPECT_EQ(infinite_range.GetBoundaryCondition(), lattice::BoundaryCondition::NONE);
    EXPECT_EQ(infinite_range.GenerateCoordinateList(),
-             (std::vector<std::int32_t>{0, 1, 2, 3}));
+             (std::vector<std::tuple<std::int32_t>>{{0}, {1}, {2}, {3}}));
    EXPECT_EQ(infinite_range.CoordinateToInteger(0), 0);
    EXPECT_EQ(infinite_range.CoordinateToInteger(1), 1);
    EXPECT_EQ(infinite_range.CoordinateToInteger(2), 2);

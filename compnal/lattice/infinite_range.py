@@ -40,11 +40,11 @@ class InfiniteRange:
         """        
         self._base_infinite_range = base_lattice.InfiniteRange(system_size=system_size)
 
-    def generate_coordinate_list(self) -> list[int]:
+    def generate_coordinate_list(self) -> list[tuple[int]]:
         """Generate coordinate list.
 
         Returns:
-            list[int]: Coordinate list.
+            list[tuple[int]]: Coordinate list.
         """
         return self._base_infinite_range.generate_coordinate_list()
     

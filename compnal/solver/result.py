@@ -243,6 +243,15 @@ class CMCResultSet:
         self.index_to_uuid.append(new_uuid)
         self.results[new_uuid] = result
 
+    def merge(self, other) -> None:
+        """Merge the results.
+
+        Args:
+            other (CMCResultSet): Results.
+        """
+        self.results.update(other.results)
+        self.index_to_uuid.extend(other.index_to_uuid)
+
     def to_serializable(self) -> dict:
         """Convert to a serializable object.
 
@@ -255,7 +264,7 @@ class CMCResultSet:
         }
     
     @classmethod
-    def from_serializable(cls, obj: dict) -> None:
+    def from_serializable(cls, obj: dict):
         """Convert from a serializable object.
 
         Args:

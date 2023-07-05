@@ -17,14 +17,11 @@ from __future__ import annotations
 from typing import Union, Optional
 from compnal.base_compnal import base_solver
 from compnal.model.classical import Ising, PolyIsing
-from compnal.solver.result import CMCHardwareInfo, CMCParams, CMCResult
+from compnal.solver.result import CMCHardwareInfo, CMCParams, CMCResult, CMCResultSet
 from compnal.solver.parameters import (
     StateUpdateMethod,
     RandomNumberEngine,
     SpinSelectionMethod,
-    _cast_base_state_update_method,
-    _cast_base_random_number_engine,
-    _cast_base_spin_selection_method,
     _cast_state_update_method,
     _cast_random_number_engine,
     _cast_spin_selection_method
@@ -115,12 +112,17 @@ class CMC:
             os_info=platform.platform()
         )
 
-        return CMCResult(
-            samples=samples,
-            energies=energies,
-            coordinate_to_index=coordinate_list,
-            temperature=temperature,
-            model_info=model.export_info(),
-            hard_info=cmc_info,
-            params=cmc_params
+        result_set = CMCResultSet()
+        result_set.append(
+            CMCResult(
+                samples=samples,
+                energies=energies,
+                coordinate_to_index=coordinate_list,
+                temperature=temperature,
+                model_info=model.export_info(),
+                hard_info=cmc_info,
+                params=cmc_params
+            )
         )
+
+        return result_set

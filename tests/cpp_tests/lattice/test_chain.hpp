@@ -33,7 +33,7 @@ TEST(Lattice, Chain) {
    EXPECT_EQ(chain.GetSystemSize(), 3);
    EXPECT_EQ(chain.GetBoundaryCondition(), lattice::BoundaryCondition::OBC);
    EXPECT_EQ(chain.GenerateCoordinateList(),
-             (std::vector<std::int32_t>{0, 1, 2}));
+             (std::vector<std::tuple<std::int32_t>>{{0}, {1}, {2}}));
    EXPECT_EQ(chain.CoordinateToInteger(0), 0);
    EXPECT_EQ(chain.CoordinateToInteger(1), 1);
    EXPECT_EQ(chain.CoordinateToInteger(2), 2);

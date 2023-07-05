@@ -47,11 +47,11 @@ class Chain:
             boundary_condition=_cast_boundary_condition(boundary_condition)
         )
     
-    def generate_coordinate_list(self) -> list[int]:
+    def generate_coordinate_list(self) -> list[tuple[int]]:
         """Generate coordinate list.
 
         Returns:
-            list[int]: Coordinate list.
+            list[tuple[int]]: Coordinate list.
         """
         return self._base_chain.generate_coordinate_list()
     

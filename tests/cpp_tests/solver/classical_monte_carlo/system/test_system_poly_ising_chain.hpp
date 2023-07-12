@@ -64,6 +64,7 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnChain) {
          EXPECT_EQ(system.GenerateCandidateState(4), 1);
          EXPECT_EQ(system.GetSystemSize(), 8);
          
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
                           poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5, +0.5, -0.5, +0.5, +0.5, +0.5}) -
                           poly_ising.CalculateEnergy(system.ExtractSample()));
@@ -96,6 +97,7 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnChain) {
                           poly_ising.CalculateEnergy(system.ExtractSample()));
          
          system.Flip(2, 1);
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
                           poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5, +0.5, +0.5, +0.5}) -
                           poly_ising.CalculateEnergy(system.ExtractSample()));
@@ -126,7 +128,9 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnChain) {
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(4, 1),
                           poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, +0.5, +0.5, +0.5, +0.5}) -
                           poly_ising.CalculateEnergy(system.ExtractSample()));
+         
          system.Flip(0, 1);
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
                           poly_ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, +0.5, +0.5, -0.5, +0.5, +0.5, +0.5}) -
                           poly_ising.CalculateEnergy(system.ExtractSample()));

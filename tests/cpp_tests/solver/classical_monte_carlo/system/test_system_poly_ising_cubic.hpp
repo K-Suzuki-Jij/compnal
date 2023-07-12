@@ -80,11 +80,13 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnCubic) {
          
          const std::int32_t rand_index = rand()%system_size;
          initial_state[rand_index] = 0.5;
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(rand_index, 1),
                           poly_ising.CalculateEnergy(initial_state) -
                           poly_ising.CalculateEnergy(system.ExtractSample()));
          
          system.Flip(0, 1);
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          initial_state[0] = 0.5;
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(rand_index, 1),
                           poly_ising.CalculateEnergy(initial_state) -
@@ -92,12 +94,14 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnCubic) {
          
          
          system.Flip(system_size - 1, 1);
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          initial_state[system_size - 1] = 0.5;
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(rand_index, 1),
                           poly_ising.CalculateEnergy(initial_state) -
                           poly_ising.CalculateEnergy(system.ExtractSample()));
          
          system.Flip(system_size/2, 1);
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          initial_state[system_size/2] = 0.5;
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(rand_index, 1),
                           poly_ising.CalculateEnergy(initial_state) -

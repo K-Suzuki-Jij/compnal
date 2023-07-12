@@ -77,12 +77,14 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnSquare) {
          
          for (std::int32_t i = 0; i < x_size; ++i) {
             for (std::int32_t j = 0; j < y_size; ++j) {
+               EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
                initial_state[j*x_size + i] = 0.5;
                EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
                                 poly_ising.CalculateEnergy(initial_state) -
                                 poly_ising.CalculateEnergy(system.ExtractSample()));
                
                system.Flip(0, 1);
+               EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
                initial_state[0] = 0.5;
                EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
                                 poly_ising.CalculateEnergy(initial_state) -
@@ -90,12 +92,14 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnSquare) {
                
                
                system.Flip(29, 1);
+               EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
                initial_state[29] = 0.5;
                EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
                                 poly_ising.CalculateEnergy(initial_state) -
                                 poly_ising.CalculateEnergy(system.ExtractSample()));
                
                system.Flip(y_size*x_size - 1, 1);
+               EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
                initial_state[y_size*x_size - 1] = 0.5;
                EXPECT_DOUBLE_EQ(system.GetEnergyDifference(j*x_size + i, 1),
                                 poly_ising.CalculateEnergy(initial_state) -

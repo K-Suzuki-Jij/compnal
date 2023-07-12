@@ -64,12 +64,14 @@ public:
          this->sample_[i].SetState(state_list[i]);
       }
       this->d_E_ = GenerateEnergyDifference(this->sample_);
+      this->energy_ = this->model_.CalculateEnergy(this->ExtractSample());
    }
    
    //! @brief Flip a variable.
    //! @param index The index of the variable to be flipped.
    //! @param update_state The state number to be updated.
    void Flip(const std::int32_t index, const std::int32_t update_state) {
+      this->energy_ += this->GetEnergyDifference(index, update_state);
       const double diff = this->quadratic_*(this->sample_[index].GetValueFromState(update_state) - this->sample_[index].GetValue());
       if (this->bc_ == lattice::BoundaryCondition::PBC) {
          this->d_E_[(index - 1 + this->system_size_)%this->system_size_] += diff;

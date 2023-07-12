@@ -50,6 +50,7 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnChain) {
       EXPECT_EQ(system.GenerateCandidateState(2), 1);
       EXPECT_EQ(system.GetSystemSize(), 3);
       
+      EXPECT_DOUBLE_EQ(system.GetEnergy(), ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
                        ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
@@ -70,6 +71,7 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnChain) {
                        ising.CalculateEnergy(system.ExtractSample()));
       
       system.Flip(0, 1);
+      EXPECT_DOUBLE_EQ(system.GetEnergy(), ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
                        ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));
@@ -90,6 +92,7 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnChain) {
                        ising.CalculateEnergy(system.ExtractSample()));
       
       system.Flip(0, 0);
+      EXPECT_DOUBLE_EQ(system.GetEnergy(), ising.CalculateEnergy(system.ExtractSample()));
       EXPECT_DOUBLE_EQ(system.GetEnergyDifference(0, 0),
                        ising.CalculateEnergy(std::vector<double>{-0.5, +0.5, -0.5}) -
                        ising.CalculateEnergy(system.ExtractSample()));

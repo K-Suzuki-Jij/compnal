@@ -20,8 +20,8 @@
 //  
 //
 
-#ifndef OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
-#define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
+#ifndef OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SINGLE_FLIP_HPP_
+#define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SINGLE_FLIP_HPP_
 
 #include "../../../../include/lattice/all.hpp"
 #include "../../../../include/model/classical/ising.hpp"
@@ -30,7 +30,7 @@
 namespace compnal {
 namespace test {
 
-TEST(SolverClassicalMonteCarlo, SolverParameters) {
+TEST(SolverClassicalMonteCarloSF, SolverParameters) {
    using BC = lattice::BoundaryCondition;
    using Chain = lattice::Chain;
    using Ising = model::classical::Ising<Chain>;
@@ -65,7 +65,7 @@ TEST(SolverClassicalMonteCarlo, SolverParameters) {
    
 }
 
-TEST(SolverClassicalMonteCarlo, IsingOnChain) {
+TEST(SolverClassicalMonteCarloSF, IsingOnChain) {
    using BC = lattice::BoundaryCondition;
    using Chain = lattice::Chain;
    using Ising = model::classical::Ising<Chain>;
@@ -102,7 +102,7 @@ TEST(SolverClassicalMonteCarlo, IsingOnChain) {
    }
 }
 
-TEST(SolverClassicalMonteCarlo, IsingOnSquare) {
+TEST(SolverClassicalMonteCarloSF, IsingOnSquare) {
    using BC = lattice::BoundaryCondition;
    using Square = lattice::Square;
    using Ising = model::classical::Ising<Square>;
@@ -138,7 +138,7 @@ TEST(SolverClassicalMonteCarlo, IsingOnSquare) {
    }
 }
 
-TEST(SolverClassicalMonteCarlo, IsingOnCubic) {
+TEST(SolverClassicalMonteCarloSF, IsingOnCubic) {
    using BC = lattice::BoundaryCondition;
    using Cubic = lattice::Cubic;
    using Ising = model::classical::Ising<Cubic>;
@@ -174,7 +174,7 @@ TEST(SolverClassicalMonteCarlo, IsingOnCubic) {
    }
 }
 
-TEST(SolverClassicalMonteCarlo, IsingOnInfiniteRange) {
+TEST(SolverClassicalMonteCarloSF, IsingOnInfiniteRange) {
    using BC = lattice::BoundaryCondition;
    using InfiniteRange = lattice::InfiniteRange;
    using Ising = model::classical::Ising<InfiniteRange>;
@@ -209,7 +209,7 @@ TEST(SolverClassicalMonteCarlo, IsingOnInfiniteRange) {
 }
 
 
-TEST(SolverClassicalMonteCarlo, PolyIsingOnChain) {
+TEST(SolverClassicalMonteCarloSF, PolyIsingOnChain) {
    using BC = lattice::BoundaryCondition;
    using Chain = lattice::Chain;
    using PolyIsing = model::classical::PolynomialIsing<Chain>;
@@ -245,7 +245,7 @@ TEST(SolverClassicalMonteCarlo, PolyIsingOnChain) {
    }
 }
 
-TEST(SolverClassicalMonteCarlo, PolyIsingOnSquare) {
+TEST(SolverClassicalMonteCarloSF, PolyIsingOnSquare) {
    using BC = lattice::BoundaryCondition;
    using Square = lattice::Square;
    using PolyIsing = model::classical::PolynomialIsing<Square>;
@@ -281,7 +281,7 @@ TEST(SolverClassicalMonteCarlo, PolyIsingOnSquare) {
    }
 }
 
-TEST(SolverClassicalMonteCarlo, PolyIsingOnCubic) {
+TEST(SolverClassicalMonteCarloSF, PolyIsingOnCubic) {
    using BC = lattice::BoundaryCondition;
    using Cubic = lattice::Cubic;
    using PolyIsing = model::classical::PolynomialIsing<Cubic>;
@@ -317,7 +317,7 @@ TEST(SolverClassicalMonteCarlo, PolyIsingOnCubic) {
    }
 }
 
-TEST(SolverClassicalMonteCarlo, PolyIsingOnInfiniteRange) {
+TEST(SolverClassicalMonteCarloSF, PolyIsingOnInfiniteRange) {
    using BC = lattice::BoundaryCondition;
    using InfiniteRange = lattice::InfiniteRange;
    using PolyIsing = model::classical::PolynomialIsing<InfiniteRange>;
@@ -354,4 +354,4 @@ TEST(SolverClassicalMonteCarlo, PolyIsingOnInfiniteRange) {
 }  // namespace test
 }  // namespace compnal
 
-#endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_HPP_ */
+#endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SINGLE_FLIP_HPP_ */

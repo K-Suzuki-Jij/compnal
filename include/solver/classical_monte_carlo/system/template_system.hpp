@@ -69,10 +69,12 @@ public:
    //! @param model The model.
    //! @param seed The seed of the random number engine.
    BaseIsingSystem(const ModelType &model, const typename RandType::result_type seed):
+   model_(model),
    system_size_(model.GetLattice().GetSystemSize()),
    bc_(model.GetLattice().GetBoundaryCondition()),
    random_number_engine_(RandType(seed)),
-   sample_(GenerateRandomSpins(model, &random_number_engine_)) {}
+   sample_(GenerateRandomSpins(model, &random_number_engine_)),
+   energy_(model.CalculateEnergy(ExtractSample())) {}
    
    //! @brief Get the system size.
    //! @return The system size.
@@ -105,7 +107,16 @@ public:
       return (sample_[index].GetValueFromState(candidate_state) - sample_[index].GetValue())*d_E_[index];
    }
    
+   //! @brief Get the energy.
+   //! @return The energy.
+   double GetEnergy() const {
+      return energy_;
+   }
+   
 protected:
+   //! @brief The model.
+   const ModelType &model_;
+   
    //! @brief The system size.
    const std::int32_t system_size_ = 0;
 
@@ -120,6 +131,9 @@ protected:
    
    //! @brief The energy difference.
    std::vector<double> d_E_;
+   
+   //! @brief The energy.
+   double energy_ = 0.0;
 
 };
 

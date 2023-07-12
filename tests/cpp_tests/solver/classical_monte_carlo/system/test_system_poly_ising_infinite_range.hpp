@@ -71,17 +71,20 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnInfiniteRange) {
       
       for (std::int32_t i = 1; i < system_size; ++i) {
          initial_state[i] = 0.5;
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(i, 1),
                           poly_ising.CalculateEnergy(initial_state) -
                           poly_ising.CalculateEnergy(system.ExtractSample()));
          
          system.Flip(0, 1);
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          initial_state[0] = 0.5;
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(i, 1),
                           poly_ising.CalculateEnergy(initial_state) -
                           poly_ising.CalculateEnergy(system.ExtractSample()));
          
          system.Flip(4, 1);
+         EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(system.ExtractSample()));
          initial_state[4] = 0.5;
          EXPECT_DOUBLE_EQ(system.GetEnergyDifference(i, 1),
                           poly_ising.CalculateEnergy(initial_state) -

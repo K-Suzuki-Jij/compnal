@@ -23,7 +23,8 @@
 #ifndef OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_ALL_
 #define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_ALL_
 
-#include "test_classical_monte_carlo.hpp"
+#include "test_classical_monte_carlo_single_flip.hpp"
+#include "test_classical_monte_carlo_parallel_tempering.hpp"
 #include "system/test_system_ising_chain.hpp"
 #include "system/test_system_ising_square.hpp"
 #include "system/test_system_ising_cubic.hpp"

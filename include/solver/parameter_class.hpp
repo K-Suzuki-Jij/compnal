@@ -57,6 +57,14 @@ enum class SpinSelectionMethod {
    
 };
 
+enum class TemperatureDistribution {
+   
+   LINEAR,
+   
+   GEOMETRIC
+   
+};
+
 } // namespace solver
 } // namespace compnal
 

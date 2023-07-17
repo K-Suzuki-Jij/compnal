@@ -19,10 +19,47 @@ from compnal.model.classical.model_info import ClassicalModelInfo
 from compnal.solver.parameters import (
     StateUpdateMethod,
     RandomNumberEngine,
-    SpinSelectionMethod
+    SpinSelectionMethod,
+    CMCAlgorithm
 )
 import numpy as np
 import uuid
+
+
+@dataclass
+class CMCTime:
+    """Class for the time information of the classical Monte Carlo solver.
+
+    Attributes:
+        date (str, optional): Date. Defaults to None.
+        total (float, optional): Total time [sec]. Defaults to None.
+        sample (float, optional): Sampling time [sec]. Defaults to None.
+        energy (float, optional): Energy calculation time [sec]. Defaults to None.
+    """
+    date: Optional[str] = None
+    total: Optional[float] = None
+    sample: Optional[float] = None
+    energy: Optional[float] = None
+
+    def to_serializable(self) -> dict:
+        """Convert to a serializable object.
+
+        Returns:
+            dict: Serializable object.
+        """
+        return asdict(self)
+    
+    @classmethod
+    def from_serializable(cls, obj: dict):
+        """Convert from a serializable object.
+
+        Args:
+            obj (dict): Serializable object.
+
+        Returns:
+            CMCHardwareInfo: Hardware information.
+        """
+        return cls(**obj)
 
 
 @dataclass
@@ -30,18 +67,12 @@ class CMCHardwareInfo:
     """Class for the hardware information of the classical Monte Carlo solver.
 
     Attributes:
-        date (str, optional): Date. Defaults to None.
-        total_time (float, optional): Total time [sec]. Defaults to None.
-        sampling_time (float, optional): Sampling time [sec]. Defaults to None.
         cpu_threads (int, optional): Number of CPU threads. Defaults to None.
         cpu_cores (int, optional): Number of CPU cores. Defaults to None.
         cpu_name (str, optional): CPU name. Defaults to None.
         memory_size (int, optional): Memory size [GB]. Defaults to None.
         os_info (str, optional): OS information. Defaults to None.
     """
-    date: Optional[str] = None
-    total_time: Optional[float] = None
-    sampling_time: Optional[float] = None
     cpu_threads: Optional[int] = None
     cpu_cores: Optional[int] = None
     cpu_name: Optional[str] = None
@@ -79,6 +110,7 @@ class CMCParams:
         state_update_method (StateUpdateMethod, Optional): State update method. Defaults to None.
         random_number_engine (RandomNumberEngine, Optional): Random number engine. Defaults to None.
         spin_selection_method (SpinSelectionMethod, Optional): Spin selection method. Defaults to None.
+        algorithm (CMCAlgorithm, Optional): Algorithm. Defaults to None.
         seed (int): Seed. Defaults to None.
     """
     num_sweeps: Optional[int] = None
@@ -87,6 +119,7 @@ class CMCParams:
     state_update_method: Optional[StateUpdateMethod] = None
     random_number_engine: Optional[RandomNumberEngine] = None
     spin_selection_method: Optional[SpinSelectionMethod] = None
+    algorithm: Optional[CMCAlgorithm] = None
     seed: Optional[int] = None
 
     def to_serializable(self) -> dict:
@@ -120,16 +153,18 @@ class CMCResult:
         coordinate_to_index (dict[Union[int, tuple], int], Optional): Coordinate to index. Defaults to None.
         temperature (float, Optional): Temperature. Defaults to None.
         model_info (ClassicalModelInfo, Optional): Model information. Defaults to None.
-        hard_info (CMCHardwareInfo, Optional): Hardware information. Defaults to None.
         params (CMCParams, Optional): Parameters. Defaults to None.
+        hardware_info (CMCHardwareInfo): Hardware information. Defaults to None.
+        time (CMCTime): Time information. Defaults to None.
     """
     samples: Optional[list[list[float]]] = None
     energies: Optional[list[float]] = None
     coordinate_to_index: Optional[dict[Union[int, tuple], int]] = None
     temperature: Optional[float] = None
     model_info: Optional[ClassicalModelInfo] = None
-    hard_info: Optional[CMCHardwareInfo] = None
     params: Optional[CMCParams] = None
+    hardware_info: Optional[CMCHardwareInfo] = None
+    time: Optional[CMCTime] = None
 
     def calculate_mean(self, bias: float = 0.0, std: bool = False) -> tuple[float, float]:
         """Calculate the mean of the samples.
@@ -177,7 +212,6 @@ class CMCResult:
         else:
             return np.mean(a)
 
-    
     def calculate_energy(self, std = False) -> tuple[float, float]:
         """Calculate the energy.
 
@@ -204,8 +238,9 @@ class CMCResult:
             "coordinate": list(self.coordinate_to_index.keys()),
             "temperature": self.temperature,
             "model_info": self.model_info.to_serializable(),
-            "hard_info": self.hard_info.to_serializable(),
-            "params": self.params.to_serializable()
+            "params": self.params.to_serializable(),
+            "hardware_info": self.hardware_info.to_serializable(),
+            "time": self.time.to_serializable()
         }
 
     @classmethod
@@ -224,8 +259,9 @@ class CMCResult:
             coordinate_to_index={tuple(coo): i for i, coo in enumerate(obj["coordinate"])},
             temperature=obj["temperature"],
             model_info=ClassicalModelInfo.from_serializable(obj["model_info"]),
-            hard_info=CMCHardwareInfo.from_serializable(obj["hard_info"]),
-            params=CMCParams.from_serializable(obj["params"])
+            params=CMCParams.from_serializable(obj["params"]),
+            hardware_info=CMCHardwareInfo.from_serializable(obj["hardware_info"]),
+            time=CMCTime.from_serializable(obj["time"])
         )
     
 @dataclass

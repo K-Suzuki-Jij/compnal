@@ -109,16 +109,14 @@ public:
    
    //! @brief Execute classical monte carlo simulation.
    //! @param seed The seed used in the calculation.
-   Eigen::Vector<Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>, Eigen::Dynamic>
+   Eigen::Vector<PHQType, Eigen::Dynamic>
    RunParallelTempering(const ModelType &model,
                         const std::int32_t num_sweeps,
                         const std::int32_t num_swaps,
-                        const std::int32_t num_replica,
                         const std::int32_t num_samples,
                         const std::int32_t num_threads,
-                        const std::pair<double, double> temperature_range,
+                        const Eigen::Vector<double, Eigen::Dynamic> &temperature_list,
                         const std::uint64_t seed,
-                        const TemperatureDistribution temperature_distribution,
                         const StateUpdateMethod updater,
                         const RandomNumberEngine random_number_engine,
                         const SpinSelectionMethod spin_selector) const {
@@ -129,36 +127,30 @@ public:
       if (num_swaps < 0) {
          throw std::invalid_argument("num_swaps must be non-negative integer.");
       }
-      if (num_replica < 0) {
-         throw std::invalid_argument("num_replica must be non-negative integer.");
-      }
       if (num_samples <= 0) {
          throw std::invalid_argument("num_samples must be positive integer.");
       }
       if (num_threads <= 0) {
          throw std::invalid_argument("num_threads must be non-negative integer.");
       }
-      if (temperature_range.first < 0 || temperature_range.second < 0) {
-         throw std::invalid_argument("Temperature must be non-negative value.");
-      }
-      if (temperature_range.first > temperature_range.second) {
-         throw std::invalid_argument("Temperature range is invalid");
+      if (temperature_list.size() == 0) {
+         throw std::invalid_argument("Thhe size of temperature_list must be larger than 0.");
       }
       
       if (random_number_engine == RandomNumberEngine::XORSHIFT) {
          return TemplateParallelTempering<System<ModelType, utility::Xorshift>, utility::Xorshift>
-         (model, num_sweeps, num_swaps, num_replica, num_samples, num_threads,
-          temperature_range, seed, temperature_distribution, updater, random_number_engine, spin_selector);
+         (model, num_sweeps, num_swaps, num_samples, num_threads,
+          temperature_list, seed, updater, random_number_engine, spin_selector);
       }
       else if (random_number_engine == RandomNumberEngine::MT) {
          return TemplateParallelTempering<System<ModelType, std::mt19937>, std::mt19937>
-         (model, num_sweeps, num_swaps, num_replica, num_samples, num_threads,
-          temperature_range, seed, temperature_distribution, updater, random_number_engine, spin_selector);
+         (model, num_sweeps, num_swaps, num_samples, num_threads,
+          temperature_list, seed, updater, random_number_engine, spin_selector);
       }
       else if (random_number_engine == RandomNumberEngine::MT_64) {
          return TemplateParallelTempering<System<ModelType, std::mt19937_64>, std::mt19937_64>
-         (model, num_sweeps, num_swaps, num_replica, num_samples, num_threads,
-          temperature_range, seed, temperature_distribution, updater, random_number_engine, spin_selector);
+         (model, num_sweeps, num_swaps, num_samples, num_threads,
+          temperature_list, seed, updater, random_number_engine, spin_selector);
       }
       else {
          throw std::invalid_argument("Unknwon random_number_engine");
@@ -211,61 +203,78 @@ private:
    //! @param seed The seed used in the calculation.
    //! @return The list of samples.
    template<class SystemType, class RandType>
-   Eigen::Vector<Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>, Eigen::Dynamic>
+   Eigen::Vector<PHQType, Eigen::Dynamic>
    TemplateParallelTempering(const ModelType &model,
                              const std::int32_t num_sweeps,
                              const std::int32_t num_swaps,
-                             const std::int32_t num_replica,
                              const std::int32_t num_samples,
                              const std::int32_t num_threads,
-                             const std::pair<double, double> temperature_range,
+                             const Eigen::Vector<double, Eigen::Dynamic> &temperature_list,
                              const std::uint64_t seed,
-                             const TemperatureDistribution temperature_distribution,
                              const StateUpdateMethod updater,
                              const RandomNumberEngine random_number_engine,
                              const SpinSelectionMethod spin_selector) const {
       
       using RType = typename RandType::result_type;
-      using E2DType = Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
       
-      const auto beta_list = GenerateBetaList(temperature_range, num_replica, temperature_distribution);
-      Eigen::Vector<E2DType, Eigen::Dynamic> samples(num_samples);
-      std::vector<std::vector<RType>> system_seed(num_samples, std::vector<RType>(num_replica));
+      const std::int32_t system_size = model.GetLattice().GetSystemSize();
+      const std::int32_t num_replicas = static_cast<std::int32_t>(temperature_list.size());
+      std::vector<double> beta_list(num_replicas);
+      for (std::int32_t i = 0; i < num_replicas; ++i) {
+         beta_list[i] = 1.0/temperature_list[i];
+      }
+      
+      Eigen::Vector<PHQType, Eigen::Dynamic> samples(num_replicas*num_samples*system_size);
+      std::vector<std::vector<RType>> system_seed(num_samples, std::vector<RType>(num_replicas));
       std::vector<RType> updater_seed(num_samples);
       RandType rand(static_cast<RType>(seed));
+      
       for (std::int32_t i = 0; i < num_samples; ++i) {
          updater_seed[i] = rand();
-         for (std::int32_t j = 0; j < num_replica; ++j) {
+         for (std::int32_t j = 0; j < num_replicas; ++j) {
             system_seed[i][j] = rand();
          }
       }
-     
-      for (std::int32_t i = 0; i < num_samples; ++i) {
+      
+      std::int32_t sample_threads = 1;
+      std::int32_t pt_threads = 1;
+      
+      if (num_samples >= num_threads) {
+         sample_threads = num_threads;
+         pt_threads = 1;
+      }
+      else {
+         sample_threads = 1;
+         pt_threads = num_threads;
+      }
+      
+#pragma omp parallel for schedule(guided) num_threads(sample_threads)
+      for (std::int32_t sample_count = 0; sample_count < num_samples; ++sample_count) {
          std::vector<SystemType> system_list;
-         for (std::int32_t j = 0; j < num_replica; ++j) {
-            system_list.push_back(SystemType{model, system_seed[i][j]});
+         system_list.reserve(num_replicas);
+         for (std::int32_t j = 0; j < num_replicas; ++j) {
+            system_list.push_back(SystemType{model, system_seed[sample_count][j]});
          }
          
-         
          std::vector<SystemType*> system_list_pointer;
-         for (std::int32_t j = 0; j < num_replica; ++j) {
+         system_list_pointer.reserve(num_replicas);
+         for (std::int32_t j = 0; j < num_replicas; ++j) {
             system_list_pointer.push_back(&system_list[j]);
          }
          
          ParallelTempering<SystemType, RandType>(&system_list_pointer,
-                                                 num_sweeps, num_swaps, num_threads,
-                                                 updater_seed[i], beta_list,
+                                                 num_sweeps, num_swaps, pt_threads,
+                                                 updater_seed[sample_count], beta_list,
                                                  updater, spin_selector);
          
-         E2DType temp_samples(num_replica, model.GetLattice().GetSystemSize());
-         
-         for (std::int32_t j = 0; j < num_replica; ++j) {
-            temp_samples.row(j) = system_list[j].ExtractSample();
+         for (std::int32_t replica_count = 0; replica_count < num_replicas; ++replica_count) {
+            const auto &vec = system_list[replica_count].GetSample();
+            for (std::int32_t k = 0; k < system_size; ++k) {
+               const std::int64_t ind = replica_count*num_samples*system_size + sample_count*system_size + k;
+               samples(ind) = vec[k].GetValue();
+            }
          }
-         samples(i) = temp_samples;
       }
-      
-      
       
       return samples;
    }

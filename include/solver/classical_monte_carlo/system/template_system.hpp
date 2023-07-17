@@ -82,7 +82,7 @@ public:
       return system_size_;
    }
    
-   //! @brief Extract the sample.
+   //! @brief Extract the sample as Eigen::Vector.
    //! @return The sample.
    Eigen::Vector<typename ModelType::PHQType, Eigen::Dynamic> ExtractSample() const {
       Eigen::Vector<typename ModelType::PHQType, Eigen::Dynamic> sample(system_size_);
@@ -90,6 +90,12 @@ public:
          sample(i) = sample_[i].GetValue();
       }
       return sample;
+   }
+   
+   //! @brief Get the sample.
+   //! @return The sample.
+   const std::vector<model::utility::Spin> &GetSample() const {
+      return sample_;
    }
    
    //! @brief Generate candidate state.

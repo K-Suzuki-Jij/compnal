@@ -40,22 +40,25 @@ TEST(SolverClassicalMonteCarloPT, IsingOnChain) {
    for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
       const Ising ising{Chain{3, bc}, -1.0, -4.0, 1.5, 2};
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::LINEAR,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::METROPOLIS,
                                                solver::RandomNumberEngine::MT,
                                                solver::SpinSelectionMethod::RANDOM));
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
-                                               solver::StateUpdateMethod::HEAT_BATH,
-                                               solver::RandomNumberEngine::XORSHIFT,
-                                               solver::SpinSelectionMethod::SEQUENTIAL));
-      
-      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::HEAT_BATH,
                                                solver::RandomNumberEngine::MT_64,
+                                               solver::SpinSelectionMethod::SEQUENTIAL));
+      
+      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
+                                               solver::StateUpdateMethod::HEAT_BATH,
+                                               solver::RandomNumberEngine::XORSHIFT,
                                                solver::SpinSelectionMethod::SEQUENTIAL));
    }
    
@@ -70,22 +73,25 @@ TEST(SolverClassicalMonteCarloPT, IsingOnSquare) {
    for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
       Ising ising{Square{3, 4, bc}, -1.0, -4.0, 1.5, 2};
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::LINEAR,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::METROPOLIS,
                                                solver::RandomNumberEngine::MT,
                                                solver::SpinSelectionMethod::RANDOM));
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
-                                               solver::StateUpdateMethod::HEAT_BATH,
-                                               solver::RandomNumberEngine::XORSHIFT,
-                                               solver::SpinSelectionMethod::SEQUENTIAL));
-      
-      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::HEAT_BATH,
                                                solver::RandomNumberEngine::MT_64,
+                                               solver::SpinSelectionMethod::SEQUENTIAL));
+      
+      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
+                                               solver::StateUpdateMethod::HEAT_BATH,
+                                               solver::RandomNumberEngine::XORSHIFT,
                                                solver::SpinSelectionMethod::SEQUENTIAL));
    }
    
@@ -100,22 +106,25 @@ TEST(SolverClassicalMonteCarloPT, IsingOnCubic) {
    for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
       Ising ising{Cubic{3, 4, 2, bc}, -1.0, -4.0, 1.5, 2};
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::LINEAR,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::METROPOLIS,
                                                solver::RandomNumberEngine::MT,
                                                solver::SpinSelectionMethod::RANDOM));
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
-                                               solver::StateUpdateMethod::HEAT_BATH,
-                                               solver::RandomNumberEngine::XORSHIFT,
-                                               solver::SpinSelectionMethod::SEQUENTIAL));
-      
-      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::HEAT_BATH,
                                                solver::RandomNumberEngine::MT_64,
+                                               solver::SpinSelectionMethod::SEQUENTIAL));
+      
+      EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
+                                               solver::StateUpdateMethod::HEAT_BATH,
+                                               solver::RandomNumberEngine::XORSHIFT,
                                                solver::SpinSelectionMethod::SEQUENTIAL));
    }
    
@@ -129,22 +138,25 @@ TEST(SolverClassicalMonteCarloPT, IsingOnInfiniteRange) {
    
    Ising ising{InfiniteRange{3}, -1.0, -4.0, 1.5, 2};
    
-   EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                            solver::TemperatureDistribution::LINEAR,
+   EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                            Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                            0,
                                             solver::StateUpdateMethod::METROPOLIS,
                                             solver::RandomNumberEngine::MT,
                                             solver::SpinSelectionMethod::RANDOM));
    
-   EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                            solver::TemperatureDistribution::GEOMETRIC,
-                                            solver::StateUpdateMethod::HEAT_BATH,
-                                            solver::RandomNumberEngine::XORSHIFT,
-                                            solver::SpinSelectionMethod::SEQUENTIAL));
-   
-   EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                            solver::TemperatureDistribution::GEOMETRIC,
+   EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                            Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                            0,
                                             solver::StateUpdateMethod::HEAT_BATH,
                                             solver::RandomNumberEngine::MT_64,
+                                            solver::SpinSelectionMethod::SEQUENTIAL));
+   
+   EXPECT_NO_THROW(cmc.RunParallelTempering(ising, 10, 10, 2, 2,
+                                            Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                            0,
+                                            solver::StateUpdateMethod::HEAT_BATH,
+                                            solver::RandomNumberEngine::XORSHIFT,
                                             solver::SpinSelectionMethod::SEQUENTIAL));
    
 }
@@ -158,22 +170,25 @@ TEST(SolverClassicalMonteCarloPT, PolyIsingOnChain) {
    for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
       PolyIsing poly_ising{Chain{7, bc}, {{1, -1.5}, {4, +2.0}}, 1.5, 2};
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::LINEAR,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::METROPOLIS,
                                                solver::RandomNumberEngine::MT,
                                                solver::SpinSelectionMethod::RANDOM));
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
-                                               solver::StateUpdateMethod::HEAT_BATH,
-                                               solver::RandomNumberEngine::XORSHIFT,
-                                               solver::SpinSelectionMethod::SEQUENTIAL));
-      
-      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::HEAT_BATH,
                                                solver::RandomNumberEngine::MT_64,
+                                               solver::SpinSelectionMethod::SEQUENTIAL));
+      
+      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
+                                               solver::StateUpdateMethod::HEAT_BATH,
+                                               solver::RandomNumberEngine::XORSHIFT,
                                                solver::SpinSelectionMethod::SEQUENTIAL));
    }
    
@@ -188,22 +203,25 @@ TEST(SolverClassicalMonteCarloPT, PolyIsingOnSquare) {
    for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
       PolyIsing poly_ising{Square{7, 6, bc}, {{1, -1.5}, {4, +2.0}}, 1.5, 2};
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::LINEAR,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::METROPOLIS,
                                                solver::RandomNumberEngine::MT,
                                                solver::SpinSelectionMethod::RANDOM));
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
-                                               solver::StateUpdateMethod::HEAT_BATH,
-                                               solver::RandomNumberEngine::XORSHIFT,
-                                               solver::SpinSelectionMethod::SEQUENTIAL));
-      
-      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::HEAT_BATH,
                                                solver::RandomNumberEngine::MT_64,
+                                               solver::SpinSelectionMethod::SEQUENTIAL));
+      
+      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
+                                               solver::StateUpdateMethod::HEAT_BATH,
+                                               solver::RandomNumberEngine::XORSHIFT,
                                                solver::SpinSelectionMethod::SEQUENTIAL));
    }
    
@@ -218,22 +236,25 @@ TEST(SolverClassicalMonteCarloPT, PolyIsingOnCubic) {
    for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
       PolyIsing poly_ising{Cubic{7, 6, 5, bc}, {{1, -1.5}, {4, +2.0}}, 1.5, 2};
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::LINEAR,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::METROPOLIS,
                                                solver::RandomNumberEngine::MT,
                                                solver::SpinSelectionMethod::RANDOM));
       
-      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
-                                               solver::StateUpdateMethod::HEAT_BATH,
-                                               solver::RandomNumberEngine::XORSHIFT,
-                                               solver::SpinSelectionMethod::SEQUENTIAL));
-      
-      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                               solver::TemperatureDistribution::GEOMETRIC,
+      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
                                                solver::StateUpdateMethod::HEAT_BATH,
                                                solver::RandomNumberEngine::MT_64,
+                                               solver::SpinSelectionMethod::SEQUENTIAL));
+      
+      EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                               Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                               0,
+                                               solver::StateUpdateMethod::HEAT_BATH,
+                                               solver::RandomNumberEngine::XORSHIFT,
                                                solver::SpinSelectionMethod::SEQUENTIAL));
    }
    
@@ -247,22 +268,25 @@ TEST(SolverClassicalMonteCarloPT, PolyIsingOnInfiniteRange) {
    
    PolyIsing poly_ising{InfiniteRange{7}, {{1, -1.5}, {4, +2.0}}, 1.5, 2};
    
-   EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                            solver::TemperatureDistribution::LINEAR,
+   EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                            Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                            0,
                                             solver::StateUpdateMethod::METROPOLIS,
                                             solver::RandomNumberEngine::MT,
                                             solver::SpinSelectionMethod::RANDOM));
    
-   EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                            solver::TemperatureDistribution::GEOMETRIC,
-                                            solver::StateUpdateMethod::HEAT_BATH,
-                                            solver::RandomNumberEngine::XORSHIFT,
-                                            solver::SpinSelectionMethod::SEQUENTIAL));
-   
-   EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 10, 5, 2, {0.5, 2.0}, 0,
-                                            solver::TemperatureDistribution::GEOMETRIC,
+   EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                            Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                            0,
                                             solver::StateUpdateMethod::HEAT_BATH,
                                             solver::RandomNumberEngine::MT_64,
+                                            solver::SpinSelectionMethod::SEQUENTIAL));
+   
+   EXPECT_NO_THROW(cmc.RunParallelTempering(poly_ising, 10, 10, 2, 2,
+                                            Eigen::Vector<double, 3>{1.0, 2.0, 3.0},
+                                            0,
+                                            solver::StateUpdateMethod::HEAT_BATH,
+                                            solver::RandomNumberEngine::XORSHIFT,
                                             solver::SpinSelectionMethod::SEQUENTIAL));
    
 }

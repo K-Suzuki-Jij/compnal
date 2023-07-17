@@ -17,7 +17,7 @@ from enum import Enum
 from typing import Union
 from compnal.base_compnal import base_lattice
 
-class BoundaryCondition(int, Enum):
+class BoundaryCondition(str, Enum):
     """Boundary condition.
 
     Args:
@@ -26,9 +26,9 @@ class BoundaryCondition(int, Enum):
         PBC: Periodic boundary condition.
     """
 
-    NONE = 0
-    OBC = 1
-    PBC = 2
+    NONE = "NONE"
+    OBC = "OBC"
+    PBC = "PBC"
 
 def _cast_base_boundary_condition(base_boundary_condition: base_lattice.BoundaryCondition) -> BoundaryCondition:
     """Cast base boundary condition to boundary condition.

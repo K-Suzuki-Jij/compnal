@@ -31,7 +31,6 @@ template<class SystemType, typename RandType>
 void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
                        const std::int32_t num_sweeps,
                        const std::int32_t num_swaps,
-                       const std::int32_t num_threads,
                        const typename RandType::result_type seed,
                        const std::vector<double> &beta_list,
                        const StateUpdateMethod updater,
@@ -72,7 +71,6 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
          const double b = swap_count - static_cast<double>(sweep_count + swap_count)*num_swaps/num_total;
          if (a >= b) {
             // Do Sweep
-#pragma omp parallel for schedule(guided) num_threads(num_threads)
             for (std::size_t j = 0; j < beta_list.size(); ++j) {
                const std::int32_t system_size = (*(*system_list_pointer)[j]).GetSystemSize();
                std::uniform_int_distribution<std::int32_t> dist_system_size(0, system_size - 1);
@@ -89,22 +87,8 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
          }
          else {
             // Do Replica Swap
-            // Even Number Replica
-            const std::int32_t num_even_swap = static_cast<std::int32_t>(beta_list.size()/2);
-            const std::int32_t num_odd_swap = static_cast<std::int32_t>(beta_list.size()/2) - (1 - beta_list.size()%2);
-#pragma omp parallel for schedule(guided) num_threads(num_threads)
-            for (std::int32_t j = 0; j < num_even_swap; ++j) {
-               const std::int32_t ind = 2*j;
-               const auto delta_energy = (*(*system_list_pointer)[ind + 1]).GetEnergy() - (*(*system_list_pointer)[ind]).GetEnergy();
-               const auto delta_beta = beta_list[ind + 1] - beta_list[ind];
-               if (trans_prob(delta_energy, delta_beta, dist_real(random_number_engine))) {
-                  std::swap((*system_list_pointer)[ind + 1], (*system_list_pointer)[ind]);
-               }
-            }
-            // Odd Number Replica
-#pragma omp parallel for schedule(guided) num_threads(num_threads)
-            for (std::int32_t j = 0; j < num_odd_swap; ++j) {
-               const std::int32_t ind = 2*j + 1;
+            const std::int32_t num_swap = static_cast<std::int32_t>(beta_list.size()) - 1;
+            for (std::int32_t ind = 0; ind < num_swap; ++ind) {
                const auto delta_energy = (*(*system_list_pointer)[ind + 1]).GetEnergy() - (*(*system_list_pointer)[ind]).GetEnergy();
                const auto delta_beta = beta_list[ind + 1] - beta_list[ind];
                if (trans_prob(delta_energy, delta_beta, dist_real(random_number_engine))) {
@@ -121,7 +105,6 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
          const double b = swap_count - static_cast<double>(sweep_count + swap_count)*num_swaps/num_total;
          if (a >= b) {
             // Do Sweep
-#pragma omp parallel for schedule(guided) num_threads(num_threads)
             for (std::size_t j = 0; j < beta_list.size(); ++j) {
                const std::int32_t system_size = (*(*system_list_pointer)[j]).GetSystemSize();
                for (std::int32_t index = 0; index < system_size; index++) {
@@ -136,22 +119,8 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
          }
          else {
             // Do Replica Swap
-            // Even Number Replica
-            const std::int32_t num_even_swap = static_cast<std::int32_t>(beta_list.size()/2);
-            const std::int32_t num_odd_swap = static_cast<std::int32_t>(beta_list.size()/2) - (1 - beta_list.size()%2);
-#pragma omp parallel for schedule(guided) num_threads(num_threads)
-            for (std::int32_t j = 0; j < num_even_swap; ++j) {
-               const std::int32_t ind = 2*j;
-               const auto delta_energy = (*(*system_list_pointer)[ind + 1]).GetEnergy() - (*(*system_list_pointer)[ind]).GetEnergy();
-               const auto delta_beta = beta_list[ind + 1] - beta_list[ind];
-               if (trans_prob(delta_energy, delta_beta, dist_real(random_number_engine))) {
-                  std::swap((*system_list_pointer)[ind + 1], (*system_list_pointer)[ind]);
-               }
-            }
-            // Odd Number Replica
-#pragma omp parallel for schedule(guided) num_threads(num_threads)
-            for (std::int32_t j = 0; j < num_odd_swap; ++j) {
-               const std::int32_t ind = 2*j + 1;
+            const std::int32_t num_swap = static_cast<std::int32_t>(beta_list.size()) - 1;
+            for (std::int32_t ind = 0; ind < num_swap; ++ind) {
                const auto delta_energy = (*(*system_list_pointer)[ind + 1]).GetEnergy() - (*(*system_list_pointer)[ind]).GetEnergy();
                const auto delta_beta = beta_list[ind + 1] - beta_list[ind];
                if (trans_prob(delta_energy, delta_beta, dist_real(random_number_engine))) {

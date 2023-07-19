@@ -235,20 +235,8 @@ private:
             system_seed[i][j] = rand();
          }
       }
-      
-      std::int32_t sample_threads = 1;
-      std::int32_t pt_threads = 1;
-      
-      if (num_samples >= num_threads) {
-         sample_threads = num_threads;
-         pt_threads = 1;
-      }
-      else {
-         sample_threads = 1;
-         pt_threads = num_threads;
-      }
-      
-#pragma omp parallel for schedule(guided) num_threads(sample_threads)
+            
+#pragma omp parallel for schedule(guided) num_threads(num_threads)
       for (std::int32_t sample_count = 0; sample_count < num_samples; ++sample_count) {
          std::vector<SystemType> system_list;
          system_list.reserve(num_replicas);
@@ -263,7 +251,7 @@ private:
          }
          
          ParallelTempering<SystemType, RandType>(&system_list_pointer,
-                                                 num_sweeps, num_swaps, pt_threads,
+                                                 num_sweeps, num_swaps,
                                                  updater_seed[sample_count], beta_list,
                                                  updater, spin_selector);
          

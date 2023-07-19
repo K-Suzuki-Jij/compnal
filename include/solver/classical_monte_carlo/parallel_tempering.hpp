@@ -68,8 +68,8 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
    
    if (spin_selector == SpinSelectionMethod::RANDOM) {
       for (std::int32_t i = 0; i < num_total; ++i) {
-         const double a = sweep_count - (sweep_count + swap_count)*num_sweeps/num_total;
-         const double b = swap_count - (sweep_count + swap_count)*num_swaps/num_total;
+         const double a = sweep_count - static_cast<double>(sweep_count + swap_count)*num_sweeps/num_total;
+         const double b = swap_count - static_cast<double>(sweep_count + swap_count)*num_swaps/num_total;
          if (a >= b) {
             // Do Sweep
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
@@ -85,12 +85,13 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
                   }
                }
             }
+            sweep_count--;
          }
          else {
             // Do Replica Swap
             // Even Number Replica
-            const std::int32_t num_even_swap = static_cast<std::int32_t>(beta_list.size()/2) + beta_list.size()%2;
-            const std::int32_t num_odd_swap = static_cast<std::int32_t>(beta_list.size()/2);
+            const std::int32_t num_even_swap = static_cast<std::int32_t>(beta_list.size()/2);
+            const std::int32_t num_odd_swap = static_cast<std::int32_t>(beta_list.size()/2) - (1 - beta_list.size()%2);
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
             for (std::int32_t j = 0; j < num_even_swap; ++j) {
                const std::int32_t ind = 2*j;
@@ -110,13 +111,14 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
                   std::swap((*system_list_pointer)[ind + 1], (*system_list_pointer)[ind]);
                }
             }
+            swap_count--;
          }
       }
    }
    else if (spin_selector == SpinSelectionMethod::SEQUENTIAL) {
       for (std::int32_t i = 0; i < num_total; ++i) {
-         const double a = sweep_count - (sweep_count + swap_count)*num_sweeps/num_total;
-         const double b = swap_count - (sweep_count + swap_count)*num_swaps/num_total;
+         const double a = sweep_count - static_cast<double>(sweep_count + swap_count)*num_sweeps/num_total;
+         const double b = swap_count - static_cast<double>(sweep_count + swap_count)*num_swaps/num_total;
          if (a >= b) {
             // Do Sweep
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
@@ -130,12 +132,13 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
                   }
                }
             }
+            sweep_count--;
          }
          else {
             // Do Replica Swap
             // Even Number Replica
-            const std::int32_t num_even_swap = static_cast<std::int32_t>(beta_list.size()/2) + beta_list.size()%2;
-            const std::int32_t num_odd_swap = static_cast<std::int32_t>(beta_list.size()/2);
+            const std::int32_t num_even_swap = static_cast<std::int32_t>(beta_list.size()/2);
+            const std::int32_t num_odd_swap = static_cast<std::int32_t>(beta_list.size()/2) - (1 - beta_list.size()%2);
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
             for (std::int32_t j = 0; j < num_even_swap; ++j) {
                const std::int32_t ind = 2*j;
@@ -155,6 +158,7 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
                   std::swap((*system_list_pointer)[ind + 1], (*system_list_pointer)[ind]);
                }
             }
+            swap_count--;
          }
       }
    }

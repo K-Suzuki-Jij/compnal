@@ -42,15 +42,15 @@ void SingleUpdater(SystemType *system,
    std::uniform_real_distribution<double> dist_real(0, 1);
    
    // Set update function
-   std::function<bool(double, double, double)> trans_prob;
+   std::function<bool(double, double)> trans_prob;
    if (update_method == StateUpdateMethod::METROPOLIS) {
-      trans_prob = [](const double delta_energy, const double beta, const double dist_real) {
-         return delta_energy <= 0.0 || std::exp(-beta*delta_energy) > dist_real;
+      trans_prob = [](const double delta_S, const double dist_real) {
+         return delta_S <= 0.0 || std::exp(-delta_S) > dist_real;
       };
    }
    else if (update_method == StateUpdateMethod::HEAT_BATH) {
-      trans_prob = [](const double delta_energy, const double beta, const double dist_real) {
-         return 1.0/(1.0 + std::exp(beta*delta_energy)) > dist_real;
+      trans_prob = [](const double delta_S, const double dist_real) {
+         return 1.0/(1.0 + std::exp(delta_S)) > dist_real;
       };
    }
    else {
@@ -64,7 +64,7 @@ void SingleUpdater(SystemType *system,
             const std::int32_t index = dist_system_size(random_number_engine);
             const auto candidate_state = system->GenerateCandidateState(index);
             const auto delta_energy = system->GetEnergyDifference(index, candidate_state);
-            if (trans_prob(delta_energy, beta, dist_real(random_number_engine))) {
+            if (trans_prob(delta_energy*beta, dist_real(random_number_engine))) {
                system->Flip(index, candidate_state);
             }
          }
@@ -75,7 +75,7 @@ void SingleUpdater(SystemType *system,
          for (std::int32_t i = 0; i < system_size; i++) {
             const auto candidate_state = system->GenerateCandidateState(i);
             const auto delta_energy = system->GetEnergyDifference(i, candidate_state);
-            if (trans_prob(delta_energy, beta, dist_real(random_number_engine))) {
+            if (trans_prob(delta_energy*beta, dist_real(random_number_engine))) {
                system->Flip(i, candidate_state);
             }
          }

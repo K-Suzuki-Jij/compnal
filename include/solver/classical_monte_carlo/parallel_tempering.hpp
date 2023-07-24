@@ -45,15 +45,15 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
    std::uniform_real_distribution<double> dist_real(0, 1);
    
    // Set update function
-   std::function<bool(double, double, double)> trans_prob;
+   std::function<bool(double, double)> trans_prob;
    if (updater == StateUpdateMethod::METROPOLIS) {
-      trans_prob = [](const double delta_energy, const double beta, const double dist_real) {
-         return delta_energy <= 0.0 || std::exp(-beta*delta_energy) > dist_real;
+      trans_prob = [](const double delta_S, const double dist_real) {
+         return delta_S <= 0.0 || std::exp(-delta_S) > dist_real;
       };
    }
    else if (updater == StateUpdateMethod::HEAT_BATH) {
-      trans_prob = [](const double delta_energy, const double beta, const double dist_real) {
-         return 1.0/(1.0 + std::exp(beta*delta_energy)) > dist_real;
+      trans_prob = [](const double delta_S, const double dist_real) {
+         return 1.0/(1.0 + std::exp(delta_S)) > dist_real;
       };
    }
    else {
@@ -78,7 +78,7 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
                   const std::int32_t index = dist_system_size(random_number_engine);
                   const auto candidate_state = (*(*system_list_pointer)[j]).GenerateCandidateState(index);
                   const auto delta_energy = (*(*system_list_pointer)[j]).GetEnergyDifference(index, candidate_state);
-                  if (trans_prob(delta_energy, beta_list[j], dist_real(random_number_engine))) {
+                  if (trans_prob(delta_energy*beta_list[j], dist_real(random_number_engine))) {
                      (*(*system_list_pointer)[j]).Flip(index, candidate_state);
                   }
                }
@@ -91,7 +91,7 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
             for (std::int32_t ind = 0; ind < num_swap; ++ind) {
                const auto delta_energy = (*(*system_list_pointer)[ind + 1]).GetEnergy() - (*(*system_list_pointer)[ind]).GetEnergy();
                const auto delta_beta = beta_list[ind + 1] - beta_list[ind];
-               if (trans_prob(delta_energy, delta_beta, dist_real(random_number_engine))) {
+               if (trans_prob(delta_energy*delta_beta, dist_real(random_number_engine))) {
                   std::swap((*system_list_pointer)[ind + 1], (*system_list_pointer)[ind]);
                }
             }
@@ -110,7 +110,7 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
                for (std::int32_t index = 0; index < system_size; index++) {
                   const auto candidate_state = (*(*system_list_pointer)[j]).GenerateCandidateState(index);
                   const auto delta_energy = (*(*system_list_pointer)[j]).GetEnergyDifference(index, candidate_state);
-                  if (trans_prob(delta_energy, beta_list[j], dist_real(random_number_engine))) {
+                  if (trans_prob(delta_energy*beta_list[j], dist_real(random_number_engine))) {
                      (*(*system_list_pointer)[j]).Flip(index, candidate_state);
                   }
                }
@@ -123,7 +123,7 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
             for (std::int32_t ind = 0; ind < num_swap; ++ind) {
                const auto delta_energy = (*(*system_list_pointer)[ind + 1]).GetEnergy() - (*(*system_list_pointer)[ind]).GetEnergy();
                const auto delta_beta = beta_list[ind + 1] - beta_list[ind];
-               if (trans_prob(delta_energy, delta_beta, dist_real(random_number_engine))) {
+               if (trans_prob(delta_energy*delta_beta, dist_real(random_number_engine))) {
                   std::swap((*system_list_pointer)[ind + 1], (*system_list_pointer)[ind]);
                }
             }

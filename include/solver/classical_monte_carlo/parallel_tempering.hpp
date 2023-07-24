@@ -91,8 +91,8 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
             for (std::int32_t ind = 0; ind < num_swap; ++ind) {
                const auto delta_energy = (*(*system_list_pointer)[ind + 1]).GetEnergy() - (*(*system_list_pointer)[ind]).GetEnergy();
                const auto delta_beta = beta_list[ind + 1] - beta_list[ind];
-               if (trans_prob(delta_energy*delta_beta, dist_real(random_number_engine))) {
-                  std::swap((*system_list_pointer)[ind + 1], (*system_list_pointer)[ind]);
+               if (trans_prob(-delta_energy*delta_beta, dist_real(random_number_engine))) {
+                  std::swap((*system_list_pointer)[ind], (*system_list_pointer)[ind + 1]);
                }
             }
             swap_count--;
@@ -123,8 +123,8 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
             for (std::int32_t ind = 0; ind < num_swap; ++ind) {
                const auto delta_energy = (*(*system_list_pointer)[ind + 1]).GetEnergy() - (*(*system_list_pointer)[ind]).GetEnergy();
                const auto delta_beta = beta_list[ind + 1] - beta_list[ind];
-               if (trans_prob(delta_energy*delta_beta, dist_real(random_number_engine))) {
-                  std::swap((*system_list_pointer)[ind + 1], (*system_list_pointer)[ind]);
+               if (trans_prob(-delta_energy*delta_beta, dist_real(random_number_engine))) {
+                  std::swap((*system_list_pointer)[ind], (*system_list_pointer)[ind + 1]);
                }
             }
             swap_count--;

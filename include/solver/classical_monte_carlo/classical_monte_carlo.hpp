@@ -256,7 +256,7 @@ private:
                                                  updater, spin_selector);
          
          for (std::int32_t replica_count = 0; replica_count < num_replicas; ++replica_count) {
-            const auto &vec = system_list[replica_count].GetSample();
+            const auto &vec = system_list_pointer[replica_count]->GetSample();
             for (std::int32_t k = 0; k < system_size; ++k) {
                const std::int64_t ind = replica_count*num_samples*system_size + sample_count*system_size + k;
                samples(ind) = vec[k].GetValue();

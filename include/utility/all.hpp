@@ -25,5 +25,6 @@
 
 #include "random.hpp"
 #include "combination.hpp"
+#include "statistics.hpp"
 
 #endif /* COMPNAL_UTILITY_ALL_HPP_ */

@@ -15,6 +15,7 @@
 
 from typing import Optional, Union
 from dataclasses import dataclass, asdict, field
+from compnal.base_compnal import base_utility
 from compnal.model.classical.model_info import ClassicalModelInfo
 from compnal.solver.parameters import (
     StateUpdateMethod,
@@ -166,51 +167,40 @@ class CMCResult:
     hardware_info: Optional[CMCHardwareInfo] = None
     time: Optional[CMCTime] = None
 
-    def calculate_mean(self, bias: float = 0.0, std: bool = False) -> tuple[float, float]:
+    def calculate_mean(self, bias: float = 0.0) -> tuple[float, float]:
         """Calculate the mean of the samples.
 
         Args:
             bias (float, optional): The bias in E(X - bias). Defaults to 0.0.
-            std (bool, optional): If True, calculate the standard deviation. Defaults to False.
 
         Returns:
             Union[tuple[float, float], float]: The mean of the samples, and if `std` is `True`, its standard deviation.
         """
-        return self.calculate_moment(order=1, bias=bias, std=std)
+        return self.calculate_moment(order=1, bias=bias)
 
-    def calculate_moment(self, order: int, bias: float = 0.0, std = False) -> tuple[float, float]:
+    def calculate_moment(self, order: int, bias: float = 0.0) -> tuple[float, float]:
         """Calculate the moment of the samples.
 
         Args:
             order (int): The order of the moment.
             bias (float, optional): The bias in E((X - bias)^order). Defaults to 0.0.
-            std (bool, optional): If True, calculate the standard deviation. Defaults to False.
 
         Returns:
-            Union[tuple[float, float], float]: The moment of the samples, and if `std` is `True`, its standard deviation.
+            float: The moment of the samples.
         """
-        a = [np.mean(np.array(list(sample)) + bias)**order for sample in self.samples]
-        if std:
-            return np.mean(a), np.std(a)
-        else:
-            return np.mean(a)
+        return base_utility.calculate_moment(self.samples, order=order, bias=bias, num_threads=self.params.num_threads)
     
-    def calculate_correlation(self, i: Union[int, tuple], j: Union[int, tuple], std = False) -> tuple[float, float]:
+    def calculate_correlation(self, i: Union[int, tuple], j: Union[int, tuple]) -> tuple[float, float]:
         """Calculate the correlation between the spin i and j.
         
         Args:
             i (Union[int, tuple]): The coordinate of the spin.
             j (Union[int, tuple]): The coordinate of the spin.
-            std (bool, optional): If True, calculate the standard deviation. Defaults to False.
 
         Returns:
-            Union[tuple[float, float], float]: The correlation between the spin i and j, and if `std` is `True`, its standard deviation.
+            float: The correlation between the spin i and j.
         """
-        a = self.samples.T[self.coordinate_to_index[i]]*self.samples.T[self.coordinate_to_index[j]]
-        if std:
-            return np.mean(a), np.std(a)
-        else:
-            return np.mean(a)
+        return np.mean(self.samples.T[self.coordinate_to_index[i]]*self.samples.T[self.coordinate_to_index[j]])
 
     def calculate_energy(self, std = False) -> tuple[float, float]:
         """Calculate the energy.

@@ -13,17 +13,31 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  all.hpp
+//  pybind_utility.hpp
 //  compnal
 //
-//  Created by kohei on 2023/06/29.
+//  Created by kohei on 2023/07/25.
 //  
 //
 
-#ifndef COMPNAL_TEST_UTILITY_ALL_HPP_
-#define COMPNAL_TEST_UTILITY_ALL_HPP_
+#ifndef COMPNAL_WRAPPER_UTILITY_HPP_
+#define COMPNAL_WRAPPER_UTILITY_HPP_
 
-#include "test_combination.hpp"
-#include "test_statistics.hpp"
+#include "../../../include/utility/all.hpp"
 
-#endif /* COMPNAL_TEST_UTILITY_ALL_HPP_ */
+namespace compnal {
+namespace wrapper {
+
+namespace py = pybind11;
+
+//The following does not bring in anything else from the pybind11 namespace except for literals.
+using namespace pybind11::literals;
+
+void PyBindUtility(py::module &m) {
+    m.def("calculate_moment", &utility::CalculateMoment, "samples"_a, "order"_a, "bias"_a, "num_threads"_a);
+}
+
+} // namespace wrapper
+} // namespace compnal
+
+#endif /* COMPNAL_WRAPPER_UTILITY_HPP_ */

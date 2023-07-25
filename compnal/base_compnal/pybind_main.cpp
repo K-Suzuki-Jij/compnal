@@ -29,6 +29,7 @@
 #include "include/pybind_classical_model.hpp"
 #include "include/pybind_classical_monte_carlo.hpp"
 #include "include/pybind_solver_parameters.hpp"
+#include "include/pybind_utility.hpp"
 
 PYBIND11_MODULE(base_compnal, m) {
    namespace py = pybind11;
@@ -67,5 +68,9 @@ PYBIND11_MODULE(base_compnal, m) {
    compnal::wrapper::PyBindClassicalMonteCarlo<compnal::model::classical::PolynomialIsing<compnal::lattice::Square>>(m_solver, "PolyIsingSquare");
    compnal::wrapper::PyBindClassicalMonteCarlo<compnal::model::classical::PolynomialIsing<compnal::lattice::Cubic>>(m_solver, "PolyIsingCubic");
    compnal::wrapper::PyBindClassicalMonteCarlo<compnal::model::classical::PolynomialIsing<compnal::lattice::InfiniteRange>>(m_solver, "PolyIsingInfiniteRange");
+
+   // Utility
+   py::module_ m_utility = m.def_submodule("base_utility");
+   compnal::wrapper::PyBindUtility(m_utility);
 
 };

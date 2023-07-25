@@ -8,16 +8,16 @@ def test_poly_ising_chain():
     poly_ising = PolyIsing(lattice=chain, interaction={0: -1.0, 1: +2.0, 2: -3.0, 3: +4.0}, spin_magnitude=1)
     assert poly_ising.get_interaction() == {0: -1.0, 1: +2.0, 2: -3.0, 3: +4.0}
     assert poly_ising.get_degree() == 3
-    assert poly_ising.get_spin_magnitude() == {0: 1, 1: 1, 2: 1, 3: 1}
+    assert poly_ising.get_spin_magnitude() == {(0,): 1, (1,): 1, (2,): 1, (3,): 1}
     assert poly_ising.get_spin_scale_factor() == 1
-    poly_ising.set_spin_magnitude(2, 0)
-    assert poly_ising.get_spin_magnitude() == {0: 2, 1: 1, 2: 1, 3: 1}
+    poly_ising.set_spin_magnitude(2, (0,))
+    assert poly_ising.get_spin_magnitude() == {(0,): 2, (1,): 1, (2,): 1, (3,): 1}
 
     with pytest.raises(ValueError):
-        poly_ising.set_spin_magnitude(1.4999, 0)
+        poly_ising.set_spin_magnitude(1.4999, (0,))
     
     with pytest.raises(ValueError):
-        poly_ising.set_spin_magnitude(1.5, 10)
+        poly_ising.set_spin_magnitude(1.5, (10,))
 
     with pytest.raises(ValueError):
         PolyIsing(lattice=chain, interaction={-1: -1.0})
@@ -28,7 +28,7 @@ def test_poly_ising_chain():
     info = poly_ising.export_info()
     assert info.model_type == ClassicalModelType.POLY_ISING
     assert info.interactions == {0: -1.0, 1: +2.0, 2: -3.0, 3: +4.0}
-    assert info.spin_magnitude == {0: 2, 1: 1, 2: 1, 3: 1}
+    assert info.spin_magnitude == {(0,): 2, (1,): 1, (2,): 1, (3,): 1}
     assert info.spin_scale_factor == 1
     assert info.lattice.lattice_type == LatticeType.CHAIN
     assert info.lattice.system_size == 4
@@ -41,8 +41,8 @@ def test_poly_ising_chain_serializable():
     obj = poly_ising.to_serializable()
     assert obj["model_type"] == ClassicalModelType.POLY_ISING
     assert obj["interactions"] == {0: -1.0, 1: +2.0, 2: -3.0, 3: +4.0}
-    assert obj["spin_magnitude_values"] == list({0: 1, 1: 1, 2: 1, 3: 1}.values())
-    assert obj["spin_magnitude_keys"] == list({0: 1, 1: 1, 2: 1, 3: 1}.keys())
+    assert obj["spin_magnitude_values"] == list({(0,): 1, (1,): 1, (2,): 1, (3,): 1}.values())
+    assert obj["spin_magnitude_keys"] == list({(0,): 1, (1,): 1, (2,): 1, (3,): 1}.keys())
     assert obj["spin_scale_factor"] == 1
     assert obj["lattice"]["lattice_type"] == LatticeType.CHAIN
     assert obj["lattice"]["system_size"] == 4
@@ -52,7 +52,7 @@ def test_poly_ising_chain_serializable():
     poly_ising = PolyIsing.from_serializable(obj)
     assert poly_ising.get_interaction() == {0: -1.0, 1: +2.0, 2: -3.0, 3: +4.0}
     assert poly_ising.get_degree() == 3
-    assert poly_ising.get_spin_magnitude() == {0: 1, 1: 1, 2: 1, 3: 1}
+    assert poly_ising.get_spin_magnitude() == {(0,): 1, (1,): 1, (2,): 1, (3,): 1}
     assert poly_ising.get_spin_scale_factor() == 1
 
 
@@ -238,16 +238,16 @@ def test_poly_ising_infinite_range():
     )
     assert poly_ising.get_interaction() == {0: -1.0, 1: +2.0, 2: -3.0, 3: +4.0}
     assert poly_ising.get_degree() == 3
-    assert poly_ising.get_spin_magnitude() == {0: 1, 1: 1, 2: 1, 3: 1}
-    poly_ising.set_spin_magnitude(2, 0)
-    assert poly_ising.get_spin_magnitude() == {0: 2, 1: 1, 2: 1, 3: 1}
+    assert poly_ising.get_spin_magnitude() == {(0,): 1, (1,): 1, (2,): 1, (3,): 1}
+    poly_ising.set_spin_magnitude(2, (0,))
+    assert poly_ising.get_spin_magnitude() == {(0,): 2, (1,): 1, (2,): 1, (3,): 1}
     assert poly_ising.get_spin_scale_factor() == 2
 
     with pytest.raises(ValueError):
-        poly_ising.set_spin_magnitude(1.4999, 0)
+        poly_ising.set_spin_magnitude(1.4999, (0,))
     
     with pytest.raises(ValueError):
-        poly_ising.set_spin_magnitude(1.5, 10)
+        poly_ising.set_spin_magnitude(1.5, (10,))
 
     with pytest.raises(ValueError):
         PolyIsing(lattice=infinite_range, interaction={-1: -1.0})
@@ -258,7 +258,7 @@ def test_poly_ising_infinite_range():
     info = poly_ising.export_info()
     assert info.model_type == ClassicalModelType.POLY_ISING
     assert info.interactions == {0: -1.0, 1: +2.0, 2: -3.0, 3: +4.0}
-    assert info.spin_magnitude == {0: 2, 1: 1, 2: 1, 3: 1}
+    assert info.spin_magnitude == {(0,): 2, (1,): 1, (2,): 1, (3,): 1}
     assert info.spin_scale_factor == 2
     assert info.lattice.lattice_type == LatticeType.INFINITE_RANGE
     assert info.lattice.system_size == 4
@@ -276,8 +276,8 @@ def test_poly_ising_infinite_range_serializable():
     obj = poly_ising.to_serializable()
     assert obj["model_type"] == ClassicalModelType.POLY_ISING
     assert obj["interactions"] == {0: -1.0, 1: +2.0, 2: -3.0, 3: +4.0}
-    assert obj["spin_magnitude_values"] == list({0: 1, 1: 1, 2: 1, 3: 1}.values())
-    assert obj["spin_magnitude_keys"] == list({0: 1, 1: 1, 2: 1, 3: 1}.keys())
+    assert obj["spin_magnitude_values"] == list({(0,): 1, (1,): 1, (2,): 1, (3,): 1}.values())
+    assert obj["spin_magnitude_keys"] == list({(0,): 1, (1,): 1, (2,): 1, (3,): 1}.keys())
     assert obj["spin_scale_factor"] == 2
     assert obj["lattice"]["lattice_type"] == LatticeType.INFINITE_RANGE
     assert obj["lattice"]["system_size"] == 4
@@ -287,5 +287,5 @@ def test_poly_ising_infinite_range_serializable():
     poly_ising = PolyIsing.from_serializable(obj)
     assert poly_ising.get_interaction() == {0: -1.0, 1: +2.0, 2: -3.0, 3: +4.0}
     assert poly_ising.get_degree() == 3
-    assert poly_ising.get_spin_magnitude() == {0: 1, 1: 1, 2: 1, 3: 1}
+    assert poly_ising.get_spin_magnitude() == {(0,): 1, (1,): 1, (2,): 1, (3,): 1}
     assert poly_ising.get_spin_scale_factor() == 2

@@ -71,13 +71,13 @@ class CMCHardwareInfo:
         cpu_threads (int, optional): Number of CPU threads. Defaults to None.
         cpu_cores (int, optional): Number of CPU cores. Defaults to None.
         cpu_name (str, optional): CPU name. Defaults to None.
-        memory_size (int, optional): Memory size [GB]. Defaults to None.
+        memory_size (float, optional): Memory size [GB]. Defaults to None.
         os_info (str, optional): OS information. Defaults to None.
     """
     cpu_threads: Optional[int] = None
     cpu_cores: Optional[int] = None
     cpu_name: Optional[str] = None
-    memory_size: Optional[int] = None
+    memory_size: Optional[float] = None
     os_info: Optional[str] = None
 
     def to_serializable(self) -> dict:
@@ -108,6 +108,8 @@ class CMCParams:
         num_sweeps (int, Optional): Number of sweeps. Defaults to None.
         num_samples (int, Optional): Number of samples. Defaults to None.
         num_threads (int, Optional): Number of threads. Defaults to None.
+        num_replicas (int, Optional): Number of replicas. Defaults to None.
+        num_replica_exchange (int, Optional): Number of replica exchange. Defaults to None.
         state_update_method (StateUpdateMethod, Optional): State update method. Defaults to None.
         random_number_engine (RandomNumberEngine, Optional): Random number engine. Defaults to None.
         spin_selection_method (SpinSelectionMethod, Optional): Spin selection method. Defaults to None.
@@ -117,6 +119,8 @@ class CMCParams:
     num_sweeps: Optional[int] = None
     num_samples: Optional[int] = None
     num_threads: Optional[int] = None
+    num_replicas: Optional[int] = None
+    num_replica_exchange: Optional[int] = None
     state_update_method: Optional[StateUpdateMethod] = None
     random_number_engine: Optional[RandomNumberEngine] = None
     spin_selection_method: Optional[SpinSelectionMethod] = None

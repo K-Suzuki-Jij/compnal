@@ -21,7 +21,7 @@ def test_infinite_range():
     infinite_range = InfiniteRange(system_size=3)
     assert infinite_range.system_size == 3
     assert infinite_range.boundary_condition == BoundaryCondition.NONE
-    assert infinite_range.generate_coordinate_list() == [0, 1, 2]
+    assert infinite_range.generate_coordinate_list() == [(0,), (1,), (2,)]
 
     with pytest.raises(ValueError):
         InfiniteRange(system_size=0)
@@ -43,4 +43,4 @@ def test_infinite_serializable():
     infinite_range = InfiniteRange.from_serializable(obj)
     assert infinite_range.system_size == 3
     assert infinite_range.boundary_condition == BoundaryCondition.NONE
-    assert infinite_range.generate_coordinate_list() == [0, 1, 2]
+    assert infinite_range.generate_coordinate_list() == [(0,), (1,), (2,)]

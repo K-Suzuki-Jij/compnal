@@ -58,7 +58,7 @@ class CMC:
         spin_selection_method: Union[str, SpinSelectionMethod] = "RANDOM",
         seed: Optional[int] = None
     ) -> CMCResultSet:
-        """Run sampling.
+        """Run sampling by single flip method.
 
         Args:
             model (Union[Ising, PolyIsing]): Model.
@@ -78,7 +78,7 @@ class CMC:
 
         # Set seed
         if seed is None:
-            seed = random.randint(0, 9223372036854775807)
+            seed = random.randint(0, 2**63-1)
 
         # Set solver
         _base_solver = base_solver.make_classical_monte_carlo(model._base_model)
@@ -158,10 +158,10 @@ class CMC:
     @staticmethod
     def run_parallel_tempering(
         model: Union[Ising, PolyIsing],
-        time_range: tuple[float, float],
+        temperature_range: tuple[float, float],
         num_sweeps: int = 1000,
-        num_swaps: int = 1000,
-        num_replicas: int = 100,
+        replica_exchange_ratio: float = 1,
+        num_replicas: int = 10,
         num_samples: int = 1,
         num_threads: int = 1,
         state_update_method: Union[str, StateUpdateMethod] = "METROPOLIS",
@@ -169,22 +169,47 @@ class CMC:
         spin_selection_method: Union[str, SpinSelectionMethod] = "RANDOM",
         temperature_distribution: Union[str, TemperatureDistribution] = "ARITHMETIC",
         seed: Optional[int] = None
-    ) -> CMCResultSet:        
+    ) -> CMCResultSet:
+        """Run sampling by parallel tempering.
+
+        Args:
+            model (Union[Ising, PolyIsing]): Model.
+            temperature_range (tuple[float, float]): Temperature range.
+            num_sweeps (int, optional): Number of sweeps. Defaults to 1000.
+            replica_swap_ratio (float, optional): Ratio of replica swap. Defaults to 1.
+            num_replicas (int, optional): Number of replicas. Defaults to 00.
+            num_samples (int, optional): Number of samples. Defaults to 1.
+            num_threads (int, optional): Number of threads. Defaults to 1.
+            state_update_method (Union[str, StateUpdateMethod], optional): State update method. Defaults to "METROPOLIS".
+            random_number_engine (Union[str, RandomNumberEngine], optional): Random number engine. Defaults to "MT".
+            spin_selection_method (Union[str, SpinSelectionMethod], optional): Spin selection method. Defaults to "RANDOM".
+            temperature_distribution (Union[str, TemperatureDistribution], optional): Temperature distribution. Defaults to "ARITHMETIC".
+            seed (Optional[int], optional): Seed. Defaults to None.
+
+        Raises:
+            ValueError: When invalid temperature distribution is given.
+
+        Returns:
+            CMCResultSet: Results.
+        """
 
         start_total_time = time.time()
         
         # Set seed
         if seed is None:
-            seed = random.randint(0, 9223372036854775807)
+            seed = random.randint(0, 2**63-1)
+
+        # Set num_replica_exchange
+        num_replica_exchange = int(num_sweeps*replica_exchange_ratio)
 
         # Set solver
         _base_solver = base_solver.make_classical_monte_carlo(model._base_model)
 
         # Generate temperature list
         if _to_temperature_distribution(temperature_distribution) == TemperatureDistribution.ARITHMETIC:
-            temperature_list = np.linspace(time_range[0], time_range[1], num_replicas)
+            temperature_list = np.linspace(temperature_range[0], temperature_range[1], num_replicas)
         elif _to_temperature_distribution(temperature_distribution) == TemperatureDistribution.GEOMETRIC:
-            temperature_list = np.geomspace(time_range[0], time_range[1], num_replicas)
+            temperature_list = np.geomspace(temperature_range[0], temperature_range[1], num_replicas)
         else:
             raise ValueError("Invalid temperature distribution.")
 
@@ -192,7 +217,7 @@ class CMC:
         samples = _base_solver.run_parallel_tempering(
             model=model._base_model,
             num_sweeps=num_sweeps,
-            num_swaps=num_swaps,
+            num_swaps=num_replica_exchange,
             num_samples=num_samples,
             num_threads=num_threads,
             temperature_list=temperature_list,
@@ -226,6 +251,8 @@ class CMC:
             num_sweeps=num_sweeps,
             num_samples=num_samples,
             num_threads=num_threads,
+            num_replicas=num_replicas,
+            num_replica_exchange=num_replica_exchange,
             state_update_method=_to_state_update_method(state_update_method),
             random_number_engine=_to_random_number_engine(random_number_engine),
             spin_selection_method=_to_spin_selection_method(spin_selection_method),

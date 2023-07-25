@@ -8,16 +8,16 @@ def test_ising_chain():
     ising = Ising(lattice=chain, linear=1.0, quadratic=-4.0, spin_magnitude=1)
     assert ising.get_linear() == 1.0
     assert ising.get_quadratic() == -4.0
-    assert ising.get_spin_magnitude() == {0: 1, 1: 1, 2: 1}
+    assert ising.get_spin_magnitude() == {(0,): 1, (1,): 1, (2,): 1}
     assert ising.get_spin_scale_factor() == 1
-    ising.set_spin_magnitude(2, 0)
-    assert ising.get_spin_magnitude() == {0: 2, 1: 1, 2: 1}
+    ising.set_spin_magnitude(2, (0,))
+    assert ising.get_spin_magnitude() == {(0,): 2, (1,): 1, (2,): 1}
 
     with pytest.raises(ValueError):
-        ising.set_spin_magnitude(1.4999, 0)
+        ising.set_spin_magnitude(1.4999, (0,))
     
     with pytest.raises(ValueError):
-        ising.set_spin_magnitude(1.5, 10)
+        ising.set_spin_magnitude(1.5, (10,))
 
     with pytest.raises(ValueError):
         Ising(lattice=chain, linear=1.0, quadratic=-4.0, spin_magnitude=1.5, spin_scale_factor=0)
@@ -25,7 +25,7 @@ def test_ising_chain():
     info = ising.export_info()
     assert info.model_type == ClassicalModelType.ISING
     assert info.interactions == {1: 1.0, 2: -4.0}
-    assert info.spin_magnitude == {0: 2, 1: 1, 2: 1}
+    assert info.spin_magnitude == {(0,): 2, (1,): 1, (2,): 1}
     assert info.spin_scale_factor == 1
     assert info.lattice.lattice_type == LatticeType.CHAIN
     assert info.lattice.system_size == 3
@@ -38,8 +38,8 @@ def test_ising_chain_serializable():
     obj = ising.to_serializable()
     assert obj["model_type"] == ClassicalModelType.ISING
     assert obj["interactions"] == {1: 1.0, 2: -4.0}
-    assert obj["spin_magnitude_values"] == list({0: 1, 1: 1, 2: 1}.values())
-    assert obj["spin_magnitude_keys"] == list({0: 1, 1: 1, 2: 1}.keys())
+    assert obj["spin_magnitude_values"] == list({(0,): 1, (1,): 1, (2,): 1}.values())
+    assert obj["spin_magnitude_keys"] == list({(0,): 1, (1,): 1, (2,): 1}.keys())
     assert obj["spin_scale_factor"] == 1
     assert obj["lattice"]["lattice_type"] == LatticeType.CHAIN
     assert obj["lattice"]["system_size"] == 3
@@ -49,7 +49,7 @@ def test_ising_chain_serializable():
     ising = Ising.from_serializable(obj)
     assert ising.get_linear() == 1.0
     assert ising.get_quadratic() == -4.0
-    assert ising.get_spin_magnitude() == {0: 1, 1: 1, 2: 1}
+    assert ising.get_spin_magnitude() == {(0,): 1, (1,): 1, (2,): 1}
     assert ising.get_spin_scale_factor() == 1
 
 
@@ -182,16 +182,16 @@ def test_ising_infinite_range():
     ising = Ising(lattice=infinite_range, linear=1.0, quadratic=2.0, spin_magnitude=1, spin_scale_factor=3)
     assert ising.get_linear() == 1.0
     assert ising.get_quadratic() == 2.0
-    assert ising.get_spin_magnitude() == {0: 1, 1: 1, 2: 1}
+    assert ising.get_spin_magnitude() == {(0,): 1, (1,): 1, (2,): 1}
     assert ising.get_spin_scale_factor() == 3
-    ising.set_spin_magnitude(2, 0)
-    assert ising.get_spin_magnitude() == {0: 2, 1: 1, 2: 1}
+    ising.set_spin_magnitude(2, (0,))
+    assert ising.get_spin_magnitude() == {(0,): 2, (1,): 1, (2,): 1}
 
     with pytest.raises(ValueError):
-        ising.set_spin_magnitude(1.4999, 0)
+        ising.set_spin_magnitude(1.4999, (0,))
     
     with pytest.raises(ValueError):
-        ising.set_spin_magnitude(1.5, 10)
+        ising.set_spin_magnitude(1.5, (10,))
 
     with pytest.raises(ValueError):
         Ising(lattice=infinite_range, linear=1.0, quadratic=-4.0, spin_magnitude=1.5, spin_scale_factor=0)
@@ -199,7 +199,7 @@ def test_ising_infinite_range():
     info = ising.export_info()
     assert info.model_type == ClassicalModelType.ISING
     assert info.interactions == {1: 1.0, 2: 2.0}
-    assert info.spin_magnitude == {0: 2, 1: 1, 2: 1}
+    assert info.spin_magnitude == {(0,): 2, (1,): 1, (2,): 1}
     assert info.spin_scale_factor == 3
     assert info.lattice.lattice_type == LatticeType.INFINITE_RANGE
     assert info.lattice.system_size == 3
@@ -212,8 +212,8 @@ def test_ising_infinite_range_serializable():
     obj = ising.to_serializable()
     assert obj["model_type"] == ClassicalModelType.ISING
     assert obj["interactions"] == {1: 1.0, 2: 2.0}
-    assert obj["spin_magnitude_values"] == list({0: 1, 1: 1, 2: 1}.values())
-    assert obj["spin_magnitude_keys"] == list({0: 1, 1: 1, 2: 1}.keys())
+    assert obj["spin_magnitude_values"] == list({(0,): 1, (1,): 1, (2,): 1}.values())
+    assert obj["spin_magnitude_keys"] == list({(0,): 1, (1,): 1, (2,): 1}.keys())
     assert obj["spin_scale_factor"] == 3
     assert obj["lattice"]["lattice_type"] == LatticeType.INFINITE_RANGE
     assert obj["lattice"]["system_size"] == 3
@@ -223,5 +223,5 @@ def test_ising_infinite_range_serializable():
     ising = Ising.from_serializable(obj)
     assert ising.get_linear() == 1.0
     assert ising.get_quadratic() == 2.0
-    assert ising.get_spin_magnitude() == {0: 1, 1: 1, 2: 1}
+    assert ising.get_spin_magnitude() == {(0,): 1, (1,): 1, (2,): 1}
     assert ising.get_spin_scale_factor() == 3

@@ -25,6 +25,7 @@
 
 #include <stdexcept>
 #include <cmath>
+#include <sstream>
 
 namespace compnal {
 namespace model {
@@ -59,7 +60,10 @@ public:
    //! @return The value of the spin variable.
    double GetValueFromState(const std::int32_t state_number) const {
       if (state_number < 0 || state_number >= num_state_) {
-         throw std::invalid_argument("state_number must be in [0, num_state_).");
+         std::stringstream ss;
+         ss << "state_number must be in [0," << num_state_ << ")." << std::endl;
+         ss << "But state_number=" << state_number;
+         throw std::invalid_argument(ss.str());
       }
       return (-1*twice_spin_magnitude_*0.5 + state_number)*spin_scale_factor_;
    }
@@ -98,7 +102,10 @@ public:
    //! @param state_number The state number of the spin variable.
    void SetState(const std::int32_t state_number) {
       if (state_number < 0 || state_number >= num_state_) {
-         throw std::invalid_argument("state_number must be in [0, num_state_).");
+         std::stringstream ss;
+         ss << "state_number must be in [0," << num_state_ << ")." << std::endl;
+         ss << "But state_number=" << state_number;
+         throw std::invalid_argument(ss.str());
       }
       state_number_ = state_number;
    }

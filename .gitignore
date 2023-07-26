@@ -181,3 +181,7 @@ _version.py
 .vscode
 
 notebook
+
+*.gcov
+*.gcda
+*.gcno

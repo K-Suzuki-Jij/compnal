@@ -14,9 +14,11 @@
 
 
 from __future__ import annotations
-from typing import Optional, Union
+
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional, Union
+
 from compnal.lattice.lattice_info import LatticeInfo
 
 
@@ -27,6 +29,7 @@ class ClassicalModelType(str, Enum):
         ISING: Ising model.
         POLY_ISING: Polynomial Ising model.
     """
+
     ISING = "ISING"
     POLY_ISING = "POLY_ISING"
 
@@ -39,6 +42,7 @@ class ClassicalModelInfo:
         model_type (ClassicalModelType): Model type. Defaults to None.
         interactions (dict[int, int]): Interactions. Defaults to None.
     """
+
     model_type: Optional[ClassicalModelType] = None
     interactions: Optional[dict[int, float]] = None
     spin_magnitude: Optional[dict[Union[list, tuple], float]] = None
@@ -57,9 +61,9 @@ class ClassicalModelInfo:
             "spin_magnitude_values": list(self.spin_magnitude.values()),
             "spin_magnitude_keys": list(self.spin_magnitude.keys()),
             "spin_scale_factor": self.spin_scale_factor,
-            "lattice": self.lattice.to_serializable()
+            "lattice": self.lattice.to_serializable(),
         }
-    
+
     @classmethod
     def from_serializable(cls, obj: dict):
         """Convert from a serializable object.
@@ -75,10 +79,10 @@ class ClassicalModelInfo:
             interactions=obj.get("interactions", None),
             spin_magnitude=dict(
                 zip(
-                    [tuple(elem) for elem in obj.get("spin_magnitude_keys", None)], 
-                    obj.get("spin_magnitude_values", None)
+                    [tuple(elem) for elem in obj.get("spin_magnitude_keys", None)],
+                    obj.get("spin_magnitude_values", None),
                 )
             ),
             spin_scale_factor=obj.get("spin_scale_factor", None),
-            lattice=LatticeInfo.from_serializable(obj.get("lattice", None))
+            lattice=LatticeInfo.from_serializable(obj.get("lattice", None)),
         )

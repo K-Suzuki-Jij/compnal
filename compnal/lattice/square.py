@@ -14,14 +14,16 @@
 
 
 from __future__ import annotations
+
 from typing import Union
+
 from compnal.base_compnal import base_lattice
-from compnal.lattice.lattice_info import LatticeInfo, LatticeType
 from compnal.lattice.boundary_condition import (
-    BoundaryCondition, 
-    _cast_base_boundary_condition, 
-    _cast_boundary_condition
+    BoundaryCondition,
+    _cast_base_boundary_condition,
+    _cast_boundary_condition,
 )
+from compnal.lattice.lattice_info import LatticeInfo, LatticeType
 
 
 class Square:
@@ -35,11 +37,11 @@ class Square:
     """
 
     def __init__(
-            self, 
-            x_size: int, 
-            y_size: int, 
-            boundary_condition: Union[str, BoundaryCondition]
-        ) -> None:
+        self,
+        x_size: int,
+        y_size: int,
+        boundary_condition: Union[str, BoundaryCondition],
+    ) -> None:
         """Initialize square lattice class.
 
         Args:
@@ -51,8 +53,9 @@ class Square:
             ValueError: When x/y size is smaller than or equal to zero.
         """
         self._base_square = base_lattice.Square(
-            x_size=x_size, y_size=y_size, 
-            boundary_condition=_cast_boundary_condition(boundary_condition)
+            x_size=x_size,
+            y_size=y_size,
+            boundary_condition=_cast_boundary_condition(boundary_condition),
         )
 
     def generate_coordinate_list(self) -> list[tuple[int, int]]:
@@ -62,7 +65,7 @@ class Square:
             list[tuple[int, int]]: Coordinate list.
         """
         return self._base_square.generate_coordinate_list()
-    
+
     def to_serializable(self) -> dict:
         """Convert to serializable object.
 
@@ -70,7 +73,7 @@ class Square:
             dict: Serializable object.
         """
         return self.export_info().to_serializable()
-    
+
     @classmethod
     def from_serializable(cls, obj: dict) -> Square:
         """Create Square instance from serializable object.
@@ -90,9 +93,9 @@ class Square:
         return cls(
             x_size=obj["shape"][0],
             y_size=obj["shape"][1],
-            boundary_condition=obj["boundary_condition"]
+            boundary_condition=obj["boundary_condition"],
         )
-    
+
     def export_info(self) -> LatticeInfo:
         """Export lattice information.
 
@@ -103,25 +106,25 @@ class Square:
             lattice_type=LatticeType.SQUARE,
             system_size=self.system_size,
             shape=(self.x_size, self.y_size),
-            boundary_condition=self.boundary_condition
+            boundary_condition=self.boundary_condition,
         )
-    
+
     @property
     def x_size(self) -> int:
         return self._base_square.get_x_size()
-    
+
     @property
     def y_size(self) -> int:
         return self._base_square.get_y_size()
-    
+
     @property
     def system_size(self) -> int:
         return self._base_square.get_system_size()
-    
+
     @property
     def boundary_condition(self) -> BoundaryCondition:
         return _cast_base_boundary_condition(self._base_square.get_boundary_condition())
-    
+
     @property
     def _base_lattice(self) -> base_lattice.Square:
         return self._base_square

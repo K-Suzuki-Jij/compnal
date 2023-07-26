@@ -14,12 +14,13 @@
 
 
 from __future__ import annotations
+
 from compnal.base_compnal import base_lattice
-from compnal.lattice.lattice_info import LatticeInfo, LatticeType
 from compnal.lattice.boundary_condition import (
-    BoundaryCondition, 
-    _cast_base_boundary_condition
+    BoundaryCondition,
+    _cast_base_boundary_condition,
 )
+from compnal.lattice.lattice_info import LatticeInfo, LatticeType
 
 
 class InfiniteRange:
@@ -29,6 +30,7 @@ class InfiniteRange:
         system_size (int): System size.
         boundary_condition (BoundaryCondition): Boundary condition. This is always BoundaryCondition.NONE.
     """
+
     def __init__(self, system_size: int) -> None:
         """Initialize infinite range lattice class.
 
@@ -37,7 +39,7 @@ class InfiniteRange:
 
         Raises:
             ValueError: When the system size is smaller than or equal to zero.
-        """        
+        """
         self._base_infinite_range = base_lattice.InfiniteRange(system_size=system_size)
 
     def generate_coordinate_list(self) -> list[tuple[int]]:
@@ -47,7 +49,7 @@ class InfiniteRange:
             list[tuple[int]]: Coordinate list.
         """
         return self._base_infinite_range.generate_coordinate_list()
-    
+
     def to_serializable(self) -> dict:
         """Convert to serializable object.
 
@@ -55,7 +57,7 @@ class InfiniteRange:
             dict: Serializable object.
         """
         return self.export_info().to_serializable()
-    
+
     @classmethod
     def from_serializable(cls, obj: dict) -> InfiniteRange:
         """Generate infinite range lattice from serializable object.
@@ -84,17 +86,19 @@ class InfiniteRange:
             lattice_type=LatticeType.INFINITE_RANGE,
             system_size=self.system_size,
             shape=None,
-            boundary_condition=self.boundary_condition
+            boundary_condition=self.boundary_condition,
         )
 
     @property
     def system_size(self) -> int:
         return self._base_infinite_range.get_system_size()
-    
+
     @property
     def boundary_condition(self) -> BoundaryCondition:
-        return _cast_base_boundary_condition(self._base_infinite_range.get_boundary_condition())
-    
+        return _cast_base_boundary_condition(
+            self._base_infinite_range.get_boundary_condition()
+        )
+
     @property
     def _base_lattice(self) -> base_lattice.InfiniteRange:
         return self._base_infinite_range

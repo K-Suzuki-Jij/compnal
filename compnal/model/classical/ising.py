@@ -13,11 +13,14 @@
 #  limitations under the License.
 
 from __future__ import annotations
+
 from typing import Union
-from compnal.lattice import Chain, Square, Cubic, InfiniteRange
+
+from compnal.base_compnal import base_classical_model
+from compnal.lattice import Chain, Cubic, InfiniteRange, Square
 from compnal.lattice.lattice_info import LatticeType
 from compnal.model.classical.model_info import ClassicalModelInfo, ClassicalModelType
-from compnal.base_compnal import base_classical_model
+
 
 class Ising:
     """Class for the Ising model.
@@ -25,13 +28,14 @@ class Ising:
     Args:
         lattice (Union[Chain, Square, Cubic, InfiniteRange]): Lattice.
     """
+
     def __init__(
-        self, 
+        self,
         lattice: Union[Chain, Square, Cubic, InfiniteRange],
         linear: float,
         quadratic: float,
         spin_magnitude: float = 0.5,
-        spin_scale_factor: int = 1
+        spin_scale_factor: int = 1,
     ) -> None:
         """Initialize Ising class.
 
@@ -40,7 +44,7 @@ class Ising:
             linear (float): Linear interaction.
             quadratic (float): Quadratic interaction.
             spin_magnitude (float, optional): Magnitude of spins. This must be half-integer. Defaults to 0.5.
-            spin_scale_factor (int, optional): 
+            spin_scale_factor (int, optional):
                 A scaling factor used to adjust the value taken by the spin.
                 The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
                 By changing this value, you can represent spins of different values,
@@ -51,11 +55,11 @@ class Ising:
             ValueError: When the magnitude of spins or spin_scale_factor is invalid.
         """
         self._base_model = base_classical_model.make_ising(
-            lattice=lattice._base_lattice, 
-            linear=linear, 
-            quadratic=quadratic, 
+            lattice=lattice._base_lattice,
+            linear=linear,
+            quadratic=quadratic,
             spin_magnitude=spin_magnitude,
-            spin_scale_factor=spin_scale_factor
+            spin_scale_factor=spin_scale_factor,
         )
         self._lattice = lattice
 
@@ -66,7 +70,7 @@ class Ising:
             float: Linear interaction.
         """
         return self._base_model.get_linear()
-        
+
     def get_quadratic(self) -> float:
         """Get the quadratic interaction.
 
@@ -74,21 +78,21 @@ class Ising:
             float: Quadratic interaction.
         """
         return self._base_model.get_quadratic()
-    
+
     def get_spin_magnitude(self) -> dict[Union[list, tuple], float]:
         """Get the magnitude of spins.
 
         Returns:
-            dict[Union[list, tuple], float]: Magnitude of spins. 
+            dict[Union[list, tuple], float]: Magnitude of spins.
                 The keys are the coordinates of the lattice and the values are the magnitude of spins.
         """
         return dict(
             zip(
-                self._lattice.generate_coordinate_list(), 
-                [v/2 for v in self._base_model.get_twice_spin_magnitude()]
+                self._lattice.generate_coordinate_list(),
+                [v / 2 for v in self._base_model.get_twice_spin_magnitude()],
             )
         )
-    
+
     def get_spin_scale_factor(self) -> int:
         """Get the spin scale factor.
 
@@ -97,18 +101,20 @@ class Ising:
         """
         return self._base_model.get_spin_scale_factor()
 
-    def set_spin_magnitude(self, spin_magnitude: float, coordinate: Union[int, tuple]) -> None:
+    def set_spin_magnitude(
+        self, spin_magnitude: float, coordinate: Union[int, tuple]
+    ) -> None:
         """Set the magnitude of spins.
 
         Args:
             spin_magnitude (float): Magnitude of spins. This must be half-integer.
             coordinate (Union[int, tuple]): Coordinate of the lattice.
-        
+
         Raises:
             ValueError: When the magnitude of spins is invalid or the coordinate is invalid.
         """
         self._base_model.set_spin_magnitude(spin_magnitude, coordinate)
-    
+
     def to_serializable(self) -> dict:
         """Convert to a serializable object.
 
@@ -116,7 +122,7 @@ class Ising:
             dict: Serializable object.
         """
         return self.export_info().to_serializable()
-    
+
     @classmethod
     def from_serializable(cls, obj: dict) -> Ising:
         """Create an Ising class from a serializable object.
@@ -145,7 +151,9 @@ class Ising:
             spin_scale_factor=obj["spin_scale_factor"],
         )
 
-        for coordinate, spin_magnitude in zip(obj["spin_magnitude_keys"], obj["spin_magnitude_values"]):
+        for coordinate, spin_magnitude in zip(
+            obj["spin_magnitude_keys"], obj["spin_magnitude_values"]
+        ):
             ising.set_spin_magnitude(spin_magnitude, coordinate)
 
         return ising
@@ -161,7 +169,7 @@ class Ising:
             interactions={1: self.get_linear(), 2: self.get_quadratic()},
             spin_magnitude=self.get_spin_magnitude(),
             spin_scale_factor=self.get_spin_scale_factor(),
-            lattice=self._lattice.export_info()
+            lattice=self._lattice.export_info(),
         )
 
     @property

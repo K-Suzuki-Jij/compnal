@@ -1,16 +1,18 @@
-from compnal.solver import (
-    CMCResult, 
-    CMCHardwareInfo, 
-    CMCParams, 
-    StateUpdateMethod, 
-    RandomNumberEngine, 
-    SpinSelectionMethod,
-    CMCAlgorithm,
-    CMCTime,
-)
-from compnal.model.classical import ClassicalModelInfo, ClassicalModelType
-from compnal.lattice import LatticeInfo, LatticeType, BoundaryCondition
 import numpy as np
+
+from compnal.lattice import BoundaryCondition, LatticeInfo, LatticeType
+from compnal.model.classical import ClassicalModelInfo, ClassicalModelType
+from compnal.solver import (
+    CMCAlgorithm,
+    CMCHardwareInfo,
+    CMCParams,
+    CMCResult,
+    CMCTime,
+    RandomNumberEngine,
+    SpinSelectionMethod,
+    StateUpdateMethod,
+)
+
 
 def test_cmc_time():
     time = CMCTime.from_serializable(
@@ -27,6 +29,7 @@ def test_cmc_time():
     assert time.sample == 100
     assert time.energy == 10
 
+
 def test_cmc_hardware_info():
     info = CMCHardwareInfo.from_serializable(
         CMCHardwareInfo(
@@ -34,7 +37,7 @@ def test_cmc_hardware_info():
             cpu_cores=6,
             cpu_name="Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz",
             memory_size=16,
-            os_info="Linux-5.4.0-80-generic-x86_64-with-glibc2.29"
+            os_info="Linux-5.4.0-80-generic-x86_64-with-glibc2.29",
         ).to_serializable()
     )
 
@@ -43,7 +46,7 @@ def test_cmc_hardware_info():
     assert info.cpu_name == "Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
     assert info.memory_size == 16
     assert info.os_info == "Linux-5.4.0-80-generic-x86_64-with-glibc2.29"
-    
+
 
 def test_cmc_params():
     params = CMCParams.from_serializable(
@@ -55,7 +58,7 @@ def test_cmc_params():
             random_number_engine=RandomNumberEngine.MT,
             spin_selection_method=SpinSelectionMethod.RANDOM,
             algorithm=CMCAlgorithm.PARALLEL_TEMPERING,
-            seed=0
+            seed=0,
         ).to_serializable()
     )
 
@@ -75,7 +78,7 @@ def test_cmc_result():
     result = CMCResult.from_serializable(
         CMCResult(
             samples=np.full((4, 2), -1),
-            energies=np.array([1,2,3,4]),
+            energies=np.array([1, 2, 3, 4]),
             coordinate_to_index={(0, 0): 0, (0, 1): 1, (1, 0): 2, (1, 1): 3},
             temperature=1.0,
             model_info=ClassicalModelInfo(
@@ -88,7 +91,7 @@ def test_cmc_result():
                     system_size=4,
                     shape=(2, 2),
                     boundary_condition=BoundaryCondition.OBC,
-                )
+                ),
             ),
             params=CMCParams(
                 num_sweeps=100,
@@ -98,31 +101,36 @@ def test_cmc_result():
                 random_number_engine=RandomNumberEngine.MT,
                 spin_selection_method=SpinSelectionMethod.RANDOM,
                 algorithm=CMCAlgorithm.PARALLEL_TEMPERING,
-                seed=0
+                seed=0,
             ),
             hardware_info=CMCHardwareInfo(
                 cpu_threads=12,
                 cpu_cores=6,
                 cpu_name="Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz",
                 memory_size=16,
-                os_info="Linux-5.4.0-80-generic-x86_64-with-glibc2.29"
+                os_info="Linux-5.4.0-80-generic-x86_64-with-glibc2.29",
             ),
             time=CMCTime(
                 date="2021-08-01",
                 total=200,
                 sample=100,
                 energy=10,
-            )
+            ),
         ).to_serializable()
     )
 
     assert (result.samples == np.full((4, 2), -1)).all()
-    assert (result.energies == np.array([1,2,3,4])).all()
+    assert (result.energies == np.array([1, 2, 3, 4])).all()
     assert result.coordinate_to_index == {(0, 0): 0, (0, 1): 1, (1, 0): 2, (1, 1): 3}
     assert result.temperature == 1.0
     assert result.model_info.model_type == ClassicalModelType.ISING
     assert result.model_info.interactions == {0: 1.0, 2: 1.0}
-    assert result.model_info.spin_magnitude == {(0, 0): 0.5, (0, 1): 0.5, (1, 0): 0.5, (1, 1): 0.5}
+    assert result.model_info.spin_magnitude == {
+        (0, 0): 0.5,
+        (0, 1): 0.5,
+        (1, 0): 0.5,
+        (1, 1): 0.5,
+    }
     assert result.model_info.spin_scale_factor == 2
     assert result.model_info.lattice.lattice_type == LatticeType.SQUARE
     assert result.model_info.lattice.system_size == 4
@@ -142,9 +150,10 @@ def test_cmc_result():
     assert result.hardware_info.cpu_cores == 6
     assert result.hardware_info.cpu_name == "Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
     assert result.hardware_info.memory_size == 16
-    assert result.hardware_info.os_info == "Linux-5.4.0-80-generic-x86_64-with-glibc2.29"
+    assert (
+        result.hardware_info.os_info == "Linux-5.4.0-80-generic-x86_64-with-glibc2.29"
+    )
     assert result.time.date == "2021-08-01"
     assert result.time.total == 200
     assert result.time.sample == 100
     assert result.time.energy == 10
-    

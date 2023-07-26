@@ -1,4 +1,5 @@
-from compnal.lattice import LatticeInfo, LatticeType, BoundaryCondition
+from compnal.lattice import BoundaryCondition, LatticeInfo, LatticeType
+
 
 def test_lattice_info():
     lattice_info = LatticeInfo.from_serializable(
@@ -6,7 +7,7 @@ def test_lattice_info():
             lattice_type=LatticeType.SQUARE,
             system_size=4,
             shape=(2, 2),
-            boundary_condition=BoundaryCondition.PBC
+            boundary_condition=BoundaryCondition.PBC,
         ).to_serializable()
     )
 

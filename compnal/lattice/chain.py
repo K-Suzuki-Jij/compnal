@@ -14,14 +14,16 @@
 
 
 from __future__ import annotations
+
 from typing import Union
+
 from compnal.base_compnal import base_lattice
-from compnal.lattice.lattice_info import LatticeInfo, LatticeType
 from compnal.lattice.boundary_condition import (
-    BoundaryCondition, 
-    _cast_base_boundary_condition, 
-    _cast_boundary_condition
+    BoundaryCondition,
+    _cast_base_boundary_condition,
+    _cast_boundary_condition,
 )
+from compnal.lattice.lattice_info import LatticeInfo, LatticeType
 
 
 class Chain:
@@ -32,7 +34,9 @@ class Chain:
         boundary_condition (BoundaryCondition): Boundary condition.
     """
 
-    def __init__(self, system_size: int, boundary_condition: Union[str, BoundaryCondition]) -> None:
+    def __init__(
+        self, system_size: int, boundary_condition: Union[str, BoundaryCondition]
+    ) -> None:
         """Initialize chain class.
 
         Args:
@@ -43,10 +47,10 @@ class Chain:
             ValueError: When the system size is smaller than or equal to zero.
         """
         self._base_chain = base_lattice.Chain(
-            system_size=system_size, 
-            boundary_condition=_cast_boundary_condition(boundary_condition)
+            system_size=system_size,
+            boundary_condition=_cast_boundary_condition(boundary_condition),
         )
-    
+
     def generate_coordinate_list(self) -> list[tuple[int]]:
         """Generate coordinate list.
 
@@ -54,7 +58,7 @@ class Chain:
             list[tuple[int]]: Coordinate list.
         """
         return self._base_chain.generate_coordinate_list()
-    
+
     def to_serializable(self) -> dict:
         """Convert to serializable object.
 
@@ -62,7 +66,7 @@ class Chain:
             dict: Serializable object.
         """
         return self.export_info().to_serializable()
-    
+
     @classmethod
     def from_serializable(cls, obj: dict) -> Chain:
         """Create chain class from serializable object.
@@ -80,10 +84,9 @@ class Chain:
             raise ValueError("The lattice type is not chain.")
 
         return cls(
-            system_size=obj["system_size"],
-            boundary_condition=obj["boundary_condition"]
+            system_size=obj["system_size"], boundary_condition=obj["boundary_condition"]
         )
-    
+
     def export_info(self) -> LatticeInfo:
         """Export lattice information.
 
@@ -94,17 +97,17 @@ class Chain:
             lattice_type=LatticeType.CHAIN,
             system_size=self.system_size,
             shape=(self.system_size,),
-            boundary_condition=self.boundary_condition
+            boundary_condition=self.boundary_condition,
         )
-    
+
     @property
     def system_size(self) -> int:
         return self._base_chain.get_system_size()
-    
+
     @property
     def boundary_condition(self) -> BoundaryCondition:
         return _cast_base_boundary_condition(self._base_chain.get_boundary_condition())
-    
+
     @property
     def _base_lattice(self) -> base_lattice.Chain:
         return self._base_chain

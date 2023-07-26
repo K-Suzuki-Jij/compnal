@@ -14,8 +14,9 @@
 
 
 import pytest
-from compnal.lattice import Square, BoundaryCondition
-from compnal.lattice import LatticeType
+
+from compnal.lattice import BoundaryCondition, LatticeType, Square
+
 
 def test_square():
     square = Square(x_size=2, y_size=3, boundary_condition="OBC")
@@ -23,11 +24,18 @@ def test_square():
     assert square.y_size == 3
     assert square.system_size == 6
     assert square.boundary_condition == BoundaryCondition.OBC
-    assert square.generate_coordinate_list() == [(0, 0), (1, 0), (0, 1), (1, 1), (0, 2), (1, 2)]
+    assert square.generate_coordinate_list() == [
+        (0, 0),
+        (1, 0),
+        (0, 1),
+        (1, 1),
+        (0, 2),
+        (1, 2),
+    ]
 
     with pytest.raises(ValueError):
         Square(x_size=2, y_size=3, boundary_condition="ABC")
-    
+
     with pytest.raises(ValueError):
         Square(x_size=0, y_size=2, boundary_condition="OBC")
 
@@ -39,6 +47,7 @@ def test_square():
     assert info.system_size == 6
     assert info.shape == (2, 3)
     assert info.boundary_condition == BoundaryCondition.OBC
+
 
 def test_square_serializable():
     square = Square(x_size=2, y_size=3, boundary_condition="OBC")
@@ -53,4 +62,11 @@ def test_square_serializable():
     assert square.y_size == 3
     assert square.system_size == 6
     assert square.boundary_condition == BoundaryCondition.OBC
-    assert square.generate_coordinate_list() == [(0, 0), (1, 0), (0, 1), (1, 1), (0, 2), (1, 2)]
+    assert square.generate_coordinate_list() == [
+        (0, 0),
+        (1, 0),
+        (0, 1),
+        (1, 1),
+        (0, 2),
+        (1, 2),
+    ]

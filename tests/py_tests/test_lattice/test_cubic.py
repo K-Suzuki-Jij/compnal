@@ -14,8 +14,9 @@
 
 
 import pytest
-from compnal.lattice import Cubic, BoundaryCondition
-from compnal.lattice import LatticeType
+
+from compnal.lattice import BoundaryCondition, Cubic, LatticeType
+
 
 def test_cubic():
     cubic = Cubic(x_size=2, y_size=3, z_size=2, boundary_condition="OBC")
@@ -25,12 +26,18 @@ def test_cubic():
     assert cubic.system_size == 12
     assert cubic.boundary_condition == BoundaryCondition.OBC
     assert cubic.generate_coordinate_list() == [
-        (0, 0, 0), (1, 0, 0),
-        (0, 1, 0), (1, 1, 0),
-        (0, 2, 0), (1, 2, 0),
-        (0, 0, 1), (1, 0, 1),
-        (0, 1, 1), (1, 1, 1),
-        (0, 2, 1), (1, 2, 1),
+        (0, 0, 0),
+        (1, 0, 0),
+        (0, 1, 0),
+        (1, 1, 0),
+        (0, 2, 0),
+        (1, 2, 0),
+        (0, 0, 1),
+        (1, 0, 1),
+        (0, 1, 1),
+        (1, 1, 1),
+        (0, 2, 1),
+        (1, 2, 1),
     ]
 
     with pytest.raises(ValueError):
@@ -38,7 +45,7 @@ def test_cubic():
 
     with pytest.raises(ValueError):
         Cubic(x_size=0, y_size=2, z_size=2, boundary_condition="OBC")
-    
+
     with pytest.raises(ValueError):
         Cubic(x_size=3, y_size=-1, z_size=2, boundary_condition="OBC")
 
@@ -50,6 +57,7 @@ def test_cubic():
     assert info.system_size == 12
     assert info.shape == (2, 3, 2)
     assert info.boundary_condition == BoundaryCondition.OBC
+
 
 def test_cubic_serializable():
     cubic = Cubic(x_size=2, y_size=3, z_size=2, boundary_condition="OBC")
@@ -66,10 +74,16 @@ def test_cubic_serializable():
     assert cubic.system_size == 12
     assert cubic.boundary_condition == BoundaryCondition.OBC
     assert cubic.generate_coordinate_list() == [
-        (0, 0, 0), (1, 0, 0),
-        (0, 1, 0), (1, 1, 0),
-        (0, 2, 0), (1, 2, 0),
-        (0, 0, 1), (1, 0, 1),
-        (0, 1, 1), (1, 1, 1),
-        (0, 2, 1), (1, 2, 1),
+        (0, 0, 0),
+        (1, 0, 0),
+        (0, 1, 0),
+        (1, 1, 0),
+        (0, 2, 0),
+        (1, 2, 0),
+        (0, 0, 1),
+        (1, 0, 1),
+        (0, 1, 1),
+        (1, 1, 1),
+        (0, 2, 1),
+        (1, 2, 1),
     ]

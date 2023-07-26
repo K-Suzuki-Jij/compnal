@@ -15,7 +15,9 @@
 
 from enum import Enum
 from typing import Union
+
 from compnal.base_compnal import base_lattice
+
 
 class BoundaryCondition(str, Enum):
     """Boundary condition.
@@ -30,7 +32,10 @@ class BoundaryCondition(str, Enum):
     OBC = "OBC"
     PBC = "PBC"
 
-def _cast_base_boundary_condition(base_boundary_condition: base_lattice.BoundaryCondition) -> BoundaryCondition:
+
+def _cast_base_boundary_condition(
+    base_boundary_condition: base_lattice.BoundaryCondition,
+) -> BoundaryCondition:
     """Cast base boundary condition to boundary condition.
 
     Args:
@@ -51,8 +56,11 @@ def _cast_base_boundary_condition(base_boundary_condition: base_lattice.Boundary
         return BoundaryCondition.PBC
     else:
         raise ValueError("Invalid boundary condition.")
-    
-def _cast_boundary_condition(boundary_condition: Union[str, BoundaryCondition]) -> base_lattice.BoundaryCondition:
+
+
+def _cast_boundary_condition(
+    boundary_condition: Union[str, BoundaryCondition]
+) -> base_lattice.BoundaryCondition:
     """Cast boundary condition to base boundary condition.
 
     Args:
@@ -73,6 +81,3 @@ def _cast_boundary_condition(boundary_condition: Union[str, BoundaryCondition]) 
         return base_lattice.BoundaryCondition.PBC
     else:
         raise ValueError("Invalid boundary condition.")
-
-    
-

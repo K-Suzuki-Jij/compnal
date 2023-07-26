@@ -14,10 +14,13 @@
 
 
 from __future__ import annotations
+
+from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Optional
-from dataclasses import dataclass, asdict
+
 from compnal.lattice.boundary_condition import BoundaryCondition
+
 
 class LatticeType(str, Enum):
     """Lattice type.
@@ -28,11 +31,12 @@ class LatticeType(str, Enum):
         CUBIC: Cubic lattice.
         INFINITE_RANGE: Infinite-range lattice.
     """
+
     CHAIN = "CHAIN"
     SQUARE = "SQUARE"
     CUBIC = "CUBIC"
     INFINITE_RANGE = "INFINITE_RANGE"
-    
+
 
 @dataclass
 class LatticeInfo:
@@ -44,6 +48,7 @@ class LatticeInfo:
         shape (tuple[int]): Shape. Defaults to None.
         boundary_condition (BoundaryCondition): Boundary condition. Defaults to None.
     """
+
     lattice_type: Optional[LatticeType] = None
     system_size: Optional[int] = None
     shape: Optional[tuple[int]] = None
@@ -56,7 +61,7 @@ class LatticeInfo:
             dict: Serializable object.
         """
         return asdict(self)
-    
+
     @classmethod
     def from_serializable(cls, obj: dict):
         """Convert from serializable object.

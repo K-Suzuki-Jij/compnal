@@ -14,8 +14,9 @@
 
 
 import pytest
-from compnal.lattice import Chain, BoundaryCondition
-from compnal.lattice import LatticeType
+
+from compnal.lattice import BoundaryCondition, Chain, LatticeType
+
 
 def test_chain():
     chain = Chain(system_size=3, boundary_condition="OBC")
@@ -25,7 +26,7 @@ def test_chain():
 
     with pytest.raises(ValueError):
         Chain(system_size=3, boundary_condition="ABC")
-    
+
     with pytest.raises(ValueError):
         Chain(system_size=0, boundary_condition="OBC")
 
@@ -34,6 +35,7 @@ def test_chain():
     assert info.system_size == 3
     assert info.shape == (3,)
     assert info.boundary_condition == BoundaryCondition.OBC
+
 
 def test_chain_serializable():
     chain = Chain(system_size=3, boundary_condition="OBC")

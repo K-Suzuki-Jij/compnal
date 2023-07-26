@@ -13,18 +13,20 @@
 #  limitations under the License.
 
 
+import uuid
+from dataclasses import asdict, dataclass, field
 from typing import Optional, Union
-from dataclasses import dataclass, asdict, field
+
+import numpy as np
+
 from compnal.base_compnal import base_utility
 from compnal.model.classical.model_info import ClassicalModelInfo
 from compnal.solver.parameters import (
-    StateUpdateMethod,
+    CMCAlgorithm,
     RandomNumberEngine,
     SpinSelectionMethod,
-    CMCAlgorithm
+    StateUpdateMethod,
 )
-import numpy as np
-import uuid
 
 
 @dataclass
@@ -37,6 +39,7 @@ class CMCTime:
         sample (float, optional): Sampling time [sec]. Defaults to None.
         energy (float, optional): Energy calculation time [sec]. Defaults to None.
     """
+
     date: Optional[str] = None
     total: Optional[float] = None
     sample: Optional[float] = None
@@ -49,7 +52,7 @@ class CMCTime:
             dict: Serializable object.
         """
         return asdict(self)
-    
+
     @classmethod
     def from_serializable(cls, obj: dict):
         """Convert from a serializable object.
@@ -74,6 +77,7 @@ class CMCHardwareInfo:
         memory_size (float, optional): Memory size [GB]. Defaults to None.
         os_info (str, optional): OS information. Defaults to None.
     """
+
     cpu_threads: Optional[int] = None
     cpu_cores: Optional[int] = None
     cpu_name: Optional[str] = None
@@ -87,7 +91,7 @@ class CMCHardwareInfo:
             dict: Serializable object.
         """
         return asdict(self)
-    
+
     @classmethod
     def from_serializable(cls, obj: dict):
         """Convert from a serializable object.
@@ -99,7 +103,8 @@ class CMCHardwareInfo:
             CMCHardwareInfo: Hardware information.
         """
         return cls(**obj)
-    
+
+
 @dataclass
 class CMCParams:
     """Class for the parameters of the classical Monte Carlo solver.
@@ -116,6 +121,7 @@ class CMCParams:
         algorithm (CMCAlgorithm, Optional): Algorithm. Defaults to None.
         seed (int): Seed. Defaults to None.
     """
+
     num_sweeps: Optional[int] = None
     num_samples: Optional[int] = None
     num_threads: Optional[int] = None
@@ -134,7 +140,7 @@ class CMCParams:
             dict: Serializable object.
         """
         return asdict(self)
-    
+
     @classmethod
     def from_serializable(cls, obj: dict):
         """Convert from a serializable object.
@@ -162,6 +168,7 @@ class CMCResult:
         hardware_info (CMCHardwareInfo): Hardware information. Defaults to None.
         time (CMCTime): Time information. Defaults to None.
     """
+
     samples: Optional[list[list[float]]] = None
     energies: Optional[list[float]] = None
     coordinate_to_index: Optional[dict[Union[int, tuple], int]] = None
@@ -192,11 +199,15 @@ class CMCResult:
         Returns:
             float: The moment of the samples.
         """
-        return base_utility.calculate_moment(self.samples, order=order, bias=bias, num_threads=self.params.num_threads)
-    
-    def calculate_correlation(self, i: Union[int, tuple], j: Union[int, tuple]) -> tuple[float, float]:
+        return base_utility.calculate_moment(
+            self.samples, order=order, bias=bias, num_threads=self.params.num_threads
+        )
+
+    def calculate_correlation(
+        self, i: Union[int, tuple], j: Union[int, tuple]
+    ) -> tuple[float, float]:
         """Calculate the correlation between the spin i and j.
-        
+
         Args:
             i (Union[int, tuple]): The coordinate of the spin.
             j (Union[int, tuple]): The coordinate of the spin.
@@ -204,9 +215,12 @@ class CMCResult:
         Returns:
             float: The correlation between the spin i and j.
         """
-        return np.mean(self.samples.T[self.coordinate_to_index[i]]*self.samples.T[self.coordinate_to_index[j]])
+        return np.mean(
+            self.samples.T[self.coordinate_to_index[i]]
+            * self.samples.T[self.coordinate_to_index[j]]
+        )
 
-    def calculate_energy(self, std = False) -> tuple[float, float]:
+    def calculate_energy(self, std=False) -> tuple[float, float]:
         """Calculate the energy.
 
         Args:
@@ -234,7 +248,7 @@ class CMCResult:
             "model_info": self.model_info.to_serializable(),
             "params": self.params.to_serializable(),
             "hardware_info": self.hardware_info.to_serializable(),
-            "time": self.time.to_serializable()
+            "time": self.time.to_serializable(),
         }
 
     @classmethod
@@ -250,14 +264,17 @@ class CMCResult:
         return cls(
             samples=np.array(obj["samples"]),
             energies=np.array(obj["energies"]),
-            coordinate_to_index={tuple(coo): i for i, coo in enumerate(obj["coordinate"])},
+            coordinate_to_index={
+                tuple(coo): i for i, coo in enumerate(obj["coordinate"])
+            },
             temperature=obj["temperature"],
             model_info=ClassicalModelInfo.from_serializable(obj["model_info"]),
             params=CMCParams.from_serializable(obj["params"]),
             hardware_info=CMCHardwareInfo.from_serializable(obj["hardware_info"]),
-            time=CMCTime.from_serializable(obj["time"])
+            time=CMCTime.from_serializable(obj["time"]),
         )
-    
+
+
 @dataclass
 class CMCResultSet:
     results: dict[uuid.UUID, CMCResult] = field(default_factory=dict)
@@ -289,10 +306,12 @@ class CMCResultSet:
             dict: Serializable object.
         """
         return {
-            "results": {str(key): value.to_serializable() for key, value in self.results.items()},
-            "index_to_uuid": [str(value) for value in self.index_to_uuid]
+            "results": {
+                str(key): value.to_serializable() for key, value in self.results.items()
+            },
+            "index_to_uuid": [str(value) for value in self.index_to_uuid],
         }
-    
+
     @classmethod
     def from_serializable(cls, obj: dict):
         """Convert from a serializable object.
@@ -304,10 +323,13 @@ class CMCResultSet:
             CMCResultSet: Results.
         """
         return cls(
-            results={uuid.UUID(key): CMCResult.from_serializable(value) for key, value in obj["results"].items()},
-            index_to_uuid=[uuid.UUID(value) for value in obj["index_to_uuid"]]
+            results={
+                uuid.UUID(key): CMCResult.from_serializable(value)
+                for key, value in obj["results"].items()
+            },
+            index_to_uuid=[uuid.UUID(value) for value in obj["index_to_uuid"]],
         )
-    
+
     def __len__(self) -> int:
         """Return the number of results.
 
@@ -315,7 +337,7 @@ class CMCResultSet:
             int: The number of results.
         """
         return len(self.results)
-    
+
     def __getitem__(self, index: int) -> CMCResult:
         """Return the result.
 
@@ -326,9 +348,9 @@ class CMCResultSet:
             CMCResult: Result.
         """
         return self.results[self.index_to_uuid[index]]
-    
+
     def __iter__(self):
         return iter(self.results.values())
-    
+
     def __next__(self):
         return next(self.results.values())

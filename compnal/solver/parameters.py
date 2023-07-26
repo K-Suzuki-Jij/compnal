@@ -15,6 +15,7 @@
 
 from enum import Enum
 from typing import Union
+
 from compnal.base_compnal import base_solver
 
 
@@ -32,7 +33,7 @@ class StateUpdateMethod(str, Enum):
 
 class RandomNumberEngine(str, Enum):
     """Random number engine.
-    
+
     Args:
         MT: Mersenne Twister.
         MT_64: Mersenne Twister 64-bit.
@@ -81,9 +82,10 @@ class CMCAlgorithm(str, Enum):
 
 
 def _to_state_update_method(
-        base_state_update_method: Union[base_solver.StateUpdateMethod, StateUpdateMethod, str]
-    ) -> StateUpdateMethod:
-
+    base_state_update_method: Union[
+        base_solver.StateUpdateMethod, StateUpdateMethod, str
+    ]
+) -> StateUpdateMethod:
     """Cast base state update method to state update method.
 
     Args:
@@ -96,18 +98,25 @@ def _to_state_update_method(
         StateUpdateMethod: State update method in compnal.
     """
 
-    if base_state_update_method in (base_solver.StateUpdateMethod.METROPOLIS, StateUpdateMethod.METROPOLIS, "METROPOLIS"):
+    if base_state_update_method in (
+        base_solver.StateUpdateMethod.METROPOLIS,
+        StateUpdateMethod.METROPOLIS,
+        "METROPOLIS",
+    ):
         return StateUpdateMethod.METROPOLIS
-    elif base_state_update_method in (base_solver.StateUpdateMethod.HEAT_BATH, StateUpdateMethod.HEAT_BATH, "HEAT_BATH"):
+    elif base_state_update_method in (
+        base_solver.StateUpdateMethod.HEAT_BATH,
+        StateUpdateMethod.HEAT_BATH,
+        "HEAT_BATH",
+    ):
         return StateUpdateMethod.HEAT_BATH
     else:
         raise ValueError("Invalid state update method.")
-    
+
 
 def _to_base_state_update_method(
-        state_update_method: Union[str, StateUpdateMethod, base_solver.StateUpdateMethod]
-    ) -> base_solver.StateUpdateMethod:
-
+    state_update_method: Union[str, StateUpdateMethod, base_solver.StateUpdateMethod]
+) -> base_solver.StateUpdateMethod:
     """Cast state update method to base state update method.
 
     Args:
@@ -120,18 +129,27 @@ def _to_base_state_update_method(
         base_solver.StateUpdateMethod: State update method in base_compnal.
     """
 
-    if state_update_method in ("METROPOLIS", StateUpdateMethod.METROPOLIS, base_solver.StateUpdateMethod.METROPOLIS):
+    if state_update_method in (
+        "METROPOLIS",
+        StateUpdateMethod.METROPOLIS,
+        base_solver.StateUpdateMethod.METROPOLIS,
+    ):
         return base_solver.StateUpdateMethod.METROPOLIS
-    elif state_update_method in ("HEAT_BATH", StateUpdateMethod.HEAT_BATH, base_solver.StateUpdateMethod.HEAT_BATH):
+    elif state_update_method in (
+        "HEAT_BATH",
+        StateUpdateMethod.HEAT_BATH,
+        base_solver.StateUpdateMethod.HEAT_BATH,
+    ):
         return base_solver.StateUpdateMethod.HEAT_BATH
     else:
         raise ValueError("Invalid state update method.")
-    
+
 
 def _to_random_number_engine(
-        base_random_number_engine: Union[base_solver.RandomNumberEngine, RandomNumberEngine, str]
-    ) -> RandomNumberEngine:
-
+    base_random_number_engine: Union[
+        base_solver.RandomNumberEngine, RandomNumberEngine, str
+    ]
+) -> RandomNumberEngine:
     """Cast base random number engine to random number engine.
 
     Args:
@@ -144,20 +162,31 @@ def _to_random_number_engine(
         RandomNumberEngine: Random number engine in compnal.
     """
 
-    if base_random_number_engine in (base_solver.RandomNumberEngine.MT, RandomNumberEngine.MT, "MT"):
+    if base_random_number_engine in (
+        base_solver.RandomNumberEngine.MT,
+        RandomNumberEngine.MT,
+        "MT",
+    ):
         return RandomNumberEngine.MT
-    elif base_random_number_engine in (base_solver.RandomNumberEngine.MT_64, RandomNumberEngine.MT_64, "MT_64"):
+    elif base_random_number_engine in (
+        base_solver.RandomNumberEngine.MT_64,
+        RandomNumberEngine.MT_64,
+        "MT_64",
+    ):
         return RandomNumberEngine.MT_64
-    elif base_random_number_engine in (base_solver.RandomNumberEngine.XORSHIFT, RandomNumberEngine.XORSHIFT, "XORSHIFT"):
+    elif base_random_number_engine in (
+        base_solver.RandomNumberEngine.XORSHIFT,
+        RandomNumberEngine.XORSHIFT,
+        "XORSHIFT",
+    ):
         return RandomNumberEngine.XORSHIFT
     else:
         raise ValueError("Invalid random number engine.")
 
 
 def _to_base_random_number_engine(
-        random_number_engine: Union[str, RandomNumberEngine, base_solver.RandomNumberEngine]
-    ) -> base_solver.RandomNumberEngine:
-
+    random_number_engine: Union[str, RandomNumberEngine, base_solver.RandomNumberEngine]
+) -> base_solver.RandomNumberEngine:
     """Cast random number engine to base random number engine.
 
     Args:
@@ -170,20 +199,33 @@ def _to_base_random_number_engine(
         base_solver.RandomNumberEngine: Random number engine in base_compnal.
     """
 
-    if random_number_engine in ("MT", RandomNumberEngine.MT, base_solver.RandomNumberEngine.MT):
+    if random_number_engine in (
+        "MT",
+        RandomNumberEngine.MT,
+        base_solver.RandomNumberEngine.MT,
+    ):
         return base_solver.RandomNumberEngine.MT
-    elif random_number_engine in ("MT_64", RandomNumberEngine.MT_64, base_solver.RandomNumberEngine.MT_64):
+    elif random_number_engine in (
+        "MT_64",
+        RandomNumberEngine.MT_64,
+        base_solver.RandomNumberEngine.MT_64,
+    ):
         return base_solver.RandomNumberEngine.MT_64
-    elif random_number_engine in ("XORSHIFT", RandomNumberEngine.XORSHIFT, base_solver.RandomNumberEngine.XORSHIFT):
+    elif random_number_engine in (
+        "XORSHIFT",
+        RandomNumberEngine.XORSHIFT,
+        base_solver.RandomNumberEngine.XORSHIFT,
+    ):
         return base_solver.RandomNumberEngine.XORSHIFT
     else:
         raise ValueError("Invalid random number engine.")
-    
+
 
 def _to_spin_selection_method(
-        base_spin_selection_method: Union[base_solver.SpinSelectionMethod, SpinSelectionMethod, str]
-    ) -> SpinSelectionMethod:
-
+    base_spin_selection_method: Union[
+        base_solver.SpinSelectionMethod, SpinSelectionMethod, str
+    ]
+) -> SpinSelectionMethod:
     """Cast base spin selection method to spin selection method.
 
     Args:
@@ -196,18 +238,27 @@ def _to_spin_selection_method(
         SpinSelectionMethod: Spin selection method in compnal.
     """
 
-    if base_spin_selection_method in (base_solver.SpinSelectionMethod.RANDOM, SpinSelectionMethod.RANDOM, "RANDOM"):
+    if base_spin_selection_method in (
+        base_solver.SpinSelectionMethod.RANDOM,
+        SpinSelectionMethod.RANDOM,
+        "RANDOM",
+    ):
         return SpinSelectionMethod.RANDOM
-    elif base_spin_selection_method in (base_solver.SpinSelectionMethod.SEQUENTIAL, SpinSelectionMethod.SEQUENTIAL, "SEQUENTIAL"):
+    elif base_spin_selection_method in (
+        base_solver.SpinSelectionMethod.SEQUENTIAL,
+        SpinSelectionMethod.SEQUENTIAL,
+        "SEQUENTIAL",
+    ):
         return SpinSelectionMethod.SEQUENTIAL
     else:
         raise ValueError("Invalid spin selection method.")
-    
+
 
 def _to_base_spin_selection_method(
-        spin_selection_method: Union[str, SpinSelectionMethod, base_solver.SpinSelectionMethod]
-    ) -> base_solver.SpinSelectionMethod:
-
+    spin_selection_method: Union[
+        str, SpinSelectionMethod, base_solver.SpinSelectionMethod
+    ]
+) -> base_solver.SpinSelectionMethod:
     """Cast spin selection method to base spin selection method.
 
     Args:
@@ -220,18 +271,25 @@ def _to_base_spin_selection_method(
         base_solver.SpinSelectionMethod: Spin selection method in base_compnal.
     """
 
-    if spin_selection_method in ("RANDOM", SpinSelectionMethod.RANDOM, base_solver.SpinSelectionMethod.RANDOM):
+    if spin_selection_method in (
+        "RANDOM",
+        SpinSelectionMethod.RANDOM,
+        base_solver.SpinSelectionMethod.RANDOM,
+    ):
         return base_solver.SpinSelectionMethod.RANDOM
-    elif spin_selection_method in ("SEQUENTIAL", SpinSelectionMethod.SEQUENTIAL, base_solver.SpinSelectionMethod.SEQUENTIAL):
+    elif spin_selection_method in (
+        "SEQUENTIAL",
+        SpinSelectionMethod.SEQUENTIAL,
+        base_solver.SpinSelectionMethod.SEQUENTIAL,
+    ):
         return base_solver.SpinSelectionMethod.SEQUENTIAL
     else:
         raise ValueError("Invalid spin selection method.")
-    
+
 
 def _to_temperature_distribution(
-        base_temperature_distribution: Union[TemperatureDistribution, str]
-    ) -> TemperatureDistribution:
-
+    base_temperature_distribution: Union[TemperatureDistribution, str]
+) -> TemperatureDistribution:
     """Cast base temperature distribution to temperature distribution.
 
     Args:
@@ -244,9 +302,15 @@ def _to_temperature_distribution(
         TemperatureDistribution: Temperature distribution in compnal.
     """
 
-    if base_temperature_distribution in (TemperatureDistribution.ARITHMETIC, "ARITHMETIC"):
+    if base_temperature_distribution in (
+        TemperatureDistribution.ARITHMETIC,
+        "ARITHMETIC",
+    ):
         return TemperatureDistribution.ARITHMETIC
-    elif base_temperature_distribution in (TemperatureDistribution.GEOMETRIC, "GEOMETRIC"):
+    elif base_temperature_distribution in (
+        TemperatureDistribution.GEOMETRIC,
+        "GEOMETRIC",
+    ):
         return TemperatureDistribution.GEOMETRIC
     else:
-        raise ValueError("Invalid temperature distribution.") 
+        raise ValueError("Invalid temperature distribution.")

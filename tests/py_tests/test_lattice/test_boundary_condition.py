@@ -13,21 +13,45 @@
 #  limitations under the License.
 
 
-from compnal.lattice.boundary_condition import BoundaryCondition, _cast_base_boundary_condition, _cast_boundary_condition
 from compnal.base_compnal import base_lattice
+from compnal.lattice.boundary_condition import (
+    BoundaryCondition,
+    _cast_base_boundary_condition,
+    _cast_boundary_condition,
+)
+
 
 def test_cast_base_boundary_condition():
-    assert _cast_base_boundary_condition(base_lattice.BoundaryCondition.NONE) == BoundaryCondition.NONE
-    assert _cast_base_boundary_condition(base_lattice.BoundaryCondition.OBC) == BoundaryCondition.OBC
-    assert _cast_base_boundary_condition(base_lattice.BoundaryCondition.PBC) == BoundaryCondition.PBC
+    assert (
+        _cast_base_boundary_condition(base_lattice.BoundaryCondition.NONE)
+        == BoundaryCondition.NONE
+    )
+    assert (
+        _cast_base_boundary_condition(base_lattice.BoundaryCondition.OBC)
+        == BoundaryCondition.OBC
+    )
+    assert (
+        _cast_base_boundary_condition(base_lattice.BoundaryCondition.PBC)
+        == BoundaryCondition.PBC
+    )
+
 
 def test_cast_boundary_condition():
     assert _cast_boundary_condition("NONE") == base_lattice.BoundaryCondition.NONE
     assert _cast_boundary_condition("OBC") == base_lattice.BoundaryCondition.OBC
     assert _cast_boundary_condition("PBC") == base_lattice.BoundaryCondition.PBC
 
-    assert _cast_boundary_condition(BoundaryCondition.NONE) == base_lattice.BoundaryCondition.NONE
-    assert _cast_boundary_condition(BoundaryCondition.OBC) == base_lattice.BoundaryCondition.OBC
-    assert _cast_boundary_condition(BoundaryCondition.PBC) == base_lattice.BoundaryCondition.PBC
+    assert (
+        _cast_boundary_condition(BoundaryCondition.NONE)
+        == base_lattice.BoundaryCondition.NONE
+    )
+    assert (
+        _cast_boundary_condition(BoundaryCondition.OBC)
+        == base_lattice.BoundaryCondition.OBC
+    )
+    assert (
+        _cast_boundary_condition(BoundaryCondition.PBC)
+        == base_lattice.BoundaryCondition.PBC
+    )
 
     assert _cast_boundary_condition(None) == base_lattice.BoundaryCondition.NONE

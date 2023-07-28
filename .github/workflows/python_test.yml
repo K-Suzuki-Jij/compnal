@@ -1,6 +1,6 @@
 name: Python Test
 
-run-name: Python tests triggered by Pull Request @${{ github.actor }}
+run-name: Python tests triggered by @${{ github.actor }}
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
   python-test-ubuntu:
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ['3.9', '3.10', '3.11']
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}

@@ -35,7 +35,7 @@ jobs:
 
       - name: Install ${{ github.event.repository.name }}
         run: |
-          python -m pip install . -vvv
+          python -m pip install . -vv
 
       - name: Run tests
         run: |

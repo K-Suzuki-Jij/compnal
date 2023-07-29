@@ -40,7 +40,7 @@ jobs:
       - name: Compile on MacOS
         if: matrix.os == 'macos-latest'
         run: |
-          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test
+          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test -I $(brew --prefix eigen)
 
       - name: Compile on Ubuntu
         if: matrix.os == 'ubuntu-latest'

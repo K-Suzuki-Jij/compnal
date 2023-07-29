@@ -23,12 +23,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Cmake, Google Test, Eigen on MacOS
+      - name: Install Cmake, Google Test, Eigen, OpenMP on MacOS
         if: matrix.os == 'macos-latest'
         run: |
           brew install cmake  
           brew install googletest
           brew install eigen
+          brew install libomp
 
       - name: Install Cmake, Google Test, Eigen on Ubuntu
         if: matrix.os == 'ubuntu-latest'
@@ -40,12 +41,12 @@ jobs:
       - name: Compile on MacOS
         if: matrix.os == 'macos-latest'
         run: |
-          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test -I $(brew --prefix eigen)/include/eigen3/
+          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -Xclang -fopenmp -lgtest -lomp -o tests/cpp_tests/cpp_test -I $(brew --prefix eigen)/include/eigen3/ -I $(brew --prefix libomp)/include -L $(brew --prefix libomp)/lib
 
       - name: Compile on Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: |
-          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test -I /usr/include/eigen3/
+          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -fopenmp -lgtest -o tests/cpp_tests/cpp_test -I /usr/include/eigen3/
 
       - name: Test
         run: |

@@ -40,8 +40,7 @@ jobs:
       - name: Compile on MacOS
         if: matrix.os == 'macos-latest'
         run: |
-          echo $(brew --prefix eigen)
-          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test -I $(brew --prefix eigen)
+          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test -I $(brew --prefix eigen)/include/eigen3/
 
       - name: Compile on Ubuntu
         if: matrix.os == 'ubuntu-latest'

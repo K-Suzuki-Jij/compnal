@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  python-test-ubuntu:
+  python-test:
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11']

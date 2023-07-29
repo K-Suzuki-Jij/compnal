@@ -1,0 +1,49 @@
+name: C++ Test
+
+run-name: C++ tests triggered by @${{ github.actor }}
+
+on:
+  push:
+      branches:
+      - main
+  pull_request:
+      branches:    
+      - main
+  workflow_dispatch:
+
+jobs:
+  cpp-test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Cmake, Google Test, Eigen on MacOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install cmake  
+          brew install gtest
+          brew install eigen
+
+      - name: Install Cmake, Google Test, Eigen on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt install cmake
+          sudo apt install libgtest-dev
+          sudo apt install libeigen3-dev
+
+      - name: Compile on MacOS
+        run: |
+          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test
+
+      - name: Compile on Ubuntu
+        run: |
+          g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test -I /usr/include/eigen3/
+      - name: Test
+        run: |
+          ./tests/cpp_tests/cpp_test

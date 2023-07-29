@@ -1,6 +1,6 @@
 name: C++ Test
 
-run-name: C++ tests triggered by @${{ github.actor }}
+run-name: C++ tests
 
 on:
   push:

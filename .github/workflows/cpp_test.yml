@@ -27,7 +27,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew install cmake  
-          brew install gtest
+          brew install googletest
           brew install eigen
 
       - name: Install Cmake, Google Test, Eigen on Ubuntu
@@ -38,12 +38,15 @@ jobs:
           sudo apt install libeigen3-dev
 
       - name: Compile on MacOS
+        if: matrix.os == 'macos-latest'
         run: |
           g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test
 
       - name: Compile on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
         run: |
           g++ -Og -std=c++17 tests/cpp_tests/test_main.cpp -lgtest -o tests/cpp_tests/cpp_test -I /usr/include/eigen3/
+
       - name: Test
         run: |
           ./tests/cpp_tests/cpp_test

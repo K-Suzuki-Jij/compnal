@@ -220,19 +220,13 @@ class CMCResult:
             * self.samples.T[self.coordinate_to_index[j]]
         )
 
-    def calculate_energy(self, std=False) -> tuple[float, float]:
+    def calculate_energy(self) -> float:
         """Calculate the energy.
 
-        Args:
-            std (bool, optional): If True, calculate the standard deviation. Defaults to False.
-
         Returns:
-            Union[tuple[float, float], float]: The energy, and if `std` is `True`, its standard deviation.
+            float: The energy.
         """
-        if std:
-            return np.mean(self.energies), np.std(self.energies)
-        else:
-            return np.mean(self.energies)
+        return np.mean(self.energies)
 
     def to_serializable(self) -> dict:
         """Convert to a serializable object.

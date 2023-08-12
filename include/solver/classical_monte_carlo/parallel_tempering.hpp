@@ -27,6 +27,16 @@ namespace compnal {
 namespace solver {
 namespace classical_monte_carlo {
 
+//! @brief Running classical monte carlo simulation using parallel tempering.
+//! @tparam SystemType System class.
+//! @tparam RandType Random number engine class.
+//! @param system_list_pointer Pointer to the list of system.
+//! @param num_sweeps The number of sweeps.
+//! @param num_swaps The number of swaps for each replica.
+//! @param seed Seed of random number engine.
+//! @param beta_list List of inverse temperature.
+//! @param updater State update method.
+//! @param spin_selector Spin selection method.
 template<class SystemType, typename RandType>
 void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
                        const std::int32_t num_sweeps,

@@ -27,6 +27,15 @@ namespace compnal {
 namespace solver {
 namespace classical_monte_carlo {
 
+//! @brief Run classical monte carlo simulation using single flip.
+//! @tparam SystemType System class.
+//! @tparam RandType Random number engine class.
+//! @param system Pointer to the system.
+//! @param num_sweeps The number of sweeps.
+//! @param beta Inverse temperature.
+//! @param seed Seed of random number engine.
+//! @param update_method State update method.
+//! @param spin_selector Spin selection method.
 template<class SystemType, typename RandType>
 void SingleUpdater(SystemType *system,
                    const std::int32_t num_sweeps,

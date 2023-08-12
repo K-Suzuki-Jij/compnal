@@ -39,9 +39,9 @@ public:
    //! @brief Constructor for Spin class.
    //! @param spin_magnitude The magnitude of spin.
    //! @param spin_scale_factor A scaling factor used to adjust the value taken by the spin.
-   //! The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+   //! The default value is 1.0, which represents the usual spin, taking value \f[ s\in\{-1/2,+1/2\} \f].
    //! By changing this value, you can represent spins of different values,
-   //! such as s\in\{-1,+1\} by setting spin_scale_factor=2.
+   //! such as \f[ s\in\{-1,+1\} \f] by setting spin_scale_factor=2.
    Spin(const double spin_magnitude, const std::int32_t spin_scale_factor):
    state_number_(0),
    twice_spin_magnitude_(static_cast<std::int32_t>(2*spin_magnitude)),
@@ -127,9 +127,9 @@ private:
    const std::int32_t twice_spin_magnitude_ = 1;
 
    //! @brief spin_scale_factor A scaling factor used to adjust the value taken by the spin.
-   //! The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+   //! The default value is 1.0, which represents the usual spin, taking value \f[ s\in\{-1/2,+1/2\} \f].
    //! By changing this value, you can represent spins of different values,
-   //! such as s\in\{-1,+1\} by setting spin_scale_factor=2.
+   //! such as \f[ s\in\{-1,+1\} \f] by setting spin_scale_factor=2.
    const std::int32_t spin_scale_factor_ = 1;
 
    //! @brief The number of candidate states.

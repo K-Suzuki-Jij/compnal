@@ -167,9 +167,9 @@ private:
    std::vector<std::int32_t> twice_spin_magnitude_;
    
    //! @brief spin_scale_factor A scaling factor used to adjust the value taken by the spin.
-   //! The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+   //! The default value is 1.0, which represents the usual spin, taking value \f] s\in\{-1/2,+1/2\} \f].
    //! By changing this value, you can represent spins of different values,
-   //! such as s\in\{-1,+1\} by setting spin_scale_factor=2.
+   //! such as \f[ s\in\{-1,+1\} \f] by setting spin_scale_factor=2.
    std::int32_t spin_scale_factor_ = 1;
    
    //! @brief Calculate energy corresponding to the spin configuration on the one-dimensional chain.
@@ -453,9 +453,9 @@ private:
 //! @param interaction The polynomial interaction.
 //! @param spin_magnitude The magnitude of spins. This must be half-integer.
 //! @param spin_scale_factor A scaling factor used to adjust the value taken by the spin.
-//! The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+//! The default value is 1.0, which represents the usual spin, taking value \f[ s\in\{-1/2,+1/2\} \f].
 //! By changing this value, you can represent spins of different values,
-//! such as s\in\{-1,+1\} by setting spin_scale_factor=2.
+//! such as \f[ s\in\{-1,+1\} \f] by setting spin_scale_factor=2.
 template<class LatticeType>
 auto make_polynomial_ising(const LatticeType &lattice,
                            const std::unordered_map<std::int32_t, double> &interaction,

@@ -46,6 +46,9 @@ class ClassicalMonteCarlo {
 public:
    
    //! @brief Calculate energies for each sample.
+   //! @param model The model.
+   //! @param samples The list of samples.
+   //! @param num_threads The number of calculation threads.
    //! @return The list of energy.
    Eigen::Vector<PHQType, Eigen::Dynamic>
    CalculateEnergies(const ModelType &model,
@@ -62,7 +65,15 @@ public:
    }
    
    //! @brief Execute classical monte carlo simulation.
+   //! @param num_sweeps The number of sweeps.
+   //! @param num_samples The number of samples.
+   //! @param num_threads The number of calculation threads.
+   //! @param temperature The temperature.
    //! @param seed The seed used in the calculation.
+   //! @param updater The state update method.
+   //! @param random_number_engine The random number engine.
+   //! @param spin_selector The spin selection method.
+   //! @return The samples.
    Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
    RunSingleFlip(const ModelType &model,
                  const std::int32_t num_sweeps,
@@ -108,7 +119,16 @@ public:
    }
    
    //! @brief Execute classical monte carlo simulation.
+   //! @param num_sweeps The number of sweeps.
+   //! @param num_swaps The number of swaps for each replica.
+   //! @param num_samples The number of samples.
+   //! @param num_threads The number of calculation threads.
+   //! @param temperature_list The list of temperature.
    //! @param seed The seed used in the calculation.
+   //! @param updater The state update method.
+   //! @param random_number_engine The random number engine.
+   //! @param spin_selector The spin selection method.
+   //! @return The samples for each temperature.
    Eigen::Vector<PHQType, Eigen::Dynamic>
    RunParallelTempering(const ModelType &model,
                         const std::int32_t num_sweeps,
@@ -162,8 +182,16 @@ private:
    //! @brief Template function for running classical monte carlo simulation.
    //! @tparam SystemType System class.
    //! @tparam RandType Random number engine class.
+   //! @param model The model.
+   //! @param num_sweeps The number of sweeps.
+   //! @param num_samples The number of samples.
+   //! @param num_threads The number of calculation threads.
+   //! @param temperature The temperature.
    //! @param seed The seed used in the calculation.
-   //! @return The list of samples.
+   //! @param updater The state update method.
+   //! @param random_number_engine The random number engine.
+   //! @param spin_selector The spin selection method.
+   //! @return The samples.
    template<class SystemType, class RandType>
    Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
    TemplateSingleUpdater(const ModelType &model,
@@ -200,8 +228,17 @@ private:
    //! @brief Template function for running classical monte carlo simulation.
    //! @tparam SystemType System class.
    //! @tparam RandType Random number engine class.
+   //! @param model The model.
+   //! @param num_sweeps The number of sweeps.
+   //! @param num_swaps The number of swaps for each replica.
+   //! @param num_samples The number of samples.
+   //! @param num_threads The number of calculation threads.
+   //! @param temperature_list The list of temperatures.
    //! @param seed The seed used in the calculation.
-   //! @return The list of samples.
+   //! @param updater The state update method.
+   //! @param random_number_engine The random number engine.
+   //! @param spin_selector The spin selection method.
+   //! @return The samples for each temperature.
    template<class SystemType, class RandType>
    Eigen::Vector<PHQType, Eigen::Dynamic>
    TemplateParallelTempering(const ModelType &model,
@@ -270,7 +307,6 @@ private:
 
 //! @brief Make ClassicalMonteCarlo class.
 //! @tparam ModelType Model class.
-//! @param model The model.
 //! @return The ClassicalMonteCarlo class.
 template<class ModelType>
 auto make_classical_monte_carlo() {

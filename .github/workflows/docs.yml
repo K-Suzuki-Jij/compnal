@@ -1,7 +1,7 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: Deploy static content to Pages
 
-run-name: Deploy References
+run-name: Deploy Reference Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -35,7 +35,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Doxygen
         run: |
-          sudo apt install -y doxygen graphviz ghostscript texlive-binaries 
+          sudo apt install -y doxygen graphviz ghostscript texlive-binaries
+          alias latex='/usr/bin/latex'
       - name: Generate C++ Reference
         run: |
           doxygen

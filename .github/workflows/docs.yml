@@ -35,8 +35,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Doxygen
         run: |
-          sudo apt install -y doxygen graphviz ghostscript texlive-binaries
-          alias latex='/usr/bin/latex'
+          sudo apt install -y doxygen graphviz ghostscript texlive-latex-recommended
       - name: Generate C++ Reference
         run: |
           doxygen

@@ -46,9 +46,9 @@ class Ising:
             spin_magnitude (float, optional): Magnitude of spins. This must be half-integer. Defaults to 0.5.
             spin_scale_factor (int, optional):
                 A scaling factor used to adjust the value taken by the spin.
-                The default value is 1.0, which represents the usual spin, taking value s\in\{-1/2,+1/2\}.
+                The default value is 1.0, which represents the usual spin, taking value s in {-1/2, +1/2}.
                 By changing this value, you can represent spins of different values,
-                such as s\in\{-1,+1\} by setting spin_scale_factor=2.
+                such as s in {-1, +1} by setting spin_scale_factor=2.
                 This must be positive integer. Defaults to 1.
 
         Raises:

@@ -61,6 +61,7 @@ public:
    //! @param lattice The lattice.
    //! @param interaction The polynomial interaction.
    //! @param spin_magnitude The magnitude of spins. This must be half-integer.
+   //! @param spin_scale_factor The spin-scale factor.
    PolynomialIsing(const LatticeType &lattice,
                    const std::unordered_map<std::int32_t, double> &interaction,
                    const double spin_magnitude = 0.5,

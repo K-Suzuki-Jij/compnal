@@ -65,6 +65,7 @@ public:
    }
    
    //! @brief Execute classical monte carlo simulation.
+   //! @param model The model.
    //! @param num_sweeps The number of sweeps.
    //! @param num_samples The number of samples.
    //! @param num_threads The number of calculation threads.
@@ -119,6 +120,7 @@ public:
    }
    
    //! @brief Execute classical monte carlo simulation.
+   //! @param model The model.
    //! @param num_sweeps The number of sweeps.
    //! @param num_swaps The number of swaps for each replica.
    //! @param num_samples The number of samples.

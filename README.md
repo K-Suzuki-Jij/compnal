@@ -4,6 +4,7 @@
 `CO`ndensed `M`atter `P`hysics `N`umerical `A`nalytics `L`ibrary (`COMPNAL`) is a numerical calculation library in the field of condensed matter physics. This library aims to provide a comprehensive set of numerical methods and algorithms tailored for analyzing various condensed matter systems.
 
 # API Reference
+[C++ Reference](https://k-suzuki-jij.github.io/compnal/)
 
 # Features
 `COMPNAL` can calculate the following models on the following lattices by the following solvers.

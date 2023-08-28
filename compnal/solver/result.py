@@ -481,7 +481,7 @@ class CMCResultSet:
     @classmethod
     def import_hdf5(cls, path: str) -> None:
         """Import and load the results from HDF5.
-        
+
         Args:
             path (str): Path.
         """

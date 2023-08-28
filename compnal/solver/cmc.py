@@ -186,7 +186,7 @@ class CMC:
             temperature_range (tuple[float, float]): Temperature range.
             num_sweeps (int, optional): Number of sweeps. Defaults to 1000.
             replica_swap_ratio (float, optional): Ratio of replica swap. Defaults to 1.
-            num_replicas (int, optional): Number of replicas. Defaults to 00.
+            num_replicas (int, optional): Number of replicas. Defaults to 10.
             num_samples (int, optional): Number of samples. Defaults to 1.
             num_threads (int, optional): Number of threads. Defaults to 1.
             state_update_method (Union[str, StateUpdateMethod], optional): State update method. Defaults to "METROPOLIS".

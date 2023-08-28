@@ -327,7 +327,7 @@ class CMCResultSet:
             index_to_uuid=[uuid.UUID(value) for value in obj["index_to_uuid"]],
         )
 
-    def export_hdf5(self, path: str) -> None:
+    def export_as_hdf5(self, path: str) -> None:
         with h5py.File(path, "w") as f:
             group = f.create_group("CMCResultSet/")
             group.create_dataset(
@@ -474,7 +474,7 @@ class CMCResultSet:
                 group.create_dataset(str(key) + "/time/energy", data=result.time.energy)
 
     @classmethod
-    def from_hdf5(cls, path: str) -> None:
+    def import_from_hdf5(cls, path: str) -> None:
         file_contents = h5py.File(path, "r")
         index_to_uuid = [
             uuid.UUID(value.decode("utf-8"))

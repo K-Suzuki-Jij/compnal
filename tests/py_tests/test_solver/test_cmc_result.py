@@ -204,9 +204,9 @@ def test_cmc_result_h5py():
             ),
         )
     )
-    result_set.export_as_hdf5("./test.hdf5")
+    result_set.export_hdf5("./test.hdf5")
 
-    new_result_set = CMCResultSet.import_from_hdf5("./test.hdf5")
+    new_result_set = CMCResultSet.import_hdf5("./test.hdf5")
     result = new_result_set[0]
 
     assert (result.samples == np.full((4, 2), -1)).all()

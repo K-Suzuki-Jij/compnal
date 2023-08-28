@@ -17,10 +17,13 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from typing import Optional, Union
 
+import h5py
 import numpy as np
 
 from compnal.base_compnal import base_utility
-from compnal.model.classical.model_info import ClassicalModelInfo
+from compnal.lattice.boundary_condition import BoundaryCondition
+from compnal.lattice.lattice_info import LatticeInfo, LatticeType
+from compnal.model.classical.model_info import ClassicalModelInfo, ClassicalModelType
 from compnal.solver.parameters import (
     CMCAlgorithm,
     RandomNumberEngine,
@@ -323,6 +326,442 @@ class CMCResultSet:
             },
             index_to_uuid=[uuid.UUID(value) for value in obj["index_to_uuid"]],
         )
+
+    def export_hdf5(self, path: str) -> None:
+        """Export and store the results as HDF5.
+
+        Args:
+            path (str): Path.
+        """
+        with h5py.File(path, "w") as f:
+            group = f.create_group("CMCResultSet/")
+            group.create_dataset(
+                "index_to_uuid", data=[str(value) for value in self.index_to_uuid]
+            )
+
+            group = f.create_group("CMCResultSet/results/")
+            for key, result in self.results.items():
+                # Main results
+                group.create_dataset(str(key) + "/samples", data=result.samples)
+                group.create_dataset(str(key) + "/energies", data=result.energies)
+                group.create_dataset(
+                    str(key) + "/coordinate_to_index/keys",
+                    data=list(result.coordinate_to_index.keys()),
+                )
+                group.create_dataset(
+                    str(key) + "/coordinate_to_index/values",
+                    data=list(result.coordinate_to_index.values()),
+                )
+                group.create_dataset(str(key) + "/temperature", data=result.temperature)
+
+                # ClassicalModelInfo
+                group.create_dataset(
+                    str(key) + "/model_info/model_type",
+                    data=result.model_info.model_type,
+                    dtype=h5py.string_dtype(),
+                )
+                group.create_dataset(
+                    str(key) + "/model_info/interactions/keys",
+                    data=list(result.model_info.interactions.keys()),
+                )
+                group.create_dataset(
+                    str(key) + "/model_info/interactions/values",
+                    data=list(result.model_info.interactions.values()),
+                )
+                group.create_dataset(
+                    str(key) + "/model_info/spin_magnitude/keys",
+                    data=list(result.model_info.spin_magnitude.keys()),
+                )
+                group.create_dataset(
+                    str(key) + "/model_info/spin_magnitude/values",
+                    data=list(result.model_info.spin_magnitude.values()),
+                )
+                group.create_dataset(
+                    str(key) + "/model_info/spin_scale_factor",
+                    data=result.model_info.spin_scale_factor,
+                )
+
+                # ClassicalModelInfo/LatticeInfo
+                group.create_dataset(
+                    str(key) + "/model_info/lattice/lattice_type",
+                    data=result.model_info.lattice.lattice_type,
+                    dtype=h5py.string_dtype(),
+                )
+                group.create_dataset(
+                    str(key) + "/model_info/lattice/system_size",
+                    data=result.model_info.lattice.system_size,
+                )
+                group.create_dataset(
+                    str(key) + "/model_info/lattice/shape",
+                    data=result.model_info.lattice.shape,
+                )
+                group.create_dataset(
+                    str(key) + "/model_info/lattice/boundary_condition",
+                    data=result.model_info.lattice.boundary_condition,
+                    dtype=h5py.string_dtype(),
+                )
+
+                # CMCParams
+                group.create_dataset(
+                    str(key) + "/params/num_sweeps", data=result.params.num_sweeps
+                )
+                group.create_dataset(
+                    str(key) + "/params/num_samples", data=result.params.num_samples
+                )
+                group.create_dataset(
+                    str(key) + "/params/num_threads", data=result.params.num_threads
+                )
+
+                if result.params.num_replicas is not None:
+                    group.create_dataset(
+                        str(key) + "/params/num_replicas",
+                        data=result.params.num_replicas,
+                    )
+                if result.params.num_replica_exchange is not None:
+                    group.create_dataset(
+                        str(key) + "/params/num_replica_exchange",
+                        data=result.params.num_replica_exchange,
+                    )
+                group.create_dataset(
+                    str(key) + "/params/state_update_method",
+                    data=result.params.state_update_method,
+                    dtype=h5py.string_dtype(),
+                )
+                group.create_dataset(
+                    str(key) + "/params/random_number_engine",
+                    data=result.params.random_number_engine,
+                    dtype=h5py.string_dtype(),
+                )
+                group.create_dataset(
+                    str(key) + "/params/spin_selection_method",
+                    data=result.params.spin_selection_method,
+                    dtype=h5py.string_dtype(),
+                )
+                group.create_dataset(
+                    str(key) + "/params/algorithm",
+                    data=result.params.algorithm,
+                    dtype=h5py.string_dtype(),
+                )
+                group.create_dataset(str(key) + "/params/seed", data=result.params.seed)
+
+                # CMCHardwareInfo
+                group.create_dataset(
+                    str(key) + "/hardware_info/cpu_threads",
+                    data=result.hardware_info.cpu_threads,
+                )
+                group.create_dataset(
+                    str(key) + "/hardware_info/cpu_cores",
+                    data=result.hardware_info.cpu_cores,
+                )
+                group.create_dataset(
+                    str(key) + "/hardware_info/cpu_name",
+                    data=result.hardware_info.cpu_name,
+                    dtype=h5py.string_dtype(),
+                )
+                group.create_dataset(
+                    str(key) + "/hardware_info/memory_size",
+                    data=result.hardware_info.memory_size,
+                )
+                group.create_dataset(
+                    str(key) + "/hardware_info/os_info",
+                    data=result.hardware_info.os_info,
+                    dtype=h5py.string_dtype(),
+                )
+
+                # CMCTime
+                group.create_dataset(
+                    str(key) + "/time/date",
+                    data=result.time.date,
+                    dtype=h5py.string_dtype(),
+                )
+                group.create_dataset(str(key) + "/time/total", data=result.time.total)
+                group.create_dataset(str(key) + "/time/sample", data=result.time.sample)
+                group.create_dataset(str(key) + "/time/energy", data=result.time.energy)
+
+    @classmethod
+    def import_hdf5(cls, path: str) -> None:
+        """Import and load the results from HDF5.
+
+        Args:
+            path (str): Path.
+        """
+        file_contents = h5py.File(path, "r")
+        index_to_uuid = [
+            uuid.UUID(value.decode("utf-8"))
+            for value in file_contents["CMCResultSet/index_to_uuid"]
+        ]
+        new_result_set = cls(
+            results={
+                universally_unique_id: CMCResult(
+                    samples=file_contents[
+                        "CMCResultSet/results/"
+                        + str(universally_unique_id)
+                        + "/samples"
+                    ][...],
+                    energies=file_contents[
+                        "CMCResultSet/results/"
+                        + str(universally_unique_id)
+                        + "/energies"
+                    ][...],
+                    coordinate_to_index={
+                        tuple(key): value
+                        for key, value in zip(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/coordinate_to_index/keys"
+                            ],
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/coordinate_to_index/values"
+                            ],
+                        )
+                    },
+                    temperature=float(
+                        file_contents[
+                            "CMCResultSet/results/"
+                            + str(universally_unique_id)
+                            + "/temperature"
+                        ][...]
+                    ),
+                    model_info=ClassicalModelInfo(
+                        model_type=ClassicalModelType(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/model_info/model_type"
+                            ].asstr()[...]
+                        ),
+                        interactions={
+                            key: value
+                            for key, value in zip(
+                                file_contents[
+                                    "CMCResultSet/results/"
+                                    + str(universally_unique_id)
+                                    + "/model_info/interactions/keys"
+                                ],
+                                file_contents[
+                                    "CMCResultSet/results/"
+                                    + str(universally_unique_id)
+                                    + "/model_info/interactions/values"
+                                ],
+                            )
+                        },
+                        spin_magnitude={
+                            tuple(key): value
+                            for key, value in zip(
+                                file_contents[
+                                    "CMCResultSet/results/"
+                                    + str(universally_unique_id)
+                                    + "/model_info/spin_magnitude/keys"
+                                ],
+                                file_contents[
+                                    "CMCResultSet/results/"
+                                    + str(universally_unique_id)
+                                    + "/model_info/spin_magnitude/values"
+                                ],
+                            )
+                        },
+                        spin_scale_factor=int(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/model_info/spin_scale_factor"
+                            ][...]
+                        ),
+                        lattice=LatticeInfo(
+                            lattice_type=LatticeType(
+                                file_contents[
+                                    "CMCResultSet/results/"
+                                    + str(universally_unique_id)
+                                    + "/model_info/lattice/lattice_type"
+                                ].asstr()[...]
+                            ),
+                            system_size=int(
+                                file_contents[
+                                    "CMCResultSet/results/"
+                                    + str(universally_unique_id)
+                                    + "/model_info/lattice/system_size"
+                                ][...]
+                            ),
+                            shape=tuple(
+                                file_contents[
+                                    "CMCResultSet/results/"
+                                    + str(universally_unique_id)
+                                    + "/model_info/lattice/shape"
+                                ]
+                            ),
+                            boundary_condition=BoundaryCondition(
+                                file_contents[
+                                    "CMCResultSet/results/"
+                                    + str(universally_unique_id)
+                                    + "/model_info/lattice/boundary_condition"
+                                ].asstr()[...]
+                            ),
+                        ),
+                    ),
+                    params=CMCParams(
+                        num_sweeps=int(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/num_sweeps"
+                            ][...]
+                        ),
+                        num_samples=int(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/num_samples"
+                            ][...]
+                        ),
+                        num_threads=int(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/num_threads"
+                            ][...]
+                        ),
+                        num_replicas=int(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/num_replicas"
+                            ][...]
+                        )
+                        if "num_replicas"
+                        in file_contents[
+                            "CMCResultSet/results/"
+                            + str(universally_unique_id)
+                            + "/params"
+                        ]
+                        else None,
+                        num_replica_exchange=int(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/num_replica_exchange"
+                            ][...]
+                        )
+                        if "num_replica_exchange"
+                        in file_contents[
+                            "CMCResultSet/results/"
+                            + str(universally_unique_id)
+                            + "/params"
+                        ]
+                        else None,
+                        state_update_method=StateUpdateMethod(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/state_update_method"
+                            ].asstr()[...]
+                        ),
+                        random_number_engine=RandomNumberEngine(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/random_number_engine"
+                            ].asstr()[...]
+                        ),
+                        spin_selection_method=SpinSelectionMethod(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/spin_selection_method"
+                            ].asstr()[...]
+                        ),
+                        algorithm=CMCAlgorithm(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/algorithm"
+                            ].asstr()[...]
+                        ),
+                        seed=int(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/params/seed"
+                            ][...]
+                        ),
+                    ),
+                    hardware_info=CMCHardwareInfo(
+                        cpu_threads=int(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/hardware_info/cpu_threads"
+                            ][...]
+                        ),
+                        cpu_cores=int(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/hardware_info/cpu_cores"
+                            ][...]
+                        ),
+                        cpu_name=str(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/hardware_info/cpu_name"
+                            ].asstr()[...]
+                        ),
+                        memory_size=float(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/hardware_info/memory_size"
+                            ][...]
+                        ),
+                        os_info=str(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/hardware_info/os_info"
+                            ].asstr()[...]
+                        ),
+                    ),
+                    time=CMCTime(
+                        date=str(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/time/date"
+                            ].asstr()[...]
+                        ),
+                        total=float(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/time/total"
+                            ][...]
+                        ),
+                        sample=float(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/time/sample"
+                            ][...]
+                        ),
+                        energy=float(
+                            file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/time/energy"
+                            ][...]
+                        ),
+                    ),
+                )
+                for universally_unique_id in index_to_uuid
+            },
+            index_to_uuid=index_to_uuid,
+        )
+        file_contents.close()
+
+        return new_result_set
 
     def __len__(self) -> int:
         """Return the number of results.

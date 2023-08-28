@@ -256,36 +256,36 @@ private:
       
       using RType = typename RandType::result_type;
       
-      const std::int32_t system_size = model.GetLattice().GetSystemSize();
-      const std::int32_t num_replicas = static_cast<std::int32_t>(temperature_list.size());
+      const std::int64_t system_size = model.GetLattice().GetSystemSize();
+      const std::int64_t num_replicas = static_cast<std::int64_t>(temperature_list.size());
       std::vector<double> beta_list(num_replicas);
-      for (std::int32_t i = 0; i < num_replicas; ++i) {
+      for (std::int64_t i = 0; i < num_replicas; ++i) {
          beta_list[i] = 1.0/temperature_list[i];
       }
-      
+            
       Eigen::Vector<PHQType, Eigen::Dynamic> samples(num_replicas*num_samples*system_size);
       std::vector<std::vector<RType>> system_seed(num_samples, std::vector<RType>(num_replicas));
       std::vector<RType> updater_seed(num_samples);
       RandType rand(static_cast<RType>(seed));
       
-      for (std::int32_t i = 0; i < num_samples; ++i) {
+      for (std::int64_t i = 0; i < num_samples; ++i) {
          updater_seed[i] = rand();
-         for (std::int32_t j = 0; j < num_replicas; ++j) {
+         for (std::int64_t j = 0; j < num_replicas; ++j) {
             system_seed[i][j] = rand();
          }
       }
             
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
-      for (std::int32_t sample_count = 0; sample_count < num_samples; ++sample_count) {
+      for (std::int64_t sample_count = 0; sample_count < num_samples; ++sample_count) {
          std::vector<SystemType> system_list;
          system_list.reserve(num_replicas);
-         for (std::int32_t j = 0; j < num_replicas; ++j) {
+         for (std::int64_t j = 0; j < num_replicas; ++j) {
             system_list.push_back(SystemType{model, system_seed[sample_count][j]});
          }
          
          std::vector<SystemType*> system_list_pointer;
          system_list_pointer.reserve(num_replicas);
-         for (std::int32_t j = 0; j < num_replicas; ++j) {
+         for (std::int64_t j = 0; j < num_replicas; ++j) {
             system_list_pointer.push_back(&system_list[j]);
          }
          
@@ -294,15 +294,14 @@ private:
                                                  updater_seed[sample_count], beta_list,
                                                  updater, spin_selector);
          
-         for (std::int32_t replica_count = 0; replica_count < num_replicas; ++replica_count) {
+         for (std::int64_t replica_count = 0; replica_count < num_replicas; ++replica_count) {
             const auto &vec = system_list_pointer[replica_count]->GetSample();
-            for (std::int32_t k = 0; k < system_size; ++k) {
+            for (std::int64_t k = 0; k < system_size; ++k) {
                const std::int64_t ind = replica_count*num_samples*system_size + sample_count*system_size + k;
                samples(ind) = vec[k].GetValue();
             }
          }
       }
-      
       return samples;
    }
 };

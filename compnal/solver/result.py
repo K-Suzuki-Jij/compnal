@@ -391,10 +391,13 @@ class CMCResultSet:
                     str(key) + "/model_info/lattice/system_size",
                     data=result.model_info.lattice.system_size,
                 )
-                group.create_dataset(
-                    str(key) + "/model_info/lattice/shape",
-                    data=result.model_info.lattice.shape,
-                )
+
+                if result.model_info.lattice.shape is not None:
+                    group.create_dataset(
+                        str(key) + "/model_info/lattice/shape",
+                        data=result.model_info.lattice.shape,
+                    )
+
                 group.create_dataset(
                     str(key) + "/model_info/lattice/boundary_condition",
                     data=result.model_info.lattice.boundary_condition,
@@ -591,7 +594,14 @@ class CMCResultSet:
                                     + str(universally_unique_id)
                                     + "/model_info/lattice/shape"
                                 ]
-                            ),
+                            )
+                            if "shape"
+                            in file_contents[
+                                "CMCResultSet/results/"
+                                + str(universally_unique_id)
+                                + "/model_info/lattice"
+                            ]
+                            else None,
                             boundary_condition=BoundaryCondition(
                                 file_contents[
                                     "CMCResultSet/results/"

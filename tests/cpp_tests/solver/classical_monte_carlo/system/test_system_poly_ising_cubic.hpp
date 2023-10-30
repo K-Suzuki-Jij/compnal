@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_POLY_ISING_CUBIC_HPP_
-#define COMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_POLY_ISING_CUBIC_HPP_
+#pragma once
 
 #include "../../../../../include/solver/classical_monte_carlo/system/poly_ising_cubic.hpp"
 
@@ -121,5 +120,3 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnCubic) {
 
 }  // namespace test
 }  // namespace compnal
-
-#endif /* COMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_POLY_ISING_CUBIC_HPP_ */

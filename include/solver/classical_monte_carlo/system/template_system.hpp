@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_TEMPLATE_SYSTEM_HPP_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_TEMPLATE_SYSTEM_HPP_
+#pragma once
 
 #include "../../../model/utility/variable.hpp"
 #include <Eigen/Dense>
@@ -147,5 +146,3 @@ protected:
 } // namespace classical_monte_carlo
 } // namespace solver
 } // namespace compnal
-
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_TEMPLATE_SYSTEM_HPP_ */

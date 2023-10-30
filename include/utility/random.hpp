@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_UTILITY_RANDOM_HPP_
-#define COMPNAL_UTILITY_RANDOM_HPP_
+#pragma once
 
 #include <random>
 
@@ -76,6 +75,3 @@ private:
 
 } // namespace utility
 } // namespace compnal
-
-
-#endif /* COMPNAL_UTILITY_RANDOM_HPP_ */

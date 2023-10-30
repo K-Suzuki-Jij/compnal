@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ISING_HPP_
-#define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ISING_HPP_
+#pragma once
 
 #include "../../../../../include/solver/classical_monte_carlo/system/ising_chain.hpp"
 
@@ -118,6 +117,3 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnChain) {
 
 }  // namespace test
 }  // namespace compnal
-
-
-#endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ISING_HPP_ */

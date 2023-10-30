@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_PARALLEL_TEMPERING_HPP_
-#define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_PARALLEL_TEMPERING_HPP_
+#pragma once
 
 #include "../../../../include/lattice/all.hpp"
 #include "../../../../include/model/classical/ising.hpp"
@@ -293,5 +292,3 @@ TEST(SolverClassicalMonteCarloPT, PolyIsingOnInfiniteRange) {
 
 }  // namespace test
 }  // namespace compnal
-
-#endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_PARALLEL_TEMPERING_HPP_ */

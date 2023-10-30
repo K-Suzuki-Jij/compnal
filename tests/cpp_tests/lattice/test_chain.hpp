@@ -20,8 +20,7 @@
 //
 //
 
-#ifndef COMPNAL_TEST_LATTICE_CHAIN_HPP_
-#define COMPNAL_TEST_LATTICE_CHAIN_HPP_
+#pragma once
 
 #include "../../../include/lattice/chain.hpp"
 
@@ -52,5 +51,3 @@ TEST(Lattice, Chain) {
 
 }  // namespace test
 }  // namespace compnal
-
-#endif /* COMPNAL_TEST_LATTICE_CHAIN_HPP_ */

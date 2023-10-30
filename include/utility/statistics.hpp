@@ -20,9 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_UTILITY_STATISTICS_HPP_
-#define COMPNAL_UTILITY_STATISTICS_HPP_
-
+#pragma once
 
 #include <Eigen/Dense>
 
@@ -56,5 +54,3 @@ double CalculateMoment(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynami
 
 } // namespace utility
 } // namespac
-
-#endif /* COMPNAL_UTILITY_STATISTICS_HPP_ */

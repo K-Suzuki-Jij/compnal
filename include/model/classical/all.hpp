@@ -20,10 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_MODEL_CLASSICAL_ALL_HPP_
-#define COMPNAL_MODEL_CLASSICAL_ALL_HPP_
+#pragma once
 
 #include "ising.hpp"
 #include "polynomial_ising.hpp"
-
-#endif /* COMPNAL_MODEL_CLASSICAL_ALL_HPP_ */

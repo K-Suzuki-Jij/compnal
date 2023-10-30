@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_LATTICE_INFINITE_RANGE_HPP_
-#define COMPNAL_TEST_LATTICE_INFINITE_RANGE_HPP_
+#pragma once
 
 #include "../../../include/lattice/infinite_range.hpp"
 
@@ -52,5 +51,3 @@ TEST(Lattice, InfiniteRange) {
 
 }  // namespace test
 }  // namespace compnal
-
-#endif /* COMPNAL_TEST_LATTICE_INFINITE_RANGE_HPP_ */

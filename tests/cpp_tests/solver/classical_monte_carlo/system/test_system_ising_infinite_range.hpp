@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ISING_INFINITE_RANGE_HPP_
-#define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ISING_INFINITE_RANGE_HPP_
+#pragma once
 
 #include "../../../../../include/solver/classical_monte_carlo/system/ising_infinite_range.hpp"
 
@@ -112,5 +111,3 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnInfiniteRange) {
 
 }  // namespace test
 }  // namespace compnal
-
-#endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ISING_INFINITE_RANGE_HPP_ */

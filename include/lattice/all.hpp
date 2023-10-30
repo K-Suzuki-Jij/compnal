@@ -20,13 +20,10 @@
 //  
 //
 
-#ifndef COMPNAL_LATTICE_ALL_HPP_
-#define COMPNAL_LATTICE_ALL_HPP_
+#pragma once
 
 #include "boundary_condition.hpp"
 #include "chain.hpp"
 #include "square.hpp"
 #include "cubic.hpp"
 #include "infinite_range.hpp"
-
-#endif /* COMPNAL_LATTICE_ALL_HPP_ */

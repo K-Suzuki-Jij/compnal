@@ -20,8 +20,7 @@
 //
 //
 
-#ifndef COMPNAL_LATTICE_CHAIN_HPP_
-#define COMPNAL_LATTICE_CHAIN_HPP_
+#pragma once
 
 #include <numeric>
 #include <stdexcept>
@@ -98,4 +97,3 @@ private:
 }  // namespace lattice
 }  // namespace compnal
 
-#endif /* COMPNAL_LATTICE_CHAIN_HPP_ */

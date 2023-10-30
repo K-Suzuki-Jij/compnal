@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_UTILITY_COMBINATION_HPP_
-#define COMPNAL_TEST_UTILITY_COMBINATION_HPP_
+#pragma once
 
 #include "../../../include/utility/combination.hpp"
 
@@ -184,5 +183,3 @@ TEST(Utility, Combination) {
 
 }  // namespace test
 }  // namespace compnal
-
-#endif /* COMPNAL_TEST_UTILITY_COMBINATION_HPP_ */

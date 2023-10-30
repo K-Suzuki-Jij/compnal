@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_WRAPPER_LATTICE_HPP_
-#define COMPNAL_WRAPPER_LATTICE_HPP_
+#pragma once
 
 #include "../../../include/lattice/all.hpp"
 
@@ -109,5 +108,3 @@ void PyBindLatticeInfiniteRange(py::module &m) {
 
 } // namespace wrapper
 } // namespace compnal
-
-#endif /* COMPNAL_WRAPPER_LATTICE_HPP_ */

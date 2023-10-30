@@ -20,8 +20,7 @@
 //
 //
 
-#ifndef COMPNAL_LATTICE_BOUNDARY_CONDITION_HPP_
-#define COMPNAL_LATTICE_BOUNDARY_CONDITION_HPP_
+#pragma once
 
 namespace compnal {
 namespace lattice {
@@ -42,5 +41,3 @@ enum class BoundaryCondition {
 
 }  // namespace lattice
 }  // namespace compnal
-
-#endif /* COMPNAL_LATTICE_BOUNDARY_CONDITION_HPP_ */

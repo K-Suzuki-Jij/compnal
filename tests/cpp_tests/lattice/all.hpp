@@ -20,12 +20,9 @@
 //
 //
 
-#ifndef COMPNAL_TEST_LATTICE_ALL_HPP_
-#define COMPNAL_TEST_LATTICE_ALL_HPP_
+#pragma once
 
 #include "test_chain.hpp"
 #include "test_square.hpp"
 #include "test_cubic.hpp"
 #include "test_infinite_range.hpp"
-
-#endif /* COMPNAL_TEST_LATTICE_ALL_HPP_ */

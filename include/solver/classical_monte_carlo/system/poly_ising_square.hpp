@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_POLY_ISING_SQUARE_HPP_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_POLY_ISING_SQUARE_HPP_
+#pragma once
 
 namespace compnal {
 namespace solver {
@@ -614,6 +613,3 @@ private:
 } // namespace classical_monte_carlo
 } // namespace solver
 } // namespace compnal
-
-
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_POLY_ISING_SQUARE_HPP_ */

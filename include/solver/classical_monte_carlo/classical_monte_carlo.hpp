@@ -26,6 +26,7 @@
 #include "../parameter_class.hpp"
 #include "system/all.hpp"
 #include "single_updater.hpp"
+#include "multi_updater.hpp"
 #include "parallel_tempering.hpp"
 #include <random>
 #include <Eigen/Dense>
@@ -178,6 +179,53 @@ public:
       }
       
    }
+
+   Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+   RunMultiFlip(const ModelType &model,
+                const std::int32_t num_update_variables,
+                const std::int32_t num_sweeps,
+                const std::int32_t num_samples,
+                const std::int32_t num_threads,
+                const double temperature,
+                const std::uint64_t seed,
+                const StateUpdateMethod updater,
+                const RandomNumberEngine random_number_engine,
+                const SpinSelectionMethod spin_selector) const {
+      if (num_update_variables < 0) {
+         throw std::invalid_argument("num_update_variables must be non-negative integer.");
+      }
+      if (num_sweeps < 0) {
+         throw std::invalid_argument("num_sweeps must be non-negative integer.");
+      }
+      if (num_samples <= 0) {
+         throw std::invalid_argument("num_samples must be positive integer.");
+      }
+      if (num_threads <= 0) {
+         throw std::invalid_argument("num_threads must be non-negative integer.");
+      }
+      if (temperature < 0) {
+         throw std::invalid_argument("Temperature must be non-negative value.");
+      }
+
+      if (random_number_engine == RandomNumberEngine::XORSHIFT) {
+         return TemplateMultiUpdater<System<ModelType, utility::Xorshift>, utility::Xorshift>
+         (model, num_update_variables, num_sweeps, num_samples, num_threads, temperature, seed,
+          updater, random_number_engine, spin_selector);
+      }
+      else if (random_number_engine == RandomNumberEngine::MT) {
+         return TemplateMultiUpdater<System<ModelType, std::mt19937>, std::mt19937>
+         (model, num_update_variables, num_sweeps, num_samples, num_threads, temperature, seed,
+          updater, random_number_engine, spin_selector);
+      }
+      else if (random_number_engine == RandomNumberEngine::MT_64) {
+         return TemplateMultiUpdater<System<ModelType, std::mt19937_64>, std::mt19937_64>
+         (model, num_update_variables, num_sweeps, num_samples, num_threads, temperature, seed,
+          updater, random_number_engine, spin_selector);
+      }
+      else {
+         throw std::invalid_argument("Unknwon random_number_engine");
+      }
+   }
    
 private:
    //! @brief Template function for running classical monte carlo simulation.
@@ -303,6 +351,41 @@ private:
       }
       return samples;
    }
+
+   template<class SystemType, class RandType>
+   Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+   TemplateMultiUpdater(const ModelType &model,
+                        const std::int32_t num_update_variables,
+                        const std::int32_t num_sweeps,
+                        const std::int32_t num_samples,
+                        const std::int32_t num_threads,
+                        const double temperature,
+                        const std::uint64_t seed,
+                        const StateUpdateMethod updater,
+                        const RandomNumberEngine random_number_engine,
+                        const SpinSelectionMethod spin_selector) const {
+      using RType = typename RandType::result_type;
+      using E2DType = Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
+      E2DType samples(num_samples, model.GetLattice().GetSystemSize());
+      std::vector<RType> system_seed(num_samples);
+      std::vector<RType> updater_seed(num_samples);
+      RandType rand(static_cast<RType>(seed));
+      for (std::int32_t i = 0; i < num_samples; ++i) {
+         system_seed[i] = rand();
+         updater_seed[i] = rand();
+      }
+
+#pragma omp parallel for schedule(guided) num_threads(num_threads)
+      for (std::int32_t i = 0; i < num_samples; ++i) {
+         auto system = SystemType{model, system_seed[i]};
+         MultiUpdater<SystemType, RandType>(&system, num_update_variables, num_sweeps, 1.0/temperature, updater_seed[i], updater, spin_selector);
+         samples.row(i) = system.ExtractSample();
+      }
+      return samples;
+   }
+
+
 };
 
 //! @brief Make ClassicalMonteCarlo class.

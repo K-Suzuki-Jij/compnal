@@ -24,6 +24,7 @@
 
 #include "../../../../include/lattice/all.hpp"
 #include "../../../../include/model/classical/ising.hpp"
+#include "../../../../include/model/classical/polynomial_ising.hpp"
 #include "../../../../include/solver/classical_monte_carlo/classical_monte_carlo.hpp"
 
 namespace compnal {

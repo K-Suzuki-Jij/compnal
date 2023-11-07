@@ -24,6 +24,8 @@
 
 #include "test_classical_monte_carlo_single_flip.hpp"
 #include "test_classical_monte_carlo_parallel_tempering.hpp"
+#include "test_classical_monte_carlo_multi_flip.hpp"
+
 #include "system/test_system_ising_chain.hpp"
 #include "system/test_system_ising_square.hpp"
 #include "system/test_system_ising_cubic.hpp"

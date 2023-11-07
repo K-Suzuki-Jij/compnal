@@ -84,6 +84,29 @@ public:
       }
    }
    
+   double GetEnergyDifferenceTwoFlip(const std::int32_t index_1,
+                                     const std::int32_t update_state_1,
+                                     const std::int32_t index_2,
+                                     const std::int32_t update_state_2) const {
+      const double d_E_1 = this->GetEnergyDifference(index_1, update_state_1);
+      const double d_E_2 = this->GetEnergyDifference(index_2, update_state_2);
+      const double ex_term =
+      this->sample_[index_1].GetValueFromState(update_state_1)*
+      this->GetValueDifference(index_2, update_state_2) +
+      this->sample_[index_2].GetValueFromState(update_state_2)*
+      this->GetValueDifference(index_1, update_state_1);
+      if (degree_ == 2) {
+         return d_E_1 + d_E_2 + ExdECoeff2(index_1, index_2)*ex_term;
+      }
+      else if (degree_ == 3) {
+         return d_E_1 + d_E_2 + (ExdECoeff3(index_1, index_2) + ExdECoeff2(index_1, index_2))*ex_term;
+      }
+      else {
+         throw std::runtime_error("Not implemented");
+         //return dEAny(index_1, update_state_1, index_2);
+      }
+   }
+   
 private:
    //! @brief The polynomial interaction.
    std::unordered_map<std::int32_t, double> interaction_;
@@ -93,7 +116,7 @@ private:
    
    //! @brief The length of x-direction.
    const std::int32_t x_size_ = 0;
-
+   
    //! @brief The length of y-direction.
    const std::int32_t y_size_ = 0;
    
@@ -176,6 +199,134 @@ private:
       }
       
       return d_E_;
+   }
+   
+   double ExdECoeff2(const std::int32_t index_1,
+                     const std::int32_t index_2) const {
+      if (interaction_.count(2) == 0) {
+         return 0.0;
+      }
+      const std::int32_t coo_x_1 = index_1%x_size_;
+      const std::int32_t coo_y_1 = index_1/x_size_;
+      const std::int32_t coo_x_2 = index_2%x_size_;
+      const std::int32_t coo_y_2 = index_2/x_size_;
+      const bool condition_x = std::abs(coo_x_1 - coo_x_2) < 2 && coo_y_1 == coo_y_2;
+      const bool condition_y = std::abs(coo_y_1 - coo_y_2) < 2 && coo_x_1 == coo_x_2;
+      if (this->bc_ == lattice::BoundaryCondition::PBC) {
+         const bool extra_condition_x = std::abs(std::abs(coo_x_1 - coo_x_2) - x_size_) < 2 && coo_y_1 == coo_y_2;
+         const bool extra_condition_y = std::abs(std::abs(coo_y_1 - coo_y_2) - y_size_) < 2 && coo_x_1 == coo_x_2;
+         if (condition_x || condition_y || extra_condition_x || extra_condition_y) {
+            return interaction_.at(2);
+         }
+      }
+      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
+         if (condition_x || condition_y) {
+            return interaction_.at(2);
+         }
+      }
+      else {
+         throw std::invalid_argument("Unsupported BoundaryCondition");
+      }
+      return 0.0;
+   }
+
+   double ExdECoeff3(const std::int32_t index_1,
+                     const std::int32_t index_2) const {
+      if (interaction_.count(3) == 0) {
+         return 0.0;
+      }
+      const std::int32_t coo_x_1 = std::min(index_1%x_size_, index_2%x_size_);
+      const std::int32_t coo_y_1 = std::min(index_1/x_size_, index_2/x_size_);
+      const std::int32_t coo_x_2 = std::max(index_1%x_size_, index_2%x_size_);
+      const std::int32_t coo_y_2 = std::max(index_1/x_size_, index_2/x_size_);
+      if (this->bc_ == lattice::BoundaryCondition::PBC) {
+         if (coo_x_1 == coo_x_2) {
+            if (coo_y_2 - coo_y_1 == 1) {
+               const std::int32_t coo_y_p1 = (coo_y_2 + 1 + y_size_)%y_size_;
+               const std::int32_t coo_y_m1 = (coo_y_1 - 1 + y_size_)%y_size_;
+               return interaction_.at(3)*(this->sample_[coo_y_m1*x_size_ + coo_x_1].GetValue() + this->sample_[coo_y_p1*x_size_ + coo_x_1].GetValue());
+            }
+            else if (coo_y_1 + y_size_ - coo_y_2 == 1) {
+               const std::int32_t coo_y_p1 = (coo_y_1 + 1 + y_size_)%y_size_;
+               const std::int32_t coo_y_m1 = (coo_y_2 - 1 + y_size_)%y_size_;
+               return interaction_.at(3)*(this->sample_[coo_y_m1*x_size_ + coo_x_1].GetValue() + this->sample_[coo_y_p1*x_size_ + coo_x_1].GetValue());
+            }
+            else if (coo_y_2 - coo_y_1 == 2) {
+               return interaction_.at(3)*this->sample_[((coo_y_1 + coo_y_2)/2)*x_size_ + coo_x_1].GetValue();
+            }
+            else if (coo_y_1 + y_size_ - coo_y_2 == 2) {
+               return interaction_.at(3)*this->sample_[(((coo_y_1 + y_size_ + coo_y_2)/2)%y_size_)*x_size_ + coo_x_1].GetValue();
+            }
+         }
+         else if (coo_y_1 == coo_y_2) {
+            if (coo_x_2 - coo_x_1 == 1) {
+               const std::int32_t coo_x_p1 = (coo_x_2 + 1 + x_size_)%x_size_;
+               const std::int32_t coo_x_m1 = (coo_x_1 - 1 + x_size_)%x_size_;
+               return interaction_.at(3)*(this->sample_[coo_y_1*x_size_ + coo_x_m1].GetValue() + this->sample_[coo_y_1*x_size_ + coo_x_p1].GetValue());
+            }
+            else if (coo_x_2 + x_size_ - coo_x_1 == 1) {
+               const std::int32_t coo_x_p1 = (coo_x_1 + 1 + x_size_)%x_size_;
+               const std::int32_t coo_x_m1 = (coo_x_2 - 1 + x_size_)%x_size_;
+               return interaction_.at(3)*(this->sample_[coo_y_1*x_size_ + coo_x_m1].GetValue() + this->sample_[coo_y_1*x_size_ + coo_x_p1].GetValue());
+            }
+            else if (coo_x_2 - coo_x_1 == 2) {
+               return interaction_.at(3)*this->sample_[coo_y_1*x_size_ + (coo_x_1 + coo_x_2)/2].GetValue();
+            }
+            else if (coo_x_2 + x_size_ - coo_x_1 == 2) {
+               return interaction_.at(3)*this->sample_[coo_y_1*x_size_ + ((coo_x_1 + x_size_ + coo_x_2)/2)%x_size_].GetValue();
+            }
+         }
+      }
+      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
+         if (coo_x_1 == coo_x_2) {
+            if (coo_y_2 - coo_y_1 == 1) {
+               const std::int32_t coo_y_p1 = coo_y_2 + 1;
+               const std::int32_t coo_y_m1 = coo_y_1 - 1;
+               if (coo_y_m1 >= 0) {
+                  if (coo_y_p1 < y_size_) {
+                     return interaction_.at(3)*(this->sample_[coo_y_m1*x_size_ + coo_x_1].GetValue() + this->sample_[coo_y_p1*x_size_ + coo_x_1].GetValue());
+                  }
+                  else {
+                     return interaction_.at(3)*this->sample_[coo_y_m1*x_size_ + coo_x_1].GetValue();
+                  }
+               }
+               else if (coo_y_m1 < 0) {
+                  if (coo_y_p1 < y_size_) {
+                     return interaction_.at(3)*this->sample_[coo_y_p1*x_size_ + coo_x_1].GetValue();
+                  }
+               }
+            }
+            else if (coo_y_2 - coo_y_1 == 2) {
+               return interaction_.at(3)*this->sample_[((coo_y_1 + coo_y_2)/2)*x_size_ + coo_x_1].GetValue();
+            }
+         }
+         else if (coo_y_1 == coo_y_2) {
+            if (coo_x_2 - coo_x_1 == 1) {
+               const std::int32_t coo_x_p1 = coo_x_2 + 1;
+               const std::int32_t coo_x_m1 = coo_x_1 - 1;
+               if (coo_x_m1 >= 0) {
+                  if (coo_x_p1 < x_size_) {
+                     return interaction_.at(3)*(this->sample_[coo_y_1*x_size_ + coo_x_m1].GetValue() + this->sample_[coo_y_1*x_size_ + coo_x_p1].GetValue());
+                  }
+                  else {
+                     return interaction_.at(3)*this->sample_[coo_y_1*x_size_ + coo_x_m1].GetValue();
+                  }
+               }
+               else if (coo_x_m1 < 0) {
+                  if (coo_x_p1 < x_size_) {
+                     return interaction_.at(3)*this->sample_[coo_y_1*x_size_ + coo_x_p1].GetValue();
+                  }
+               }
+            }
+            else if (coo_x_2 - coo_x_1 == 2) {
+               return interaction_.at(3)*this->sample_[coo_y_1*x_size_ + (coo_x_1 + coo_x_2)/2].GetValue();
+            }
+         }
+      }
+      else {
+         throw std::invalid_argument("Unsupported BoundaryCondition");
+      }
+      return 0.0;
    }
    
    //! @brief Flip a variable.
@@ -465,7 +616,7 @@ private:
          this->d_E_[y_p2] += val_5*(y_s_m2*y_s_m1*y_s_p1 + y_s_m1*y_s_p1*y_s_p3 + y_s_p1*y_s_p3*y_s_p4) + val_4*(y_s_m1*y_s_p1 + y_s_p1*y_s_p3) + val_3*y_s_p1;
          this->d_E_[y_p3] += val_5*(y_s_m1*y_s_p1*y_s_p2 + y_s_p1*y_s_p2*y_s_p4) + val_4*y_s_p1*y_s_p2;
          this->d_E_[y_p4] += val_5*y_s_p1*y_s_p2*y_s_p3;
-
+         
       }
       else if (this->bc_ == lattice::BoundaryCondition::OBC) {
          const std::int32_t x_m4 = coo_y*x_size_ + coo_x - 4;

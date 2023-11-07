@@ -78,6 +78,12 @@ public:
    std::int32_t GetStateNumber() const {
       return state_number_;
    }
+
+   //! @brief Get the number of states.
+   //! @return The the number of states.
+   std::int32_t GetNumState() const {
+      return num_state_;
+   }
    
    //! @brief Generate candidate state.
    //! @tparam RandType Random number engine type.

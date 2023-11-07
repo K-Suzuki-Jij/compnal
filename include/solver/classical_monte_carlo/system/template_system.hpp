@@ -112,6 +112,14 @@ public:
       return (sample_[index].GetValueFromState(candidate_state) - sample_[index].GetValue())*d_E_[index];
    }
    
+   //! @brief Get the value difference between the current state and the candidate state.
+   //! @param index The index of the variable.
+   //! @param candidate_state The candidate state.
+   //! @return The value difference.
+   double GetValueDifference(const std::int32_t index, const std::int32_t candidate_state) const {
+      return sample_[index].GetValueFromState(candidate_state) - sample_[index].GetValue();
+   }
+   
    //! @brief Get the energy.
    //! @return The energy.
    double GetEnergy() const {

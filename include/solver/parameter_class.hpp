@@ -50,7 +50,7 @@ enum class RandomNumberEngine {
 
 enum class SpinSelectionMethod {
    
-   //! @brief Randomly select a spin.
+   //! @brief Select a spin randomly.
    RANDOM,
    
    //! @brief Select a spin sequentially.

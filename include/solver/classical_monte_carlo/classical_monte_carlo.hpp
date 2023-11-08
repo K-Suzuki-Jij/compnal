@@ -27,6 +27,7 @@
 #include "system/all.hpp"
 #include "single_updater.hpp"
 #include "multi_updater.hpp"
+#include "bond_updater.hpp"
 #include "parallel_tempering.hpp"
 #include <random>
 #include <Eigen/Dense>

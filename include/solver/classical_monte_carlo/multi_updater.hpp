@@ -92,8 +92,6 @@ void MultiUpdater(SystemType *system,
             }
 
             // Choose two different states randomly.
-            const std::int32_t present_state_1 = system->GetSample()[index_1].GetStateNumber();
-            const std::int32_t present_state_2 = system->GetSample()[index_2].GetStateNumber();
             const std::int32_t num_state_1 = system->GetSample()[index_1].GetNumState();
             const std::int32_t num_state_2 = system->GetSample()[index_2].GetNumState();
             std::int32_t new_whole_state = random_number_engine()%(num_state_1*num_state_2 - 1);
@@ -104,22 +102,14 @@ void MultiUpdater(SystemType *system,
                }
             }
             else if (num_state_1 - 1 <= new_whole_state && new_whole_state < num_state_1 + num_state_2 - 2) {
-               new_whole_state -= (num_state_1 - 1);
                const std::int32_t candidate_state = system->GetSample()[index_2].GenerateCandidateState(&random_number_engine);
                if (trans_prob(beta*system->GetEnergyDifference(index_2, candidate_state), dist_real(random_number_engine))) {
                   system->Flip(index_2, candidate_state);
                }
             }
             else {
-               new_whole_state -= (num_state_1 - 1) + (num_state_2 - 1);
                std::int32_t new_state_1 = system->GetSample()[index_1].GenerateCandidateState(&random_number_engine);
                std::int32_t new_state_2 = system->GetSample()[index_2].GenerateCandidateState(&random_number_engine);
-//               if (present_state_1 <= new_state_1) {
-//                  new_state_1++;
-//               }
-//               if (present_state_2 <= new_state_2) {
-//                  new_state_2++;
-//               }
                if (trans_prob(beta*system->GetEnergyDifferenceTwoFlip(index_1, new_state_1, index_2, new_state_2), dist_real(random_number_engine))) {
                   system->Flip(index_1, new_state_1);
                   system->Flip(index_2, new_state_2);

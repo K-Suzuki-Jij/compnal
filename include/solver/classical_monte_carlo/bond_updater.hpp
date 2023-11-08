@@ -22,10 +22,10 @@
 
 #pragma once
 
-
 namespace compnal {
 namespace solver {
 namespace classical_monte_carlo {
+
 
 
 

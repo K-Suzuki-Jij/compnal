@@ -81,6 +81,13 @@ public:
       this->sample_[index].SetState(update_state);
    }
    
+   double GetEnergyDifferenceTwoFlip(const std::int32_t index_1,
+                                     const std::int32_t update_state_1,
+                                     const std::int32_t index_2,
+                                     const std::int32_t update_state_2) const {
+      throw std::runtime_error("Not implemented");
+   }
+   
    
 private:
    //! @brief The linear interaction.

@@ -118,6 +118,61 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnSquare) {
    
 }
 
+TEST(SolverClassicalMonteCarloSystemMF, PolyIsingOnSquare) {
+   using BC = lattice::BoundaryCondition;
+   using Square = lattice::Square;
+   using PolyIsing = model::classical::PolynomialIsing<Square>;
+   
+   const std::int32_t x_size = 4;
+   const std::int32_t y_size = 4;
+   
+   std::vector<std::int32_t> initial_state_level = {
+      0, 1, 1, 0,
+      1, 1, 0, 1,
+      0, 0, 0, 1,
+      1, 1, 1, 1
+   };
+   
+   std::vector<double> initial_state = {
+      -0.5, +0.5, +0.5, -0.5,
+      +0.5, +0.5, -0.5, +0.5,
+      -0.5, -0.5, -0.5, +0.5,
+      +0.5, +0.5, +0.5, +0.5
+   };
+   
+   std::unordered_map<std::int32_t, double> interaction = {{3, -1.0}, {2, +1.5}, {1, -0.5}};
+   Square square{x_size, y_size, BC::PBC};
+   PolyIsing poly_ising{square, interaction};
+   const std::int32_t seed = 0;
+   
+   solver::classical_monte_carlo::System<PolyIsing, std::mt19937> system{poly_ising, seed};
+   system.SetSampleByState(initial_state_level);
+   
+   EXPECT_DOUBLE_EQ(system.GetEnergy(), poly_ising.CalculateEnergy(initial_state));
+   
+   initial_state[0] = +0.5;
+   initial_state[1] = -0.5;
+   EXPECT_DOUBLE_EQ(system.GetEnergyDifferenceTwoFlip(0, 1, 1, 0),
+                    poly_ising.CalculateEnergy(initial_state) -
+                    poly_ising.CalculateEnergy(system.ExtractSample()));
+   system.Flip(0, 1);
+   system.Flip(1, 0);
+   
+   initial_state[4] = -0.5;
+   initial_state[8] = +0.5;
+   EXPECT_DOUBLE_EQ(system.GetEnergyDifferenceTwoFlip(4, 0, 8, 1),
+                    poly_ising.CalculateEnergy(initial_state) -
+                    poly_ising.CalculateEnergy(system.ExtractSample()));
+   system.Flip(4, 0);
+   system.Flip(8, 1);
+   
+   initial_state[15] = -0.5;
+   initial_state[0]  = -0.5;
+   EXPECT_DOUBLE_EQ(system.GetEnergyDifferenceTwoFlip(0, 0, 15, 0),
+                    poly_ising.CalculateEnergy(initial_state) -
+                    poly_ising.CalculateEnergy(system.ExtractSample()));
+   
+}
 
 
 

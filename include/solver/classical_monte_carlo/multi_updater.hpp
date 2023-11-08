@@ -47,16 +47,16 @@ void MultiUpdater(SystemType *system,
                   const StateUpdateMethod update_method,
                   const SpinSelectionMethod spin_selector) {
    
+   // If num_update_variables == 1, use SingleUpdater.
+   if (num_update_variables == 1) {
+      SingleUpdater<SystemType, RandType>(system, num_sweeps, beta, seed, update_method, spin_selector);
+      return;
+   }
+   
    if (spin_selector != SpinSelectionMethod::RANDOM) {
       throw std::invalid_argument("Spin selection method must be random.");
    }
    
-   // If num_update_variables == 1, use SingleUpdater.
-   if (num_update_variables == 1) {
-      SingleUpdater<SystemType, RandType>(system, num_sweeps, beta, seed, update_method, SpinSelectionMethod::RANDOM);
-      return;
-   }
-
    const std::int32_t system_size = system->GetSystemSize();
 
    // Set random number engine

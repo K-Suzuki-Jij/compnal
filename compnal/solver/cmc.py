@@ -163,6 +163,102 @@ class CMC:
         )
 
         return result_set
+    
+    @staticmethod
+    def run_multi_flip(
+        model: Union[Ising, PolyIsing],
+        temperature: float,
+        num_update_variables: int,
+        num_sweeps: int = 1000,
+        num_samples: int = 1,
+        num_threads: int = 1,
+        state_update_method: Union[str, StateUpdateMethod] = "METROPOLIS",
+        random_number_engine: Union[str, RandomNumberEngine] = "MT",
+        spin_selection_method: Union[str, SpinSelectionMethod] = "RANDOM",
+        seed: Optional[int] = None,
+    ) -> CMCResultSet:
+        
+        start_total_time = time.time()
+
+        # Set seed
+        if seed is None:
+            seed = random.randint(0, 2**63 - 1)
+
+        # Set solver
+        _base_solver = base_solver.make_classical_monte_carlo(model._base_model)
+
+        # Sampling
+        start_sampling_time = time.time()
+        samples = _base_solver.run_multi_flip(
+            model=model._base_model,
+            num_update_variables=num_update_variables,
+            num_sweeps=num_sweeps,
+            num_samples=num_samples,
+            num_threads=num_threads,
+            temperature=temperature,
+            seed=seed,
+            updater=_to_base_state_update_method(state_update_method),
+            random_number_engine=_to_base_random_number_engine(random_number_engine),
+            spin_selector=_to_base_spin_selection_method(spin_selection_method),
+        )
+        end_sampling_time = time.time()
+
+        # Calculate energies
+        start_energy_time = time.time()
+        energies = _base_solver.calculate_energies(
+            model=model._base_model, samples=samples, num_threads=num_threads
+        )
+        end_energy_time = time.time()
+        
+        # Make coordinate list
+        coordinate_list = {
+            coo: i for i, coo in enumerate(model._lattice.generate_coordinate_list())
+        }
+
+        # Store parameter information
+        cmc_params = CMCParams(
+            num_sweeps=num_sweeps,
+            num_samples=num_samples,
+            num_threads=num_threads,
+            state_update_method=_to_state_update_method(state_update_method),
+            random_number_engine=_to_random_number_engine(random_number_engine),
+            spin_selection_method=_to_spin_selection_method(spin_selection_method),
+            algorithm=CMCAlgorithm.SINGLE_FLIP,
+            seed=seed,
+        )
+
+        # Store hardware information
+        cmc_hard_info = CMCHardwareInfo(
+            cpu_threads=psutil.cpu_count(),
+            cpu_cores=psutil.cpu_count(logical=False),
+            cpu_name=platform.processor(),
+            memory_size=psutil.virtual_memory().total / (1024**3),
+            os_info=platform.platform(),
+        )
+
+        # Store time information
+        cmc_time = CMCTime(
+            date=datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+            total=time.time() - start_total_time,
+            sample=end_sampling_time - start_sampling_time,
+            energy=end_energy_time - start_energy_time,
+        )
+
+        result_set = CMCResultSet()
+        result_set.append(
+            CMCResult(
+                samples=samples,
+                energies=energies,
+                coordinate_to_index=coordinate_list,
+                temperature=temperature,
+                model_info=model.export_info(),
+                hardware_info=cmc_hard_info,
+                params=cmc_params,
+                time=cmc_time,
+            )
+        )
+
+        return result_set
 
     @staticmethod
     def run_parallel_tempering(

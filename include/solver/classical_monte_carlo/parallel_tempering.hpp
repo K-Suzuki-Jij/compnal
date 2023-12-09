@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_PARALLEL_TEMPERING_HPP_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_PARALLEL_TEMPERING_HPP_
+#pragma once
 
 namespace compnal {
 namespace solver {
@@ -151,6 +150,3 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
 } // namespace classical_monte_carlo
 } // namespace solver
 } // namespace compnal
-
-
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_PARALLEL_TEMPERING_HPP_ */

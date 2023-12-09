@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_ISING_CHAIN_HPP_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_ISING_CHAIN_HPP_
+#pragma once
 
 #include "template_system.hpp"
 #include "../../../model/classical/ising.hpp"
@@ -132,6 +131,3 @@ private:
 } // namespace classical_monte_carlo
 } // namespace solver
 } // namespace compnal
-
-
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_ISING_CHAIN_HPP_ */

@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_LATTICE_SQUARE_HPP_
-#define COMPNAL_TEST_LATTICE_SQUARE_HPP_
+#pragma once
 
 #include "../../../include/lattice/square.hpp"
 
@@ -56,4 +55,3 @@ TEST(Lattice, Square) {
 }  // namespace test
 }  // namespace compnal
 
-#endif /* COMPNAL_TEST_LATTICE_SQUARE_HPP_ */

@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_MODEL_CLASSICAL_POLYNOMIAL_ISING_HPP_
-#define COMPNAL_TEST_MODEL_CLASSICAL_POLYNOMIAL_ISING_HPP_
+#pragma once
 
 #include "../../../../include/lattice/all.hpp"
 #include "../../../../include/model/classical/polynomial_ising.hpp"
@@ -193,5 +192,3 @@ TEST(ModelClassical, PolynomialIsingOnInfiniteRang) {
 
 }  // namespace test
 }  // namespace compnal
-
-#endif /* COMPNAL_TEST_MODEL_CLASSICAL_POLYNOMIAL_ISING_HPP_ */

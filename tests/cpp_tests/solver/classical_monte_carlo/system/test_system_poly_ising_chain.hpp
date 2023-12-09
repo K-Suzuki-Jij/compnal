@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_POLY_ISING_CHAIN_HPP_
-#define COMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_POLY_ISING_CHAIN_HPP_
+#pragma once
 
 #include "../../../../../include/solver/classical_monte_carlo/system/poly_ising_chain.hpp"
 
@@ -172,5 +171,3 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnChain) {
 }  // namespace test
 }  // namespace compnal
 
-
-#endif /* COMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_POLY_ISING_CHAIN_HPP_ */

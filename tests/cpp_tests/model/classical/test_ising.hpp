@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_MODEL_CLASSICAL_ISING_HPP_
-#define COMPNAL_TEST_MODEL_CLASSICAL_ISING_HPP_
+#pragma once
 
 #include "../../../../include/lattice/all.hpp"
 #include "../../../../include/model/classical/ising.hpp"
@@ -171,4 +170,3 @@ TEST(ModelClassical, IsingOnInfiniteRange) {
 }  // namespace test
 }  // namespace compnal
 
-#endif /* COMPNAL_TEST_MODEL_CLASSICAL_ISING_HPP_ */

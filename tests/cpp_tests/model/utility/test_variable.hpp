@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_MODEL_UTILITY_VARIABLE_HPP_
-#define COMPNAL_TEST_MODEL_UTILITY_VARIABLE_HPP_
+#pragma once
 
 #include "../../../../include/model/utility/variable.hpp"
 #include "../../../../include/utility/random.hpp"
@@ -66,10 +65,6 @@ TEST(ModelUtility, Spin) {
    
 }
 
-
-
 }  // namespace test
 }  // namespace compnal
 
-
-#endif /* COMPNAL_TEST_MODEL_UTILITY_VARIABLE_HPP_ */

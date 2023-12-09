@@ -20,10 +20,7 @@
 //  
 //
 
-#ifndef OMPNAL_TEST_SOLVER_ALL_
-#define OMPNAL_TEST_SOLVER_ALL_
+#pragma once
 
 #include "classical_monte_carlo/all.hpp"
 
-
-#endif /* OMPNAL_TEST_SOLVER_ALL_ */

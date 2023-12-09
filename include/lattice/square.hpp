@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_LATTICE_SQUARE_HPP_
-#define COMPNAL_LATTICE_SQUARE_HPP_
+#pragma once
 
 #include <stdexcept>
 #include <vector>
@@ -128,6 +127,3 @@ private:
 
 }  // namespace lattice
 }  // namespace compnal
-
-
-#endif /* COMPNAL_LATTICE_SQUARE_HPP_ */

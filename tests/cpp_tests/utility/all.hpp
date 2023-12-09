@@ -20,10 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_UTILITY_ALL_HPP_
-#define COMPNAL_TEST_UTILITY_ALL_HPP_
+#pragma once
 
 #include "test_combination.hpp"
 #include "test_statistics.hpp"
-
-#endif /* COMPNAL_TEST_UTILITY_ALL_HPP_ */

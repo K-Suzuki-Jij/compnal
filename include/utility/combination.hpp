@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_UTILITY_COMBINATION_HPP_
-#define COMPNAL_UTILITY_COMBINATION_HPP_
+#pragma once
 
 #include <algorithm>
 #include <utility>
@@ -82,5 +81,3 @@ bool NextCombination(const Iterator first, Iterator k, const Iterator last) {
 
 } // namespace utility
 } // namespace compnal
-
-#endif /* COMPNAL_UTILITY_COMBINATION_HPP_ */

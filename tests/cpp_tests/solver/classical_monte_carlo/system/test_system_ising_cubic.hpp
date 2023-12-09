@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ISING_CUBIC_HPP_
-#define OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ISING_CUBIC_HPP_
+#pragma once
 
 
 #include "../../../../../include/solver/classical_monte_carlo/system/ising_cubic.hpp"
@@ -303,6 +302,3 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnCubic) {
 
 }  // namespace test
 }  // namespace compnal
-
-
-#endif /* OMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ISING_CUBIC_HPP_ */

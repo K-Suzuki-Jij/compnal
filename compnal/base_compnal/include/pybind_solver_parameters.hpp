@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_WRAPPER_SOLVER_PARAMETERS_HPP_
-#define COMPNAL_WRAPPER_SOLVER_PARAMETERS_HPP_
+#pragma once
 
 #include "../../../include/solver/parameter_class.hpp"
 
@@ -55,5 +54,3 @@ void SpinSelectionMethod(py::module &m) {
 
 } // namespace wrapper
 } // namespace compnal
-
-#endif /* COMPNAL_WRAPPER_SOLVER_PARAMETERS_HPP_ */

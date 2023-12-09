@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_WRAPPER_CLASSICAL_MONTE_CARLO_HPP_
-#define COMPNAL_WRAPPER_CLASSICAL_MONTE_CARLO_HPP_
+#pragma once
 
 #include "../../../include/solver/classical_monte_carlo/classical_monte_carlo.hpp"
 
@@ -61,6 +60,3 @@ void PyBindClassicalMonteCarlo(py::module &m, const std::string &post_name = "")
 
 } // namespace wrapper
 } // namespace compnal
-
-
-#endif /* COMPNAL_WRAPPER_CLASSICAL_MONTE_CARLO_HPP_ */

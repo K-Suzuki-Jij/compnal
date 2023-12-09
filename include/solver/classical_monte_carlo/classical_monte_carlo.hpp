@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_HPP_
+#pragma once
 
 #include "../../utility/random.hpp"
 #include "../parameter_class.hpp"
@@ -317,6 +316,3 @@ auto make_classical_monte_carlo() {
 } // namespace classical_monte_carlo
 } // namespace solver
 } // namespace compnal
-
-
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_HPP_ */

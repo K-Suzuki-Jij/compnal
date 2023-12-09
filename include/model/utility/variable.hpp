@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_MODEL_UTILITY_VARIABLE_HPP_
-#define COMPNAL_MODEL_UTILITY_VARIABLE_HPP_
+#pragma once
 
 #include <stdexcept>
 #include <cmath>
@@ -142,5 +141,3 @@ private:
 } // namespace model
 } // namespace compnal
 
-
-#endif /* COMPNAL_MODEL_UTILITY_VARIABLE_HPP_ */

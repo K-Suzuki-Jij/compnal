@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_POLY_ISING_INFINITE_RANGE_HPP_
-#define COMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_POLY_ISING_INFINITE_RANGE_HPP_
+#pragma once
 
 #include "../../../../../include/solver/classical_monte_carlo/system/poly_ising_infinite_range.hpp"
 
@@ -102,5 +101,3 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnInfiniteRange) {
 
 }  // namespace test
 }  // namespace compnal
-
-#endif /* COMPNAL_TEST_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_POLY_ISING_INFINITE_RANGE_HPP_ */

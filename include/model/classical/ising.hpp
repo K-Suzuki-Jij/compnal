@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_MODEL_CLASSICAL_ISING_HPP_
-#define COMPNAL_MODEL_CLASSICAL_ISING_HPP_
+#pragma once
 
 #include <vector>
 #include <stdexcept>
@@ -342,6 +341,3 @@ auto make_ising(const LatticeType &lattice,
 } // namespace classical
 } // namespace model
 } // namespace compnal
-
-
-#endif /* COMPNAL_MODEL_CLASSICAL_ISING_HPP_ */

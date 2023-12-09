@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_
+#pragma once
 
 #include "ising_chain.hpp"
 #include "ising_square.hpp"
@@ -32,5 +31,3 @@
 #include "poly_ising_square.hpp"
 #include "poly_ising_cubic.hpp"
 #include "poly_ising_infinite_range.hpp"
-
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SYSTEM_ALL_ */

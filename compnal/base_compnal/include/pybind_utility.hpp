@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_WRAPPER_UTILITY_HPP_
-#define COMPNAL_WRAPPER_UTILITY_HPP_
+#pragma once
 
 #include "../../../include/utility/all.hpp"
 
@@ -39,5 +38,3 @@ void PyBindUtility(py::module &m) {
 
 } // namespace wrapper
 } // namespace compnal
-
-#endif /* COMPNAL_WRAPPER_UTILITY_HPP_ */

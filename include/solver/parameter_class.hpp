@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_PARAMETER_CLASS_HPP_
-#define COMPNAL_SOLVER_PARAMETER_CLASS_HPP_
+#pragma once
 
 namespace compnal {
 namespace solver {
@@ -61,5 +60,3 @@ enum class SpinSelectionMethod {
 
 } // namespace solver
 } // namespace compnal
-
-#endif /* COMPNAL_SOLVER_PARAMETER_CLASS_HPP_ */

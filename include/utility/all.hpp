@@ -20,11 +20,9 @@
 //  
 //
 
-#ifndef COMPNAL_UTILITY_ALL_HPP_
-#define COMPNAL_UTILITY_ALL_HPP_
+#pragma once
 
 #include "random.hpp"
 #include "combination.hpp"
 #include "statistics.hpp"
 
-#endif /* COMPNAL_UTILITY_ALL_HPP_ */

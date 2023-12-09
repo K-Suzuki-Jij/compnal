@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_TEST_UTILITY_STATISTICS_HPP_
-#define COMPNAL_TEST_UTILITY_STATISTICS_HPP_
+#pragma once
 
 #include "../../../include/utility/statistics.hpp"
 
@@ -46,6 +45,3 @@ TEST(Utility, CalculateMoment) {
 
 }  // namespace test
 }  // namespace compnal
-
-
-#endif /* COMPNAL_TEST_UTILITY_STATISTICS_HPP_ */

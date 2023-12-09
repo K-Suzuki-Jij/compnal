@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_MODEL_CLASSICAL_POLYNOMIAL_ISING_HPP_
-#define COMPNAL_MODEL_CLASSICAL_POLYNOMIAL_ISING_HPP_
+#pragma once
 
 #include <unordered_map>
 #include <vector>
@@ -468,5 +467,3 @@ auto make_polynomial_ising(const LatticeType &lattice,
 } // namespace classical
 } // namespace model
 } // namespace compnal
-
-#endif /* COMPNAL_MODEL_CLASSICAL_POLYNOMIAL_ISING_HPP_ */

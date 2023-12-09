@@ -20,8 +20,7 @@
 //  
 //
 
-#ifndef COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SINGLE_UPDATER_HPP_
-#define COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SINGLE_UPDATER_HPP_
+#pragma once
 
 namespace compnal {
 namespace solver {
@@ -100,7 +99,3 @@ void SingleUpdater(SystemType *system,
 } // namespace classical_monte_carlo
 } // namespace solver
 } // namespace compnal
-
-
-
-#endif /* COMPNAL_SOLVER_CLASSICAL_MONTE_CARLO_SINGLE_UPDATER_HPP_ */

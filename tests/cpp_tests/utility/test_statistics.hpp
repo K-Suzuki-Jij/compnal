@@ -48,15 +48,15 @@ TEST(Utility, CalculateMomentWithVariance) {
       {3, 4}
    };
    
-   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithVariance(samples, 1, 0.0, 2).first, 2.5 );
-   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithVariance(samples, 1, 3.0, 2).first, -0.5);
-   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithVariance(samples, 2, 0.0, 2).first, 7.25);
-   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithVariance(samples, 2, 3.0, 2).first, 1.25);
+   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithSTD(samples, 1, 0.0, 2).first, 2.5 );
+   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithSTD(samples, 1, 3.0, 2).first, -0.5);
+   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithSTD(samples, 2, 0.0, 2).first, 7.25);
+   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithSTD(samples, 2, 3.0, 2).first, 1.25);
 
-   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithVariance(samples, 1, 0.0, 2).second, 1.0 );
-   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithVariance(samples, 1, 3.0, 2).second, 1.0 );
-   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithVariance(samples, 2, 0.0, 2).second, 25.0);
-   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithVariance(samples, 2, 3.0, 2).second, 1.0 );
+   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithSTD(samples, 1, 0.0, 2).second, 1.0);
+   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithSTD(samples, 1, 3.0, 2).second, 1.0);
+   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithSTD(samples, 2, 0.0, 2).second, 5.0);
+   EXPECT_DOUBLE_EQ(utility::CalculateMomentWithSTD(samples, 2, 3.0, 2).second, 1.0);
    
 }
 

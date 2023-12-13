@@ -34,6 +34,7 @@ using namespace pybind11::literals;
 
 void PyBindUtility(py::module &m) {
     m.def("calculate_moment", &utility::CalculateMoment, "samples"_a, "order"_a, "bias"_a, "num_threads"_a);
+    m.def("calculate_moment_with_std", &utility::CalculateMomentWithSTD, "samples"_a, "order"_a, "bias"_a, "num_threads"_a);
 }
 
 } // namespace wrapper

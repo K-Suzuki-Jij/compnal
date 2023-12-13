@@ -181,30 +181,37 @@ class CMCResult:
     hardware_info: Optional[CMCHardwareInfo] = None
     time: Optional[CMCTime] = None
 
-    def calculate_mean(self, bias: float = 0.0) -> tuple[float, float]:
+    def calculate_mean(self, bias: float = 0.0, with_std: bool = False) -> Union[float, tuple[float, float]]:
         """Calculate the mean of the samples.
 
         Args:
             bias (float, optional): The bias in E(X - bias). Defaults to 0.0.
+            with_std (bool, optional): If `True`, return the standard deviation. Defaults to False.
 
         Returns:
-            Union[tuple[float, float], float]: The mean of the samples, and if `std` is `True`, its standard deviation.
+            Union[float, tuple[float, float]]: The mean of the samples, and if `std` is `True`, its standard deviation.
         """
-        return self.calculate_moment(order=1, bias=bias)
+        return self.calculate_moment(order=1, bias=bias, with_std=with_std)
 
-    def calculate_moment(self, order: int, bias: float = 0.0) -> tuple[float, float]:
+    def calculate_moment(self, order: int, bias: float = 0.0, with_std: bool = False) -> Union[float, tuple[float, float]]:
         """Calculate the moment of the samples.
 
         Args:
             order (int): The order of the moment.
             bias (float, optional): The bias in E((X - bias)^order). Defaults to 0.0.
+            with_std (bool, optional): If `True`, return the standard deviation. Defaults to False.
 
         Returns:
-            float: The moment of the samples.
+            Union[float, tuple[float, float]]: The moment of the samples, and if `std` is `True`, its standard deviation.
         """
-        return base_utility.calculate_moment(
-            self.samples, order=order, bias=bias, num_threads=self.params.num_threads
-        )
+        if with_std:
+            return base_utility.calculate_moment_with_std(
+                self.samples, order=order, bias=bias, num_threads=self.params.num_threads
+            )
+        else:
+            return base_utility.calculate_moment(
+                self.samples, order=order, bias=bias, num_threads=self.params.num_threads
+            )
 
     def calculate_correlation(
         self, i: Union[int, tuple], j: Union[int, tuple]

@@ -53,6 +53,36 @@ double CalculateMoment(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynami
    return moment/num_samples;
 }
 
+//! @brief Calculate the moment of samples and it's variance.
+//! @param samples Samples.
+//! @param order Order of moment.
+//! @param bias The bias in E((X - bias)^order). Defaults to 0.0.
+//! @param num_threads The Number of calculation threads. Defaults to 1.
+//! @return The moment of samples and it's variance.
+std::pair<double, double> CalculateMomentWithSTD(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &samples,
+                                                 const std::int32_t order, const double bias = 0.0, const std::int32_t num_threads = 1) {
+   
+   const std::int64_t num_samples = samples.rows();
+   double moment = 0.0;
+   double std = 0.0;
+   double squre_moment = 0.0;
+   
+#pragma omp parallel for schedule(guided) num_threads(num_threads) reduction(+: moment, squre_moment)
+   for (std::int64_t i = 0; i < num_samples; ++i) {
+      double mean = samples.row(i).mean();
+      double biased_mean = 1.0;
+      for (std::int32_t j = 0; j < order; ++j) {
+         biased_mean *= mean - bias;
+      }
+      moment += biased_mean;
+      squre_moment += biased_mean*biased_mean;
+   }
+   moment = moment/num_samples;
+   std = std::sqrt(squre_moment/num_samples - moment*moment);
+   
+   return {moment, std};
+}
+
 } // namespace utility
 } // namespac
 

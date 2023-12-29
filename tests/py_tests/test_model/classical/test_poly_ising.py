@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 
 from compnal.lattice import (
     BoundaryCondition,
@@ -24,6 +25,7 @@ def test_poly_ising_chain():
     assert poly_ising.get_spin_scale_factor() == 1
     poly_ising.set_spin_magnitude(2, (0,))
     assert poly_ising.get_spin_magnitude() == {(0,): 2, (1,): 1, (2,): 1, (3,): 1}
+    assert poly_ising.get_appropriate_spin_type() == np.int8
 
     with pytest.raises(ValueError):
         poly_ising.set_spin_magnitude(1.4999, (0,))
@@ -118,6 +120,7 @@ def test_poly_ising_square():
         (2, 2): 0.5,
         (3, 2): 0.5,
     }
+    assert poly_ising.get_appropriate_spin_type() == np.float64
 
     assert poly_ising.get_spin_scale_factor() == 1
 
@@ -291,6 +294,7 @@ def test_poly_ising_cubic():
         (2, 2, 1): 3,
         (3, 2, 1): 3,
     }
+    assert poly_ising.get_appropriate_spin_type() == np.int8
 
     assert poly_ising.get_spin_scale_factor() == 4
 
@@ -466,7 +470,8 @@ def test_poly_ising_infinite_range():
     poly_ising.set_spin_magnitude(2, (0,))
     assert poly_ising.get_spin_magnitude() == {(0,): 2, (1,): 1, (2,): 1, (3,): 1}
     assert poly_ising.get_spin_scale_factor() == 2
-
+    assert poly_ising.get_appropriate_spin_type() == np.int8
+    
     with pytest.raises(ValueError):
         poly_ising.set_spin_magnitude(1.4999, (0,))
 

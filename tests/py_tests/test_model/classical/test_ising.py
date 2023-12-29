@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 
 from compnal.lattice import (
     BoundaryCondition,
@@ -20,6 +21,7 @@ def test_ising_chain():
     assert ising.get_spin_scale_factor() == 1
     ising.set_spin_magnitude(2, (0,))
     assert ising.get_spin_magnitude() == {(0,): 2, (1,): 1, (2,): 1}
+    assert ising.get_appropriate_spin_type() == np.int8
 
     with pytest.raises(ValueError):
         ising.set_spin_magnitude(1.4999, (0,))
@@ -91,6 +93,7 @@ def test_ising_square():
         (1, 1): 0.5,
         (2, 1): 0.5,
     }
+    assert ising.get_appropriate_spin_type() == np.float64
 
     with pytest.raises(ValueError):
         ising.set_spin_magnitude(1.4999, (0, 0))
@@ -208,6 +211,7 @@ def test_ising_cubic():
         (1, 1, 1): 3,
         (2, 1, 1): 3,
     }
+    assert ising.get_appropriate_spin_type() == np.int8
 
     with pytest.raises(ValueError):
         ising.set_spin_magnitude(1.4999, (0, 0, 0))
@@ -329,6 +333,7 @@ def test_ising_infinite_range():
     assert ising.get_spin_scale_factor() == 3
     ising.set_spin_magnitude(2, (0,))
     assert ising.get_spin_magnitude() == {(0,): 2, (1,): 1, (2,): 1}
+    assert ising.get_appropriate_spin_type() == np.int8
 
     with pytest.raises(ValueError):
         ising.set_spin_magnitude(1.4999, (0,))

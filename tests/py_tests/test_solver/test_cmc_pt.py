@@ -1,4 +1,5 @@
 import itertools as it
+import numpy as np
 
 from compnal.lattice import (
     BoundaryCondition,
@@ -75,6 +76,7 @@ def test_cmc_pt_ising_chain():
 
         for i, result in enumerate(result_set):
             assert result.samples.shape == (1, 5)
+            assert result.samples.dtype == np.int8
             assert result.energies.shape == (1,)
             assert result.coordinate_to_index == {
                 (0,): 0,
@@ -179,6 +181,7 @@ def test_cmc_pt_ising_square():
 
         for i, result in enumerate(result_set):
             assert result.samples.shape == (1, 12)
+            assert result.samples.dtype == np.int8
             assert result.energies.shape == (1,)
             assert result.coordinate_to_index == {
                 (i, j): j * 4 + i for i in range(4) for j in range(3)
@@ -275,6 +278,7 @@ def test_cmc_pt_ising_cubic():
 
         for i, result in enumerate(result_set):
             assert result.samples.shape == (1, 36)
+            assert result.samples.dtype == np.int8
             assert result.energies.shape == (1,)
             assert result.coordinate_to_index == {
                 (i, j, k): k * 12 + j * 3 + i
@@ -372,6 +376,7 @@ def test_cmc_pt_ising_infinite_range():
 
         for i, result in enumerate(result_set):
             assert result.samples.shape == (1, 5)
+            assert result.samples.dtype == np.int8
             assert result.energies.shape == (1,)
             assert result.coordinate_to_index == {
                 (0,): 0,
@@ -477,6 +482,7 @@ def test_cmc_pt_poly_ising_chain():
 
         for i, result in enumerate(result_set):
             assert result.samples.shape == (1, 5)
+            assert result.samples.dtype == np.int8
             assert result.energies.shape == (1,)
             assert result.coordinate_to_index == {
                 (0,): 0,
@@ -580,6 +586,7 @@ def test_cmc_pt_poly_ising_square():
 
         for i, result in enumerate(result_set):
             assert result.samples.shape == (1, 12)
+            assert result.samples.dtype == np.int8
             assert result.energies.shape == (1,)
             assert result.coordinate_to_index == {
                 (i, j): j * 4 + i for i in range(4) for j in range(3)
@@ -675,6 +682,7 @@ def test_cmc_pt_poly_ising_cubic():
 
         for i, result in enumerate(result_set):
             assert result.samples.shape == (1, 36)
+            assert result.samples.dtype == np.int8
             assert result.energies.shape == (1,)
             assert result.coordinate_to_index == {
                 (i, j, k): k * 12 + j * 3 + i
@@ -771,6 +779,7 @@ def test_cmc_pt_poly_ising_infinite_range():
 
         for i, result in enumerate(result_set):
             assert result.samples.shape == (1, 5)
+            assert result.samples.dtype == np.int8
             assert result.energies.shape == (1,)
             assert result.coordinate_to_index == {
                 (0,): 0,

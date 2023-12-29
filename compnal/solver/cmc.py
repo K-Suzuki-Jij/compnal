@@ -107,6 +107,11 @@ class CMC:
         )
         end_sampling_time = time.time()
 
+        # Convert appropriate type to reduce size
+        value_type = model.get_appropriate_spin_type()
+        if value_type in [np.int8, np.int16, np.int32, np.int64]:
+            samples = np.round(samples).astype(value_type)
+
         # Calculate energies
         start_energy_time = time.time()
         energies = _base_solver.calculate_energies(
@@ -246,6 +251,11 @@ class CMC:
             spin_selector=_to_base_spin_selection_method(spin_selection_method),
         )
         end_sampling_time = time.time()
+
+        # Convert appropriate type to reduce size
+        value_type = model.get_appropriate_spin_type()
+        if value_type in [np.int8, np.int16, np.int32, np.int64]:
+            samples = np.round(samples).astype(value_type)
 
         samples = samples.reshape(num_replicas, num_samples, -1)
 

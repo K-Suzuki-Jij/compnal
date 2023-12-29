@@ -181,7 +181,9 @@ class CMCResult:
     hardware_info: Optional[CMCHardwareInfo] = None
     time: Optional[CMCTime] = None
 
-    def calculate_mean(self, bias: float = 0.0, with_std: bool = False) -> Union[float, tuple[float, float]]:
+    def calculate_mean(
+        self, bias: float = 0.0, with_std: bool = False
+    ) -> Union[float, tuple[float, float]]:
         """Calculate the mean of the samples.
 
         Args:
@@ -193,7 +195,9 @@ class CMCResult:
         """
         return self.calculate_moment(order=1, bias=bias, with_std=with_std)
 
-    def calculate_moment(self, order: int, bias: float = 0.0, with_std: bool = False) -> Union[float, tuple[float, float]]:
+    def calculate_moment(
+        self, order: int, bias: float = 0.0, with_std: bool = False
+    ) -> Union[float, tuple[float, float]]:
         """Calculate the moment of the samples.
 
         Args:
@@ -206,11 +210,17 @@ class CMCResult:
         """
         if with_std:
             return base_utility.calculate_moment_with_std(
-                self.samples, order=order, bias=bias, num_threads=self.params.num_threads
+                self.samples,
+                order=order,
+                bias=bias,
+                num_threads=self.params.num_threads,
             )
         else:
             return base_utility.calculate_moment(
-                self.samples, order=order, bias=bias, num_threads=self.params.num_threads
+                self.samples,
+                order=order,
+                bias=bias,
+                num_threads=self.params.num_threads,
             )
 
     def calculate_correlation(

@@ -14,12 +14,15 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Optional, Union
+
+import numpy as np
 
 from compnal.base_compnal import base_classical_model
 from compnal.lattice import Chain, Cubic, InfiniteRange, Square
 from compnal.lattice.lattice_info import LatticeType
 from compnal.model.classical.model_info import ClassicalModelInfo, ClassicalModelType
+from compnal.model.classical.util import determine_value_type
 
 
 class Ising:
@@ -114,6 +117,21 @@ class Ising:
             ValueError: When the magnitude of spins is invalid or the coordinate is invalid.
         """
         self._base_model.set_spin_magnitude(spin_magnitude, coordinate)
+
+    def get_appropriate_spin_type(self) -> type:
+        """Calculate appropriate spin type.
+
+        Returns:
+            type: Appropriate spin type.
+        """
+        scale_factor = self._base_model.get_spin_scale_factor()
+        max_spin_value = 0
+        for twice_spin_magnitude in self._base_model.get_twice_spin_magnitude():
+            v = scale_factor * twice_spin_magnitude / 2
+            if not v.is_integer():
+                return np.float64
+            max_spin_value = max(max_spin_value, v)
+        return determine_value_type(int(max_spin_value))
 
     def to_serializable(self) -> dict:
         """Convert to a serializable object.

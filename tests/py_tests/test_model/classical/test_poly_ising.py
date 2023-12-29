@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 
 from compnal.lattice import (
     BoundaryCondition,
@@ -471,7 +471,7 @@ def test_poly_ising_infinite_range():
     assert poly_ising.get_spin_magnitude() == {(0,): 2, (1,): 1, (2,): 1, (3,): 1}
     assert poly_ising.get_spin_scale_factor() == 2
     assert poly_ising.get_appropriate_spin_type() == np.int8
-    
+
     with pytest.raises(ValueError):
         poly_ising.set_spin_magnitude(1.4999, (0,))
 

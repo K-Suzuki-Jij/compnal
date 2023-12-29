@@ -1,8 +1,17 @@
 import numpy as np
 
-from compnal.lattice import BoundaryCondition, LatticeInfo, LatticeType, InfiniteRange, Square, Chain, Cubic
+from compnal.lattice import (
+    BoundaryCondition,
+    Chain,
+    Cubic,
+    InfiniteRange,
+    LatticeInfo,
+    LatticeType,
+    Square,
+)
 from compnal.model.classical import ClassicalModelInfo, ClassicalModelType, PolyIsing
 from compnal.solver import (
+    CMC,
     CMCAlgorithm,
     CMCHardwareInfo,
     CMCParams,
@@ -12,7 +21,6 @@ from compnal.solver import (
     RandomNumberEngine,
     SpinSelectionMethod,
     StateUpdateMethod,
-    CMC
 )
 
 
@@ -160,6 +168,7 @@ def test_cmc_result_serialize():
     assert result.time.sample == 100
     assert result.time.energy == 10
 
+
 def test_cmc_result_h5py():
     result_set = CMCResultSet()
     result_set.append(
@@ -249,13 +258,19 @@ def test_cmc_result_h5py():
     assert result.time.sample == 100
     assert result.time.energy == 10
 
+
 def test_cmc_result_h5py_from_ssf():
     t_list = np.linspace(0.1, 1.0, 30)
     L = 5
     p = 3
-    num_sweeps=5
-    num_samples=2
-    lattice_list = [InfiniteRange(system_size=L), Square(x_size=L, y_size=L, boundary_condition="OBC"), Chain(system_size=L, boundary_condition="OBC"), Cubic(x_size=L, y_size=L, z_size=L, boundary_condition="OBC")]
+    num_sweeps = 5
+    num_samples = 2
+    lattice_list = [
+        InfiniteRange(system_size=L),
+        Square(x_size=L, y_size=L, boundary_condition="OBC"),
+        Chain(system_size=L, boundary_condition="OBC"),
+        Cubic(x_size=L, y_size=L, z_size=L, boundary_condition="OBC"),
+    ]
 
     for LAT in lattice_list:
         result = CMCResultSet()
@@ -273,9 +288,7 @@ def test_cmc_result_h5py_from_ssf():
                     num_threads=32,
                 )
             )
-        result.export_hdf5(
-            "./test.hdf5"
-        )
+        result.export_hdf5("./test.hdf5")
 
         from_result = CMCResultSet.import_hdf5("./test.hdf5")
 
@@ -286,30 +299,70 @@ def test_cmc_result_h5py_from_ssf():
         assert result[0].temperature == from_result[0].temperature
 
         assert result[0].model_info.model_type == from_result[0].model_info.model_type
-        assert result[0].model_info.interactions == from_result[0].model_info.interactions
-        assert result[0].model_info.spin_magnitude == from_result[0].model_info.spin_magnitude
-        assert result[0].model_info.spin_scale_factor == from_result[0].model_info.spin_scale_factor
+        assert (
+            result[0].model_info.interactions == from_result[0].model_info.interactions
+        )
+        assert (
+            result[0].model_info.spin_magnitude
+            == from_result[0].model_info.spin_magnitude
+        )
+        assert (
+            result[0].model_info.spin_scale_factor
+            == from_result[0].model_info.spin_scale_factor
+        )
 
-        assert result[0].model_info.lattice.lattice_type == from_result[0].model_info.lattice.lattice_type
-        assert result[0].model_info.lattice.system_size == from_result[0].model_info.lattice.system_size
-        assert result[0].model_info.lattice.shape == from_result[0].model_info.lattice.shape
-        assert result[0].model_info.lattice.boundary_condition == from_result[0].model_info.lattice.boundary_condition
+        assert (
+            result[0].model_info.lattice.lattice_type
+            == from_result[0].model_info.lattice.lattice_type
+        )
+        assert (
+            result[0].model_info.lattice.system_size
+            == from_result[0].model_info.lattice.system_size
+        )
+        assert (
+            result[0].model_info.lattice.shape
+            == from_result[0].model_info.lattice.shape
+        )
+        assert (
+            result[0].model_info.lattice.boundary_condition
+            == from_result[0].model_info.lattice.boundary_condition
+        )
 
         assert result[0].params.num_sweeps == from_result[0].params.num_sweeps
         assert result[0].params.num_samples == from_result[0].params.num_samples
         assert result[0].params.num_threads == from_result[0].params.num_threads
         assert result[0].params.num_replicas == from_result[0].params.num_replicas
-        assert result[0].params.num_replica_exchange == from_result[0].params.num_replica_exchange
-        assert result[0].params.state_update_method == from_result[0].params.state_update_method
-        assert result[0].params.random_number_engine == from_result[0].params.random_number_engine
-        assert result[0].params.spin_selection_method == from_result[0].params.spin_selection_method
+        assert (
+            result[0].params.num_replica_exchange
+            == from_result[0].params.num_replica_exchange
+        )
+        assert (
+            result[0].params.state_update_method
+            == from_result[0].params.state_update_method
+        )
+        assert (
+            result[0].params.random_number_engine
+            == from_result[0].params.random_number_engine
+        )
+        assert (
+            result[0].params.spin_selection_method
+            == from_result[0].params.spin_selection_method
+        )
         assert result[0].params.algorithm == from_result[0].params.algorithm
         assert result[0].params.seed == from_result[0].params.seed
 
-        assert result[0].hardware_info.cpu_threads == from_result[0].hardware_info.cpu_threads
-        assert result[0].hardware_info.cpu_cores == from_result[0].hardware_info.cpu_cores
+        assert (
+            result[0].hardware_info.cpu_threads
+            == from_result[0].hardware_info.cpu_threads
+        )
+        assert (
+            result[0].hardware_info.cpu_cores == from_result[0].hardware_info.cpu_cores
+        )
         assert result[0].hardware_info.cpu_name == from_result[0].hardware_info.cpu_name
-        assert result[0].hardware_info.memory_size == from_result[0].hardware_info.memory_size
+        assert (
+            result[0].hardware_info.memory_size
+            == from_result[0].hardware_info.memory_size
+        )
         assert result[0].hardware_info.os_info == from_result[0].hardware_info.os_info
 
         assert result[0].time.date == from_result[0].time.date

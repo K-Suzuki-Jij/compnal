@@ -42,12 +42,7 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnInfiniteRange) {
       {{1, -1.5}, {2, +0.5}, {3, +1.0}, {4, -2.0}, {5, +3.0}, {6, -10}, {7, -3.5}, {8, -1.5}},
    };
    
-   std::vector<std::int32_t> initial_state_level(system_size);
-   for (std::int32_t i = 0; i < system_size; ++i) {
-      initial_state_level[i] = 0;
-   }
-   
-   std::vector<double> initial_state(system_size);
+   Eigen::Vector<double, Eigen::Dynamic> initial_state(system_size);
    for (std::int32_t i = 0; i < system_size; ++i) {
       initial_state[i] = -0.5;
    }
@@ -59,7 +54,7 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnInfiniteRange) {
       const std::int32_t seed = 0;
       
       solver::classical_monte_carlo::System<PolyIsing, std::mt19937> system{poly_ising, seed};
-      system.SetSampleByState(initial_state_level);
+      system.SetSampleByValue(initial_state);
       
       for (std::int32_t i = 0; i < system_size; ++i) {
          EXPECT_DOUBLE_EQ(system.ExtractSample()(i), -0.5);

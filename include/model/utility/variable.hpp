@@ -109,6 +109,22 @@ public:
       state_number_ = state_number;
    }
    
+   void SetValue(const double value) {
+      // Calculate value to the state number
+      const double new_state_number = (value/spin_scale_factor_ + twice_spin_magnitude_*0.5);
+      
+      // Check if new_state_number is integer
+      if (std::floor(new_state_number) != new_state_number) {
+         std::stringstream ss;
+         ss << "value must be integer multiple of spin_scale_factor." << std::endl;
+         ss << "But value=" << value << ", spin_scale_factor=" << spin_scale_factor_;
+         throw std::invalid_argument(ss.str());
+      }
+
+      // Set state number
+      SetState(static_cast<std::int32_t>(new_state_number));
+   }
+   
    //! @brief Set random state.
    //! @tparam RandType Random number engine type.
    //! @param random_number_engine Random number engine.

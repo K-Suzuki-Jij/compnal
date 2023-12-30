@@ -62,6 +62,7 @@ def test_cmc_ssf_ising_chain():
             random_number_engine=rne,
             spin_selection_method=ssm,
             seed=0,
+            initial_state_list=np.array([[1, 1, 1, 1, 1]]),
         )
 
         assert len(result_set) == 1
@@ -155,6 +156,7 @@ def test_cmc_ssf_ising_square():
             random_number_engine=rne,
             spin_selection_method=ssm,
             seed=0,
+            initial_state_list=np.full((1, 12), 1)
         )
 
         assert len(result_set) == 1
@@ -240,6 +242,7 @@ def test_cmc_ssf_ising_cubic():
             random_number_engine=rne,
             spin_selection_method=ssm,
             seed=0,
+            initial_state_list=np.full((1, 36), 1)
         )
 
         assert len(result_set) == 1
@@ -326,6 +329,7 @@ def test_cmc_ssf_ising_infinite_range():
             random_number_engine=rne,
             spin_selection_method=ssm,
             seed=0,
+            initial_state_list=np.full((1, 5), 1)
         )
 
         assert len(result_set) == 1
@@ -423,6 +427,7 @@ def test_cmc_ssf_poly_ising_chain():
             random_number_engine=rne,
             spin_selection_method=ssm,
             seed=0,
+            initial_state_list=np.array([[1, 1, 1, 1, 1]]),
         )
 
         assert len(result_set) == 1
@@ -515,6 +520,7 @@ def test_cmc_ssf_poly_ising_square():
             random_number_engine=rne,
             spin_selection_method=ssm,
             seed=0,
+            initial_state_list=np.full((1, 12), 1)
         )
 
         assert len(result_set) == 1
@@ -599,6 +605,7 @@ def test_cmc_ssf_poly_ising_cubic():
             random_number_engine=rne,
             spin_selection_method=ssm,
             seed=0,
+            initial_state_list=np.full((1, 729), 1)
         )
 
         assert len(result_set) == 1
@@ -692,6 +699,7 @@ def test_cmc_ssf_poly_ising_infinite_range():
             random_number_engine=rne,
             spin_selection_method=ssm,
             seed=0,
+            initial_state_list=np.full((1, 5), 1)
         )
 
         assert len(result_set) == 1

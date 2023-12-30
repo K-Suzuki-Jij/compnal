@@ -83,7 +83,8 @@ public:
                  const std::uint64_t seed,
                  const StateUpdateMethod updater,
                  const RandomNumberEngine random_number_engine,
-                 const SpinSelectionMethod spin_selector) const {
+                 const SpinSelectionMethod spin_selector,
+                 const Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &initial_sample_list = {}) const {
       
       if (num_sweeps < 0) {
          throw std::invalid_argument("num_sweeps must be non-negative integer.");
@@ -101,17 +102,17 @@ public:
       if (random_number_engine == RandomNumberEngine::XORSHIFT) {
          return TemplateSingleUpdater<System<ModelType, utility::Xorshift>, utility::Xorshift>
          (model, num_sweeps, num_samples, num_threads, temperature, seed,
-          updater, random_number_engine, spin_selector);
+          updater, random_number_engine, spin_selector, initial_sample_list);
       }
       else if (random_number_engine == RandomNumberEngine::MT) {
          return TemplateSingleUpdater<System<ModelType, std::mt19937>, std::mt19937>
          (model, num_sweeps, num_samples, num_threads, temperature, seed,
-          updater, random_number_engine, spin_selector);
+          updater, random_number_engine, spin_selector, initial_sample_list);
       }
       else if (random_number_engine == RandomNumberEngine::MT_64) {
          return TemplateSingleUpdater<System<ModelType, std::mt19937_64>, std::mt19937_64>
          (model, num_sweeps, num_samples, num_threads, temperature, seed,
-          updater, random_number_engine, spin_selector);
+          updater, random_number_engine, spin_selector, initial_sample_list);
       }
       else {
          throw std::invalid_argument("Unknwon random_number_engine");
@@ -203,11 +204,11 @@ private:
                          const std::uint64_t seed,
                          const StateUpdateMethod updater,
                          const RandomNumberEngine random_number_engine,
-                         const SpinSelectionMethod spin_selector) const {
+                         const SpinSelectionMethod spin_selector,
+                         const Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &initial_sample_list = {}) const {
       
       using RType = typename RandType::result_type;
       using E2DType = Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-      
       E2DType samples(num_samples, model.GetLattice().GetSystemSize());
       std::vector<RType> system_seed(num_samples);
       std::vector<RType> updater_seed(num_samples);
@@ -216,10 +217,17 @@ private:
          system_seed[i] = rand();
          updater_seed[i] = rand();
       }
+
+      if (initial_sample_list.size() != 0 && initial_sample_list.rows() != num_samples) {
+         throw std::invalid_argument("The size of initial_sample_list must be equal to num_samples.");
+      }
       
 #pragma omp parallel for schedule(guided) num_threads(num_threads)
       for (std::int32_t i = 0; i < num_samples; ++i) {
          auto system = SystemType{model, system_seed[i]};
+         if (initial_sample_list.size() != 0) {
+            system.SetSampleByValue(initial_sample_list.row(i));
+         }
          SingleUpdater<SystemType, RandType>(&system, num_sweeps, 1.0/temperature, updater_seed[i], updater, spin_selector);
          samples.row(i) = system.ExtractSample();
       }

@@ -90,6 +90,17 @@ public:
       }
       return sample;
    }
+      
+   void SetSampleByValue(const Eigen::Vector<typename ModelType::PHQType, Eigen::Dynamic> &sample_list) {
+      if (sample_list.size() != this->sample_.size()) {
+         throw std::invalid_argument("The size of initial variables is not equal to the system size.");
+      }
+      for (std::size_t i = 0; i < this->sample_.size(); ++i) {
+         this->sample_[i].SetValue(sample_list(i));
+      }
+      this->d_E_ = this->model_.GenerateEnergyDifference(this->sample_);
+      this->energy_ = this->model_.CalculateEnergy(this->ExtractSample());
+   }
    
    //! @brief Get the sample.
    //! @return The sample.

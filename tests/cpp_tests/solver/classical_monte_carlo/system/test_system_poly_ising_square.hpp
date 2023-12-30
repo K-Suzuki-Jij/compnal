@@ -50,7 +50,7 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnSquare) {
       }
    }
    
-   std::vector<double> initial_state(x_size*y_size);
+   Eigen::Vector<double, Eigen::Dynamic> initial_state(x_size*y_size);
    for (std::int32_t i = 0; i < x_size; ++i) {
       for (std::int32_t j = 0; j < y_size; ++j) {
          initial_state[j*x_size + i] = -0.5;
@@ -64,7 +64,7 @@ TEST(SolverClassicalMonteCarloSystem, PolyIsingOnSquare) {
          const std::int32_t seed = 0;
          
          solver::classical_monte_carlo::System<PolyIsing, std::mt19937> system{poly_ising, seed};
-         system.SetSampleByState(initial_state_level);
+         system.SetSampleByValue(initial_state);
          
          for (std::int32_t i = 0; i < x_size; ++i) {
             for (std::int32_t j = 0; j < y_size; ++j) {

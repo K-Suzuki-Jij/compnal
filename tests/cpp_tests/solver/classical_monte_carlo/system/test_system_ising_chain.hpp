@@ -39,11 +39,12 @@ TEST(SolverClassicalMonteCarloSystem, IsingOnChain) {
       const std::int32_t seed = 0;
       
       solver::classical_monte_carlo::System<Ising, std::mt19937> system{ising, seed};
-      system.SetSampleByState((std::vector<std::int32_t>{0, 1, 0}));
+      system.SetSampleByValue(Eigen::Vector<double, 3>(-0.5, +0.5, -0.5));
       
       EXPECT_DOUBLE_EQ(system.ExtractSample()(0), -0.5);
       EXPECT_DOUBLE_EQ(system.ExtractSample()(1), +0.5);
       EXPECT_DOUBLE_EQ(system.ExtractSample()(2), -0.5);
+      
       EXPECT_EQ(system.GenerateCandidateState(0), 1);
       EXPECT_EQ(system.GenerateCandidateState(1), 0);
       EXPECT_EQ(system.GenerateCandidateState(2), 1);

@@ -66,6 +66,7 @@ class CMC:
         random_number_engine: Union[str, RandomNumberEngine] = "MT",
         spin_selection_method: Union[str, SpinSelectionMethod] = "RANDOM",
         seed: Optional[int] = None,
+        initial_state_list: Optional[np.ndarray] = None,
     ) -> CMCResultSet:
         """Run sampling by single flip method.
 
@@ -79,6 +80,7 @@ class CMC:
             random_number_engine (Union[str, RandomNumberEngine], optional): Random number engine. Defaults to "MT".
             spin_selection_method (Union[str, SpinSelectionMethod], optional): Spin selection method. Defaults to "RANDOM".
             seed (Optional[int], optional): Seed. Defaults to None.
+            initial_state_list (Optional[Union[np.ndarray, dict[tuple, float]]], optional): Initial state list. Defaults to None.
 
         Returns:
             CMCResultSet: Results.
@@ -92,6 +94,15 @@ class CMC:
         # Set solver
         _base_solver = base_solver.make_classical_monte_carlo(model._base_model)
 
+        # Set initial state
+        if initial_state_list is None:
+            initial_state_list = []
+        elif isinstance(initial_state_list, np.ndarray):
+            if initial_state_list.shape != (num_samples, model.lattice.system_size):
+                raise ValueError("The shape of initial state list is invalid.")
+        else:
+            raise TypeError("Invalid types of initial state list.")
+        
         # Sampling
         start_sampling_time = time.time()
         samples = _base_solver.run_single_flip(
@@ -104,6 +115,7 @@ class CMC:
             updater=_to_base_state_update_method(state_update_method),
             random_number_engine=_to_base_random_number_engine(random_number_engine),
             spin_selector=_to_base_spin_selection_method(spin_selection_method),
+            initial_sample_list=initial_state_list,
         )
         end_sampling_time = time.time()
 

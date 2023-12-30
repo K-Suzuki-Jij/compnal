@@ -44,7 +44,7 @@ void PyBindClassicalMonteCarlo(py::module &m, const std::string &post_name = "")
 
    py_class.def("run_single_flip", &CMC::RunSingleFlip, 
                 "model"_a, "num_sweeps"_a, "num_samples"_a, "num_threads"_a, "temperature"_a,
-                "seed"_a, "updater"_a, "random_number_engine"_a, "spin_selector"_a);
+                "seed"_a, "updater"_a, "random_number_engine"_a, "spin_selector"_a, "initial_sample_list"_a);
    py_class.def("run_parallel_tempering", &CMC::RunParallelTempering, 
                 "model"_a, "num_sweeps"_a, "num_swaps"_a, "num_samples"_a, "num_threads"_a, 
                 "temperature_list"_a, "seed"_a, "updater"_a, 

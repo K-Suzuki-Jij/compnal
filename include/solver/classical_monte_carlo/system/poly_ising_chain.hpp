@@ -48,22 +48,7 @@ public:
    BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
    interaction_(model.GetInteraction()),
    degree_(model.GetDegree()) {
-      this->d_E_ = GenerateEnergyDifference(this->sample_);
-   }
-   
-   //! @brief Set sample by states.
-   //! Here, the states represents energy levels. For example for S=1/2 ising spins,
-   //! s=-1/2 corresponds to the state being 0 and s=1/2 corresponds to the state being 1.
-   //! @param state_list The list of states.
-   void SetSampleByState(const std::vector<std::int32_t> &state_list) {
-      if (state_list.size() != this->sample_.size()) {
-         throw std::invalid_argument("The size of initial variables is not equal to the system size.");
-      }
-      for (std::size_t i = 0; i < this->sample_.size(); ++i) {
-         this->sample_[i].SetState(state_list[i]);
-      }
-      this->d_E_ = GenerateEnergyDifference(this->sample_);
-      this->energy_ = this->model_.CalculateEnergy(this->ExtractSample());
+      this->d_E_ = model.GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -94,55 +79,6 @@ private:
    
    //! @brief The degree of the interactions.
    std::int32_t degree_ = 0;
-   
-   //! @brief Generate energy difference.
-   //! @param sample The spin configuration.
-   //! @return The energy difference.
-   std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> d_E_(this->system_size_);
-      if (this->bc_ == lattice::BoundaryCondition::PBC) {
-         for (std::int32_t index = 0; index < this->system_size_; ++index) {
-            double val = 0;
-            for (const auto &it: interaction_) {
-               double spin_prod = 1;
-               for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                  spin_prod *= this->sample_[(index - diff + this->system_size_)%this->system_size_].GetValue();
-               }
-               for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
-                  val += it.second*spin_prod;
-                  const std::int32_t ind_1 = (index - diff + this->system_size_)%this->system_size_;
-                  const std::int32_t ind_2 = (index - diff + it.first + this->system_size_)%this->system_size_;
-                  spin_prod = spin_prod*this->sample_[ind_2].GetValue()/this->sample_[ind_1].GetValue();
-               }
-            }
-            d_E_[index] += val;
-         }
-      }
-      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t index = 0; index < this->system_size_; ++index) {
-            double val = 0;
-            for (const auto &it: interaction_) {
-               double spin_prod = 1;
-               for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                  spin_prod *= this->sample_[(index - diff + this->system_size_)%this->system_size_].GetValue();
-               }
-               for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
-                  if (index - diff >= 0 && index - diff + it.first - 1 < this->system_size_) {
-                     val += it.second*spin_prod;
-                  }
-                  const std::int32_t ind_1 = (index - diff + this->system_size_)%this->system_size_;
-                  const std::int32_t ind_2 = (index - diff + it.first + this->system_size_)%this->system_size_;
-                  spin_prod = spin_prod*this->sample_[ind_2].GetValue()/this->sample_[ind_1].GetValue();
-               }
-            }
-            d_E_[index] += val;
-         }
-      }
-      else {
-         throw std::invalid_argument("Unsupported BinaryCondition");
-      }
-      return d_E_;
-   }
    
    //! @brief Flip a variable.
    //! @param index The index of the variable to be flipped.

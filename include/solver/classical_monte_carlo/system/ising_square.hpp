@@ -49,22 +49,7 @@ public:
    y_size_(model.GetLattice().GetYSize()),
    linear_(model.GetLinear()),
    quadratic_(model.GetQuadratic()) {
-      this->d_E_ = GenerateEnergyDifference(this->sample_);
-   }
-   
-   //! @brief Set sample by states.
-   //! Here, the states represents energy levels. For example for S=1/2 ising spins,
-   //! s=-1/2 corresponds to the state being 0 and s=1/2 corresponds to the state being 1.
-   //! @param state_list The list of states.
-   void SetSampleByState(const std::vector<std::int32_t> &state_list) {
-      if (state_list.size() != this->sample_.size()) {
-         throw std::invalid_argument("The size of initial variables is not equal to the system size.");
-      }
-      for (std::size_t i = 0; i < this->sample_.size(); ++i) {
-         this->sample_[i].SetState(state_list[i]);
-      }
-      this->d_E_ = GenerateEnergyDifference(this->sample_);
-      this->energy_ = this->model_.CalculateEnergy(this->ExtractSample());
+      this->d_E_ = model.GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -116,52 +101,7 @@ private:
 
    //! @brief The length of y-direction.
    const std::int32_t y_size_ = 0;
-   
-   //! @brief Generate energy difference.
-   //! @param sample The spin configuration.
-   //! @return The energy difference.
-   std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> d_E_(this->system_size_);
-      if (this->bc_ == lattice::BoundaryCondition::PBC) {
-         for (std::int32_t coo_x = 0; coo_x < x_size_; ++coo_x) {
-            for (std::int32_t coo_y = 0; coo_y < y_size_; ++coo_y) {
-               const std::int32_t index_xp1 = (coo_y*x_size_ + (coo_x + 1)%x_size_);
-               const std::int32_t index_xm1 = (coo_y*x_size_ + (coo_x - 1 + x_size_)%x_size_);
-               const std::int32_t index_yp1 = (((coo_y + 1)%y_size_)*x_size_ + coo_x);
-               const std::int32_t index_ym1 = (((coo_y - 1 + y_size_)%y_size_)*x_size_ + coo_x);
-               const auto v_xp1 = sample[index_xp1].GetValue();
-               const auto v_xm1 = sample[index_xm1].GetValue();
-               const auto v_yp1 = sample[index_yp1].GetValue();
-               const auto v_ym1 = sample[index_ym1].GetValue();
-               d_E_[coo_y*x_size_ + coo_x] += this->quadratic_*(v_xp1 + v_xm1 + v_yp1 + v_ym1) + this->linear_;
-            }
-         }
-      }
-      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t coo_x = 0; coo_x < x_size_; ++coo_x) {
-            for (std::int32_t coo_y = 0; coo_y < y_size_; ++coo_y) {
-               if (coo_x < x_size_ - 1) {
-                  d_E_[coo_y*x_size_ + coo_x] += this->quadratic_*sample[coo_y*x_size_ + coo_x + 1].GetValue();
-               }
-               if (coo_x > 0) {
-                  d_E_[coo_y*x_size_ + coo_x] += this->quadratic_*sample[coo_y*x_size_ + coo_x - 1].GetValue();
-               }
-               if (coo_y < y_size_ - 1) {
-                  d_E_[coo_y*x_size_ + coo_x] += this->quadratic_*sample[(coo_y + 1)*x_size_ + coo_x].GetValue();
-               }
-               if (coo_y > 0) {
-                  d_E_[coo_y*x_size_ + coo_x] += this->quadratic_*sample[(coo_y - 1)*x_size_ + coo_x].GetValue();
-               }
-               d_E_[coo_y*x_size_ + coo_x] += this->linear_;
-            }
-         }
-      }
-      else {
-         throw std::invalid_argument("Unsupported BinaryCondition");
-      }
-      return d_E_;
-   }
-   
+      
 };
 
 

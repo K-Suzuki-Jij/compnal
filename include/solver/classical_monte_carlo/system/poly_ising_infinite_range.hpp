@@ -50,22 +50,7 @@ public:
    BaseIsingSystem<ModelType, RandType>::BaseIsingSystem(model, seed),
    interaction_(model.GetInteraction()),
    degree_(model.GetDegree()) {
-      this->d_E_ = GenerateEnergyDifference(this->sample_);
-   }
-   
-   //! @brief Set sample by states.
-   //! Here, the states represents energy levels. For example for S=1/2 ising spins,
-   //! s=-1/2 corresponds to the state being 0 and s=1/2 corresponds to the state being 1.
-   //! @param state_list The list of states.
-   void SetSampleByState(const std::vector<std::int32_t> &state_list) {
-      if (state_list.size() != this->sample_.size()) {
-         throw std::invalid_argument("The size of initial variables is not equal to the system size.");
-      }
-      for (std::size_t i = 0; i < this->sample_.size(); ++i) {
-         this->sample_[i].SetState(state_list[i]);
-      }
-      this->d_E_ = GenerateEnergyDifference(this->sample_);
-      this->energy_ = this->model_.CalculateEnergy(this->ExtractSample());
+      this->d_E_ = model.GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -103,54 +88,6 @@ private:
    
    //! @brief The degree of the interactions.
    std::int32_t degree_ = 0;
-   
-   //! @brief Generate energy difference.
-   //! @param sample The spin configuration.
-   //! @return The energy difference.
-   std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> d_E_(this->system_size_);
-      
-      for (std::int32_t index = 0; index < this->system_size_; ++index) {
-         double val = 0.0;
-         for (const auto &it: interaction_) {
-            if (it.first < 2) {
-               if (it.first == 1) {
-                  val += it.second;
-               }
-               continue;
-            }
-            std::vector<std::int32_t> indices(it.first - 1);
-            std::int32_t start_index = 0;
-            std::int32_t size = 0;
-            
-            while (true) {
-               for (std::int32_t i = start_index; i < this->system_size_ - 1; ++i) {
-                  indices[size++] = i;
-                  if (size == it.first - 1) {
-                     double spin_prod = 1;
-                     for (std::int32_t j = 0; j < it.first - 1; ++j) {
-                        if (indices[j] >= index) {
-                           spin_prod *= sample[indices[j] + 1].GetValue();
-                        }
-                        else {
-                           spin_prod *= sample[indices[j]].GetValue();
-                        }
-                     }
-                     val += it.second*spin_prod;
-                     break;
-                  }
-               }
-               --size;
-               if (size < 0) {
-                  break;
-               }
-               start_index = indices[size] + 1;
-            }
-         }
-         d_E_[index] += val;
-      }      
-      return d_E_;
-   }
    
    //! @brief Flip a variable.
    //! @param index The index of the variable to be flipped.

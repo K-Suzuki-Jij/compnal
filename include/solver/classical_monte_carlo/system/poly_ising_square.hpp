@@ -44,22 +44,7 @@ public:
    degree_(model.GetDegree()),
    x_size_(model.GetLattice().GetXSize()),
    y_size_(model.GetLattice().GetYSize()) {
-      this->d_E_ = GenerateEnergyDifference(this->sample_);
-   }
-   
-   //! @brief Set sample by states.
-   //! Here, the states represents energy levels. For example for S=1/2 ising spins,
-   //! s=-1/2 corresponds to the state being 0 and s=1/2 corresponds to the state being 1.
-   //! @param state_list The list of states.
-   void SetSampleByState(const std::vector<std::int32_t> &state_list) {
-      if (state_list.size() != this->sample_.size()) {
-         throw std::invalid_argument("The size of initial variables is not equal to the system size.");
-      }
-      for (std::size_t i = 0; i < this->sample_.size(); ++i) {
-         this->sample_[i].SetState(state_list[i]);
-      }
-      this->d_E_ = GenerateEnergyDifference(this->sample_);
-      this->energy_ = this->model_.CalculateEnergy(this->ExtractSample());
+      this->d_E_ = model.GenerateEnergyDifference(this->sample_);
    }
    
    //! @brief Flip a variable.
@@ -96,87 +81,6 @@ private:
 
    //! @brief The length of y-direction.
    const std::int32_t y_size_ = 0;
-   
-   //! @brief Generate energy difference.
-   //! @param sample The spin configuration.
-   //! @return The energy difference.
-   std::vector<double> GenerateEnergyDifference(const std::vector<model::utility::Spin> &sample) const {
-      std::vector<double> d_E_(this->system_size_);
-      if (this->bc_ == lattice::BoundaryCondition::PBC) {
-         for (std::int32_t coo_x = 0; coo_x < x_size_; ++coo_x) {
-            for (std::int32_t coo_y = 0; coo_y < y_size_; ++coo_y) {
-               double val = 0;
-               for (const auto &it: interaction_) {
-                  double spin_prod_x = 1;
-                  double spin_prod_y = 1;
-                  for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                     const std::int32_t i_x = coo_y*x_size_ + (coo_x - diff + x_size_)%x_size_;
-                     const std::int32_t i_y = ((coo_y - diff + y_size_)%y_size_)*x_size_ + coo_x;
-                     spin_prod_x *= this->sample_[i_x].GetValue();
-                     spin_prod_y *= this->sample_[i_y].GetValue();
-                  }
-                  if (it.first == 1) {
-                     val += it.second;
-                  }
-                  else {
-                     for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
-                        val += it.second*(spin_prod_x + spin_prod_y);
-                        const std::int32_t i_x1 = coo_y*x_size_ + (coo_x - diff + x_size_)%x_size_;
-                        const std::int32_t i_x2 = coo_y*x_size_ + (coo_x - diff + it.first + x_size_)%x_size_;
-                        const std::int32_t i_y1 = ((coo_y - diff + y_size_)%y_size_)*x_size_ + coo_x;
-                        const std::int32_t i_y2 = ((coo_y - diff + it.first + y_size_)%y_size_)*x_size_ + coo_x;
-                        spin_prod_x = spin_prod_x*this->sample_[i_x2].GetValue()/this->sample_[i_x1].GetValue();
-                        spin_prod_y = spin_prod_y*this->sample_[i_y2].GetValue()/this->sample_[i_y1].GetValue();
-                     }
-                  }
-               }
-               d_E_[coo_y*x_size_ + coo_x] += val;
-            }
-         }
-      }
-      else if (this->bc_ == lattice::BoundaryCondition::OBC) {
-         for (std::int32_t coo_x = 0; coo_x < x_size_; ++coo_x) {
-            for (std::int32_t coo_y = 0; coo_y < y_size_; ++coo_y) {
-               double val = 0;
-               for (const auto &it: interaction_) {
-                  double spin_prod_x = 1;
-                  double spin_prod_y = 1;
-                  for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                     const std::int32_t i_x = coo_y*x_size_ + (coo_x - diff + x_size_)%x_size_;
-                     const std::int32_t i_y = ((coo_y - diff + y_size_)%y_size_)*x_size_ + coo_x;
-                     spin_prod_x *= this->sample_[i_x].GetValue();
-                     spin_prod_y *= this->sample_[i_y].GetValue();
-                  }
-                  if (it.first == 1) {
-                     val += it.second;
-                  }
-                  else {
-                     for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
-                        if (coo_x - diff >= 0 && coo_x - diff + it.first - 1 < x_size_) {
-                           val += it.second*spin_prod_x;
-                        }
-                        if (coo_y - diff >= 0 && coo_y - diff + it.first - 1 < y_size_) {
-                           val += it.second*spin_prod_y;
-                        }
-                        const std::int32_t i_x1 = coo_y*x_size_ + (coo_x - diff + x_size_)%x_size_;
-                        const std::int32_t i_x2 = coo_y*x_size_ + (coo_x - diff + it.first + x_size_)%x_size_;
-                        const std::int32_t i_y1 = ((coo_y - diff + y_size_)%y_size_)*x_size_ + coo_x;
-                        const std::int32_t i_y2 = ((coo_y + it.first - diff + y_size_)%y_size_)*x_size_ + coo_x;
-                        spin_prod_x = spin_prod_x*this->sample_[i_x2].GetValue()/this->sample_[i_x1].GetValue();
-                        spin_prod_y = spin_prod_y*this->sample_[i_y2].GetValue()/this->sample_[i_y1].GetValue();
-                     }
-                  }
-               }
-               d_E_[coo_y*x_size_ + coo_x] += val;
-            }
-         }
-      }
-      else {
-         throw std::invalid_argument("Unsupported BinaryCondition");
-      }
-      
-      return d_E_;
-   }
    
    //! @brief Flip a variable.
    //! @param index The index of the variable to be flipped.

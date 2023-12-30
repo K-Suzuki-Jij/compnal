@@ -91,6 +91,21 @@ public:
       return sample;
    }
    
+   //! @brief Set sample by states.
+   //! Here, the states represents energy levels. For example for S=1/2 ising spins,
+   //! s=-1/2 corresponds to the state being 0 and s=1/2 corresponds to the state being 1.
+   //! @param state_list The list of states.
+   void SetSampleByState(const std::vector<std::int32_t> &state_list) {
+      if (state_list.size() != this->sample_.size()) {
+         throw std::invalid_argument("The size of initial variables is not equal to the system size.");
+      }
+      for (std::size_t i = 0; i < this->sample_.size(); ++i) {
+         this->sample_[i].SetState(state_list[i]);
+      }
+      this->d_E_ = this->model_.GenerateEnergyDifference(this->sample_);
+      this->energy_ = this->model_.CalculateEnergy(this->ExtractSample());
+   }
+   
    //! @brief Get the sample.
    //! @return The sample.
    const std::vector<model::utility::Spin> &GetSample() const {

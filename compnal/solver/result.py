@@ -182,21 +182,22 @@ class CMCResult:
     time: Optional[CMCTime] = None
 
     def calculate_mean(
-        self, bias: float = 0.0, with_std: bool = False
+        self, bias: float = 0.0, with_std: bool = False, num_threads: int = 1
     ) -> Union[float, tuple[float, float]]:
         """Calculate the mean of the samples.
 
         Args:
             bias (float, optional): The bias in E(X - bias). Defaults to 0.0.
             with_std (bool, optional): If `True`, return the standard deviation. Defaults to False.
+            num_threads (int, optional): Number of threads. Defaults to 1.
 
         Returns:
             Union[float, tuple[float, float]]: The mean of the samples, and if `std` is `True`, its standard deviation.
         """
-        return self.calculate_moment(order=1, bias=bias, with_std=with_std)
+        return self.calculate_moment(order=1, bias=bias, with_std=with_std, num_threads=num_threads)
 
     def calculate_moment(
-        self, order: int, bias: float = 0.0, with_std: bool = False
+        self, order: int, bias: float = 0.0, with_std: bool = False, num_threads: int = 1
     ) -> Union[float, tuple[float, float]]:
         """Calculate the moment of the samples.
 
@@ -204,6 +205,7 @@ class CMCResult:
             order (int): The order of the moment.
             bias (float, optional): The bias in E((X - bias)^order). Defaults to 0.0.
             with_std (bool, optional): If `True`, return the standard deviation. Defaults to False.
+            num_threads (int, optional): Number of threads. Defaults to 1.
 
         Returns:
             Union[float, tuple[float, float]]: The moment of the samples, and if `std` is `True`, its standard deviation.
@@ -213,14 +215,14 @@ class CMCResult:
                 self.samples,
                 order=order,
                 bias=bias,
-                num_threads=self.params.num_threads,
+                num_threads=num_threads,
             )
         else:
             return base_utility.calculate_moment(
                 self.samples,
                 order=order,
                 bias=bias,
-                num_threads=self.params.num_threads,
+                num_threads=num_threads,
             )
 
     def calculate_correlation(

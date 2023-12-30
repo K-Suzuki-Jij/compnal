@@ -80,7 +80,7 @@ class CMC:
             random_number_engine (Union[str, RandomNumberEngine], optional): Random number engine. Defaults to "MT".
             spin_selection_method (Union[str, SpinSelectionMethod], optional): Spin selection method. Defaults to "RANDOM".
             seed (Optional[int], optional): Seed. Defaults to None.
-            initial_state_list (Optional[Union[np.ndarray, dict[tuple, float]]], optional): Initial state list. Defaults to None.
+            initial_state_list (Optional[np.ndarray], optional): Initial state list. Defaults to None.
 
         Returns:
             CMCResultSet: Results.

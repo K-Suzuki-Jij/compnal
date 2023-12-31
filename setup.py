@@ -43,4 +43,7 @@ setup(
     cmake_install_dir="compnal",
     include_package_data=False,
     zip_safe=False,
+    extras_require = {
+        'test': ['pytest', 'pytest-cov']
+    }
 )

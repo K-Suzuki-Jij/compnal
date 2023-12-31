@@ -56,6 +56,15 @@ We are actively working on expanding `COMPNAL` with the following upcoming featu
 
 # Installation
 ## Install from PyPI
+Not yet available.
+
+## Install the latest release from GitHub
+To install the latest release of `compnal`, use the following command:
+
+```bash
+pip install git+https://github.com/K-Suzuki-Jij/compnal.git
+```
+Before installation, make sure that the following dependencies are installed.
 
 
 ## Build from source

@@ -23,12 +23,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Cmake, Google Test, Eigen, OpenMP on MacOS
+      - name: Install requirements on MacOS
         if: matrix.os == 'macos-latest'
         run: |
           brew install cmake googletest eigen libomp lcov
 
-      - name: Install Cmake, Google Test, Eigen on Ubuntu
+      - name: Install requirements on Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt install cmake libgtest-dev libeigen3-dev lcov
@@ -49,6 +49,14 @@ jobs:
 
       - name: Generate Coverage Report on Ubuntu
         if: matrix.os == 'ubuntu-latest'
+        run: |
+          lcov --directory . --capture --output-file coverage.info # カバレッジデータを収集
+          lcov --remove coverage.info '/usr/*' '**/gtest/**' '**/test_main.cpp' --output-file coverage.info # 余分なデータを除外
+          lcov --list coverage.info # カバレッジレポートの内容を表示（オプショナル）
+
+      # MacOSでのカバレッジデータの収集とフォーマット
+      - name: Generate Coverage Report on MacOS
+        if: matrix.os == 'macos-latest'
         run: |
           lcov --directory . --capture --output-file coverage.info # カバレッジデータを収集
           lcov --remove coverage.info '/usr/*' '**/gtest/**' '**/test_main.cpp' --output-file coverage.info # 余分なデータを除外

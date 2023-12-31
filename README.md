@@ -1,4 +1,4 @@
-[![Python Test](https://github.com/K-Suzuki-Jij/compnal/actions/workflows/python_test.yml/badge.svg)](https://github.com/K-Suzuki-Jij/compnal/actions/workflows/python_test.yml) [![C++ Test](https://github.com/K-Suzuki-Jij/compnal/actions/workflows/cpp_test.yml/badge.svg)](https://github.com/K-Suzuki-Jij/compnal/actions/workflows/cpp_test.yml)
+[![Python Test](https://github.com/K-Suzuki-Jij/compnal/actions/workflows/python_test.yml/badge.svg)](https://github.com/K-Suzuki-Jij/compnal/actions/workflows/python_test.yml) [![C++ Test](https://github.com/K-Suzuki-Jij/compnal/actions/workflows/cpp_test.yml/badge.svg)](https://github.com/K-Suzuki-Jij/compnal/actions/workflows/cpp_test.yml) [![codecov](https://codecov.io/gh/K-Suzuki-Jij/compnal/graph/badge.svg?token=TQ8O865AA0)](https://codecov.io/gh/K-Suzuki-Jij/compnal)
 
 # Description
 `CO`ndensed `M`atter `P`hysics `N`umerical `A`nalytics `L`ibrary (`COMPNAL`) is a numerical calculation library in the field of condensed matter physics. This library aims to provide a comprehensive set of numerical methods and algorithms tailored for analyzing various condensed matter systems.

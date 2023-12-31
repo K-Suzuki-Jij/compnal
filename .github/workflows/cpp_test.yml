@@ -54,10 +54,10 @@ jobs:
           lcov --remove coverage.info '/usr/*' '**/gtest/**' '**/test_main.cpp' --output-file coverage.info # 余分なデータを除外
           lcov --list coverage.info # カバレッジレポートの内容を表示（オプショナル）
 
-          - name: Upload coverage reports to Codecov
-          uses: codecov/codecov-action@v3
-          with:
-            token: ${{ secrets.CODECOV_TOKEN }}
-            file: ./coverage.info
-            name: codecov-cpp
-            fail_ci_if_error: false
+      - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.info
+        name: codecov-cpp
+        fail_ci_if_error: false

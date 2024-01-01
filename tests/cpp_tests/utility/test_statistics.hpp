@@ -66,6 +66,10 @@ TEST(Utility, CalculateFFTMagnitudeList) {
       {1, 2, 3},
       {4, 5, 6}
    };
+
+   EXPECT_THROW(utility::CalculateFFTMagnitudeList(samples, 2, "ortho", 2), std::invalid_argument);
+   EXPECT_THROW(utility::CalculateFFTMagnitudeList(samples, 3, "aaa", 2), std::invalid_argument);
+
    
    auto magnitude_list = utility::CalculateFFTMagnitudeList(samples, 3, "ortho", 2);
    EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 3.4641016151377553);
@@ -99,6 +103,9 @@ TEST(Utility, CalculateFFT2MagnitudeList) {
       {1, 2, 3, 4},
       {5, 6, 7, 8}
    };
+
+   EXPECT_THROW(utility::CalculateFFT2MagnitudeList(samples, 2, 3, "ortho", 2), std::invalid_argument);
+   EXPECT_THROW(utility::CalculateFFT2MagnitudeList(samples, 2, 2, "aaa", 2), std::invalid_argument);
    
    auto magnitude_list = utility::CalculateFFT2MagnitudeList(samples, 2, 2, "ortho", 2);
    EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 5.0);

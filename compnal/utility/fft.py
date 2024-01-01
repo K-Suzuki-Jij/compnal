@@ -3,7 +3,6 @@ import numpy as np
 
 def calculate_fft_magnitude_list(
     array_list: np.array,
-    n: int,
     norm: str = "backward",
     num_threads: int = 1,
 ) -> np.array:
@@ -16,24 +15,20 @@ def calculate_fft_magnitude_list(
         num_threads (int, optional): Number of threads to use. Defaults to 1.
 
     Returns:
-        np.array: FFT of the array list.
+        np.array: FFT magnitude of the array list.
     """
     if len(array_list.shape) != 2:
         raise ValueError("array_list must be a 2D array.")
-    if array_list.shape[1] != n:
-        raise ValueError("The second dimension of array_list must be n.")
     
     return base_compnal.base_utility.calculate_fft_magnitude_list(
         array_list=array_list,
-        n=n,
+        n=array_list.shape[1],
         norm=norm,
         num_threads=num_threads,
     )
 
 def calculate_fft2_magnitude_list(
     array_list: np.array,
-    n_x: int,
-    n_y: int,
     norm: str = "backward",
     num_threads: int = 1,
 ) -> np.array:
@@ -47,23 +42,20 @@ def calculate_fft2_magnitude_list(
         num_threads (int, optional): Number of threads to use. Defaults to 1.
 
     Returns:
-        np.array: 2D FFT of the array list.
+        np.array: 2D FFT magnitude of the array list.
     """
     if len(array_list.shape) != 3:
         raise ValueError("array_list must be a 3D array.")
-    if array_list.shape[1] != n_x:
-        raise ValueError("The second dimension of array_list must be n_x.")
-    if array_list.shape[2] != n_y:
-        raise ValueError("The third dimension of array_list must be n_y.")
     
     num_arrays = array_list.shape[0]
-    
+    n_x = array_list.shape[1]
+    n_y = array_list.shape[2]
     magnitude = base_compnal.base_utility.calculate_fft2_magnitude_list(
-        array_list=array_list.reshape(num_arrays, -1),
+        array_list=array_list.reshape(num_arrays, n_x*n_y),
         n_x=n_x,
         n_y=n_y,
         norm=norm,
         num_threads=num_threads,
     )
-    
+
     return magnitude.reshape(num_arrays, n_x, n_y)

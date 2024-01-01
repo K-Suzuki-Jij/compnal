@@ -39,6 +39,7 @@ setup(
         'compnal.model',
         'compnal.model.classical',
         'compnal.solver',
+        'compnal.utility',
         ],
     cmake_install_dir="compnal",
     include_package_data=False,

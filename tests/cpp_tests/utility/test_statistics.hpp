@@ -60,7 +60,41 @@ TEST(Utility, CalculateMomentWithVariance) {
    
 }
 
+TEST(Utility, CalculateFFTMagnitudeList) {
+   
+   Eigen::Matrix<double, 2, 3, Eigen::RowMajor> samples{
+      {1, 2, 3},
+      {4, 5, 6}
+   };
+   
+   auto magnitude_list = utility::CalculateFFTMagnitudeList(samples, 3, "ortho", 2);
+   
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 3.4641016151377553);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 1), 1.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 2), 1.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 0), 8.660254037844387);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 1), 1.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 2), 1.0);
+}
 
+TEST(Utility, CalculateFFT2MagnitudeList) {
+   
+   Eigen::Matrix<double, 2, 4, Eigen::RowMajor> samples{
+      {1, 2, 3, 4},
+      {5, 6, 7, 8}
+   };
+   
+   auto magnitude_list = utility::CalculateFFT2MagnitudeList(samples, 2, 2, "ortho", 2);
+   
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 5.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 1), 1.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 2), 2.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 3), 0.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 0), 13.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 1), 1.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 2), 2.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 3), 0.0);
+}
 
 }  // namespace test
 }  // namespace compnal

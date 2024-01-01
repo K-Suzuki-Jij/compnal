@@ -84,14 +84,14 @@ std::pair<double, double> CalculateMomentWithSTD(const Eigen::Matrix<double, Eig
    return {moment, std};
 }
 
-//! @brief Calculates the 1D Fourier transform intensity for each sample in a list of arrays.
+//! @brief Calculates the 1D Fourier transform magnitude for each sample in a list of arrays.
 //! @param array_list The input matrix where each row represents a 1D array.
 //! @param n The number of elements in the 1D array.
 //! @param norm The normalization type to use.
 //! @param num_threads The number of threads to use for parallel computation.
-//! @return A matrix where each row contains the Fourier transform intensity of the corresponding input array.
+//! @return A matrix where each row contains the Fourier transform magnitude of the corresponding input array.
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-CalculateFFTList(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &array_list,
+CalculateFFTMagnitudeList(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &array_list,
                  const std::int64_t n,
                  const std::string norm,
                  const std::int32_t num_threads) {
@@ -135,15 +135,15 @@ CalculateFFTList(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eig
 }
 
 
-//! @brief Calculates the 2D Fourier transform intensity for each sample in a list of arrays.
+//! @brief Calculates the 2D Fourier transform magnitude for each sample in a list of arrays.
 //! @param array_list The input matrix where each row represents a flattened 2D array.
 //! @param n_x The number of columns in the unflattened 2D array.
 //! @param n_y The number of rows in the unflattened 2D array.
 //! @param norm The normalization type to use.
 //! @param num_threads The number of threads to use for parallel computation.
-//! @return A matrix where each row contains the Fourier transform intensity of the corresponding input array.
+//! @return A matrix where each row contains the Fourier transform magnitude of the corresponding input array.
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-CalculateFFT2List(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &array_list,
+CalculateFFT2MagnitudeList(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &array_list,
                   const std::int64_t n_x,
                   const std::int64_t n_y,
                   const std::string norm,

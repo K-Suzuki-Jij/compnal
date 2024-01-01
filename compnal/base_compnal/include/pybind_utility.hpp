@@ -17,7 +17,7 @@
 //  compnal
 //
 //  Created by kohei on 2023/07/25.
-//  
+//
 //
 
 #pragma once
@@ -33,8 +33,10 @@ namespace py = pybind11;
 using namespace pybind11::literals;
 
 void PyBindUtility(py::module &m) {
-    m.def("calculate_moment", &utility::CalculateMoment, "samples"_a, "order"_a, "bias"_a, "num_threads"_a);
-    m.def("calculate_moment_with_std", &utility::CalculateMomentWithSTD, "samples"_a, "order"_a, "bias"_a, "num_threads"_a);
+   m.def("calculate_moment", &utility::CalculateMoment, "samples"_a, "order"_a, "bias"_a, "num_threads"_a);
+   m.def("calculate_moment_with_std", &utility::CalculateMomentWithSTD, "samples"_a, "order"_a, "bias"_a, "num_threads"_a);
+   m.def("calculate_fft_list", &utility::CalculateFFTList, "array"_a, "n"_a, "norm"_a, "num_threads"_a);
+   m.def("calculate_fft2_list", &utility::CalculateFFT2List, "array_list"_a, "n_x"_a, "n_y"_a, "norm"_a, "num_threads"_a);
 }
 
 } // namespace wrapper

@@ -68,13 +68,29 @@ TEST(Utility, CalculateFFTMagnitudeList) {
    };
    
    auto magnitude_list = utility::CalculateFFTMagnitudeList(samples, 3, "ortho", 2);
-   
    EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 3.4641016151377553);
    EXPECT_DOUBLE_EQ(magnitude_list(0, 1), 1.0);
    EXPECT_DOUBLE_EQ(magnitude_list(0, 2), 1.0);
    EXPECT_DOUBLE_EQ(magnitude_list(1, 0), 8.660254037844387);
    EXPECT_DOUBLE_EQ(magnitude_list(1, 1), 1.0);
    EXPECT_DOUBLE_EQ(magnitude_list(1, 2), 1.0);
+
+   magnitude_list = utility::CalculateFFTMagnitudeList(samples, 3, "forward", 2);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 2.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 1), 0.5773502691896257);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 2), 0.5773502691896257);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 0), 5.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 1), 0.5773502691896257);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 2), 0.5773502691896257);
+
+   magnitude_list = utility::CalculateFFTMagnitudeList(samples, 3, "backward", 2);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 6.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 1), 1.7320508075688772);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 2), 1.7320508075688772);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 0), 15.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 1), 1.7320508075688772);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 2), 1.7320508075688772);
+
 }
 
 TEST(Utility, CalculateFFT2MagnitudeList) {
@@ -85,7 +101,6 @@ TEST(Utility, CalculateFFT2MagnitudeList) {
    };
    
    auto magnitude_list = utility::CalculateFFT2MagnitudeList(samples, 2, 2, "ortho", 2);
-   
    EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 5.0);
    EXPECT_DOUBLE_EQ(magnitude_list(0, 1), 1.0);
    EXPECT_DOUBLE_EQ(magnitude_list(0, 2), 2.0);
@@ -93,6 +108,26 @@ TEST(Utility, CalculateFFT2MagnitudeList) {
    EXPECT_DOUBLE_EQ(magnitude_list(1, 0), 13.0);
    EXPECT_DOUBLE_EQ(magnitude_list(1, 1), 1.0);
    EXPECT_DOUBLE_EQ(magnitude_list(1, 2), 2.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 3), 0.0);
+
+   magnitude_list = utility::CalculateFFT2MagnitudeList(samples, 2, 2, "forward", 2);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 2.5);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 1), 0.5);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 2), 1.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 3), 0.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 0), 6.5);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 1), 0.5);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 2), 1.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 3), 0.0);
+
+   magnitude_list = utility::CalculateFFT2MagnitudeList(samples, 2, 2, "backward", 2);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 0), 10.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 1), 2.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 2), 4.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(0, 3), 0.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 0), 26.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 1), 2.0);
+   EXPECT_DOUBLE_EQ(magnitude_list(1, 2), 4.0);
    EXPECT_DOUBLE_EQ(magnitude_list(1, 3), 0.0);
 }
 

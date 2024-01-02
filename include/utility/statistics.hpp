@@ -88,12 +88,14 @@ std::pair<double, double> CalculateMomentWithSTD(const Eigen::Matrix<double, Eig
 //! @param array_list The input matrix where each row represents a 1D array.
 //! @param n The number of elements in the 1D array.
 //! @param norm The normalization type to use.
+//! @param power The exponent to be applied to the calculated Fourier intensities.
 //! @param num_threads The number of threads to use for parallel computation.
 //! @return A matrix where each row contains the Fourier transform magnitude of the corresponding input array.
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
 CalculateFFTMagnitudeList(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &array_list,
                           const std::int64_t n,
                           const std::string norm,
+                          const std::int32_t power,
                           const std::int32_t num_threads) {
    
    if (array_list.cols() != n) {
@@ -128,7 +130,13 @@ CalculateFFTMagnitudeList(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dyn
       fft.fwd(fft_result, new_row);
       
       // Calculating Fourier intensity
-      fft_intensity.row(i) = fft_result.array().abs()*norm_factor;
+      if (power == 1) {
+         fft_intensity.row(i) = fft_result.array().abs()*norm_factor;
+      }
+      else {
+         fft_intensity.row(i) = (fft_result.array().abs()*norm_factor).pow(power);
+      }
+
    }
    
    return fft_intensity;
@@ -140,6 +148,7 @@ CalculateFFTMagnitudeList(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dyn
 //! @param n_x The number of columns in the unflattened 2D array.
 //! @param n_y The number of rows in the unflattened 2D array.
 //! @param norm The normalization type to use.
+//! @param power The exponent to be applied to the calculated Fourier intensities.
 //! @param num_threads The number of threads to use for parallel computation.
 //! @return A matrix where each row contains the Fourier transform magnitude of the corresponding input array.
 Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
@@ -147,6 +156,7 @@ CalculateFFT2MagnitudeList(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dy
                            const std::int64_t n_x,
                            const std::int64_t n_y,
                            const std::string norm,
+                           const double power,
                            const std::int32_t num_threads) {
    if (array_list.cols() != n_x*n_y) {
       throw std::invalid_argument("The number of columns in array_list must be equal to n_x*n_y.");
@@ -191,7 +201,12 @@ CalculateFFT2MagnitudeList(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dy
       }
       
       // Calculating Fourier intensity
-      fft_intensity.row(i) = temp_fft_matrix.array().abs().reshaped<Eigen::RowMajor>()*norm_factor;
+      if (power == 1) {
+         fft_intensity.row(i) = temp_fft_matrix.array().abs().reshaped<Eigen::RowMajor>()*norm_factor;
+      }
+      else {
+         fft_intensity.row(i) = (temp_fft_matrix.array().abs()*norm_factor).pow(power).reshaped<Eigen::RowMajor>();
+      }
    }
    
    return fft_intensity;

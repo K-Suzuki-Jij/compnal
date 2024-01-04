@@ -315,6 +315,17 @@ class CMCResultSet:
         self.results.update(other.results)
         self.index_to_uuid.extend(other.index_to_uuid)
 
+    def sort(self, key: callable):
+        """
+        Sort the results in-place using a custom key function.
+
+        Args:
+            key (callable): A function that takes a CMCResult object and returns a value to sort by.
+        """
+        sorted_items = sorted(self.results.items(), key=lambda item: key(item[1]))
+        self.results = dict(sorted_items)
+        self.index_to_uuid = [uuid for uuid, _ in sorted_items]
+
     def to_serializable(self) -> dict:
         """Convert to a serializable object.
 

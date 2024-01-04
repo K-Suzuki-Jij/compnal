@@ -369,3 +369,45 @@ def test_cmc_result_h5py_from_ssf():
         assert result[0].time.total == from_result[0].time.total
         assert result[0].time.sample == from_result[0].time.sample
         assert result[0].time.energy == from_result[0].time.energy
+
+def test_cmc_result_sort_1():
+    result_set = CMC.run_single_flip(
+        model=PolyIsing(
+            lattice=InfiniteRange(system_size=4),
+            interaction={3: -1.0},
+            spin_magnitude=0.5,
+            spin_scale_factor=1,
+        ),
+        temperature=1.0,
+        num_sweeps=1,
+        num_samples=2,
+        num_threads=2,
+    )
+
+    result_set.merge(
+        CMC.run_single_flip(
+            model=PolyIsing(
+                lattice=InfiniteRange(system_size=4),
+                interaction={3: -1.0},
+                spin_magnitude=0.5,
+                spin_scale_factor=1,
+            ),
+            temperature=0.5,
+            num_sweeps=1,
+            num_samples=2,
+            num_threads=2,
+        )
+    )
+    result_set[0].temperature = 1.0
+    result_set[1].temperature = 0.5
+    ans = [1.0, 0.5]
+    for i, result in enumerate(result_set):
+        result.temperature = ans[i]
+
+    result_set.sort(lambda x: x.temperature)
+    assert result_set[0].temperature == 0.5
+    assert result_set[1].temperature == 1.0
+    ans = [0.5, 1.0]
+    for i, result in enumerate(result_set):
+        result.temperature = ans[i]
+

@@ -44,5 +44,6 @@ jobs:
           CIBW_BUILD_VERBOSITY: 3
           IBW_ENVIRONMENT: PATH=$PATH:/usr/include/eigen3
         run: |
+          dpkg -L libeigen3-dev
           cibuildwheel --output-dir wheelhouse
           twine upload wheelhouse/* --repository testpypi

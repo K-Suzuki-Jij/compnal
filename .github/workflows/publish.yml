@@ -35,6 +35,8 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew install eigen
+          softwareupdate --install-rosetta
+          arch -arm64 brew install libomp
 
       - name: Build and publish
         env:

@@ -43,5 +43,8 @@ jobs:
           CIBW_BUILD: cp39-*
           CIBW_BUILD_VERBOSITY: 3
         run: |
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            export CIBW_ENVIRONMENT="CPLUS_INCLUDE_PATH=/usr/include/eigen3"
+          fi
           cibuildwheel --output-dir wheelhouse
           twine upload wheelhouse/* --repository testpypi

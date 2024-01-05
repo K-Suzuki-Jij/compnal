@@ -8,7 +8,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        os: [macos-latest, macos-13-xlarge]
+        os: [macos-latest, macos-13-large]
 
     runs-on: ${{ matrix.os }}
 

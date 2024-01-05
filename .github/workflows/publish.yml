@@ -10,6 +10,11 @@ jobs:
         matrix:
           python-version: ['3.9', '3.10', '3.11', '3.12']
           os: [ubuntu-latest, macos-latest]
+          include:
+            - os: ubuntu-latest
+              os-tag: "linux"
+            - os: macos-latest
+              os-tag: "macos"
 
     runs-on: ${{ matrix.os }}
 
@@ -31,7 +36,8 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          OS_TAG: ${{ matrix.os-tag }}
         run: |
-            python setup.py sdist -vvv
-            python setup.py bdist_wheel --python-tag py${{ matrix.python-version }} -vvv
+            python setup.py sdist
+            python setup.py bdist_wheel --plat-name=py${{ matrix.python-version }}_${{ env.OS_TAG }} -vvv
             twine upload dist/* --repository testpypi

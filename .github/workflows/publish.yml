@@ -8,7 +8,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [macos-latest, macos-13-xlarge]
 
     runs-on: ${{ matrix.os }}
 
@@ -34,16 +34,14 @@ jobs:
       - name: Install compile dependencies on MacOS
         if: matrix.os == 'macos-latest'
         run: |
-          brew install eigen
-          softwareupdate --install-rosetta
-          arch -arm64 brew install libomp
+          brew install eigen libomp
 
       - name: Build and publish
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           CIBW_BUILD: cp39-*
-          CIBW_ARCHS_MACOS: x86_64 arm64
+          CIBW_ARCHS: auto64
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse

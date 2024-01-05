@@ -27,7 +27,12 @@ jobs:
     
     - name: Extract version tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-    
+
+    - name: Extract version tag and update setup.py temporarily
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        sed -i "s/version='.*',/version='$VERSION',/" setup.py
+        
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.USERNAME }}

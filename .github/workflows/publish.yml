@@ -8,7 +8,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9']
         os: [macos-latest]
 
     runs-on: ${{ matrix.os }}
@@ -42,6 +42,7 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-*
         run: |
           cibuildwheel --output-dir wheelhouse
           twine upload wheelhouse/* --repository testpypi

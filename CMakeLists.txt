@@ -10,13 +10,11 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 # Set OpenMP
 if(APPLE)
-  # Set the C++ compiler to g++
-  set(CMAKE_CXX_COMPILER g++-13)
-  #message(STATUS "Try to enable OpenMP from Homebrew on Apple")
-  #execute_process(COMMAND brew --prefix libomp COMMAND tr -d '\n' OUTPUT_VARIABLE OMP_DIR)
-  #include_directories("${OMP_DIR}/include")
-  #link_directories("${OMP_DIR}/lib")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+  message(STATUS "Try to enable OpenMP from Homebrew on Apple")
+  execute_process(COMMAND brew --prefix libomp COMMAND tr -d '\n' OUTPUT_VARIABLE OMP_DIR)
+  include_directories("${OMP_DIR}/include")
+  link_directories("${OMP_DIR}/lib")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xpreprocessor -fopenmp -lomp -Wno-unused-command-line-argument")
 else()
   find_package(OpenMP)
   if(OpenMP_FOUND)

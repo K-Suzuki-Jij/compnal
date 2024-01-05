@@ -42,7 +42,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           CIBW_BUILD: cp39-*
           CIBW_ARCHS_MACOS: x86_64 arm64
-          CIBW_VERBOSITY: 3
+          CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse
           twine upload wheelhouse/* --repository testpypi

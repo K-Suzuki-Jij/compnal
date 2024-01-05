@@ -40,4 +40,5 @@ jobs:
           CIBW_ARCHS_MACOS: x86_64 arm64
         run: |
           cibuildwheel --output-dir wheelhouse
+          python -m pip install twine
           twine upload wheelhouse/* --repository testpypi

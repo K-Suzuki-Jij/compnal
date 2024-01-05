@@ -34,14 +34,13 @@ jobs:
       - name: Install compile dependencies on MacOS
         if: matrix.os == 'macos-latest'
         run: |
-          brew install eigen libomp
+          brew install eigen libomp gcc
 
       - name: Build and publish
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           CIBW_BUILD: cp39-*
-          arch: universal2
           CIBW_PLATFORM: macos
           CIBW_BUILD_VERBOSITY: 3
         run: |

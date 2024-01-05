@@ -8,7 +8,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        os: [macos-latest, macos-13-large]
+        os: [macos-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -41,7 +41,8 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           CIBW_BUILD: cp39-*
-          CIBW_ARCHS: auto64
+          arch: universal2
+          CIBW_PLATFORM: macos
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse

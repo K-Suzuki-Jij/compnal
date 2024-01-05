@@ -26,6 +26,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install setuptools wheel twine build
+          pip install cibuildwheel
 
       - name: Install compile dependencies on Ubuntu
         if: matrix.os == 'ubuntu-latest'
@@ -42,5 +43,5 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          python -m build
-          twine upload dist/* --repository testpypi
+          cibuildwheel --output-dir wheelhouse
+          twine upload wheelhouse/* --repository testpypi

@@ -595,7 +595,7 @@ def test_cmc_pt_poly_ising_square():
             assert result.temperature == 0.5 + 0.5 * i
 
             assert result.model_info.model_type == ClassicalModelType.POLY_ISING
-            assert result.model_info.interactions == {1: -1, 3: +2}
+            assert result.model_info.interactions == {1: -1.0, 2: 2.0}
             assert result.model_info.spin_magnitude == {
                 (i, j): 1 for i in range(4) for j in range(3)
             }
@@ -694,7 +694,7 @@ def test_cmc_pt_poly_ising_cubic():
             assert result.temperature == 0.5 + 0.5 * i
 
             assert result.model_info.model_type == ClassicalModelType.POLY_ISING
-            assert result.model_info.interactions == {1: -1, 3: +2}
+            assert result.model_info.interactions == {1: -1, 2: +2}
             assert result.model_info.spin_magnitude == {
                 (i, j, k): 1 for i in range(3) for j in range(4) for k in range(3)
             }

@@ -26,7 +26,6 @@ setup_requires = [
     "pybind11 >=2.11.0, < 2.12.0",
     "cmake > 3.20",
     "scikit-build > 0.16.0",
-    "setuptools_scm",
 ]
 
 if any(arg in sys.argv for arg in ("pytest", "test")):

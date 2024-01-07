@@ -26,16 +26,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install cibuildwheel twine
 
-      - name: Install compile dependencies on Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt install libeigen3-dev
-  
-      - name: Install compile dependencies on MacOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install eigen
-
       - name: Build and publish for Linux
         if: matrix.os == 'ubuntu-latest'
         env:
@@ -52,7 +42,7 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-          CIBW_BUILD: cp39-macosx_universal2
+          CIBW_BUILD: cp39-macosx_x86_64
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse

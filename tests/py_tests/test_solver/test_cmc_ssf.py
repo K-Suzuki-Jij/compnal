@@ -533,7 +533,7 @@ def test_cmc_ssf_poly_ising_square():
         assert result_set[0].temperature == 0.5
 
         assert result_set[0].model_info.model_type == ClassicalModelType.POLY_ISING
-        assert result_set[0].model_info.interactions == {0: +3, 8: -12}
+        assert result_set[0].model_info.interactions == {0: 3.0, 2: -12.0}
         assert result_set[0].model_info.spin_magnitude == {
             (i, j): 1 for i in range(4) for j in range(3)
         }

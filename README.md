@@ -44,7 +44,7 @@ We are actively working on expanding `COMPNAL` with the following upcoming featu
     - [ ] Hubbard model
     - [ ] Kondo Lattice model
 
-#### Alghorithm
+#### Algorithm
 - [ ] Classical Monte Carlo method
     - [ ] Suwa-Todo algorithm
     - [ ] Wolff algorithm
@@ -56,10 +56,14 @@ We are actively working on expanding `COMPNAL` with the following upcoming featu
 
 # Installation
 ## Install from PyPI
-Not yet available.
+Only for Linux and MacOS on x86_64.
+```bash
+pip install compnal
+```
+For MacOS on Apple Silicon, please follow the instructions below.
 
-## Install the latest release from GitHub
-To install the latest release of `compnal`, use the following command:
+## Install from GitHub
+To install the latest release of `compnal` from the source, use the following command:
 
 ```bash
 pip install git+https://github.com/K-Suzuki-Jij/compnal.git
@@ -76,7 +80,7 @@ Before installation, make sure that the following dependencies are installed.
 ### On MacOS
 First, install the dependencies using [Homebrew](https://brew.sh/).
 ```bash
-brew install cmake eigen pybind11 libomp
+brew install cmake libomp
 ```
 
 Then, clone this repository and install `COMPNAL`.
@@ -92,7 +96,7 @@ python -m pytest tests
 ### On Linux
 First, install the dependencies using apt.
 ```bash
-sudo apt install cmake libeigen3-dev pybind11-dev
+sudo apt install cmake
 ```
 
 Then, clone this repository and install `COMPNAL`.

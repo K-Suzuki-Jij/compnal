@@ -35,7 +35,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse
-          twine upload wheelhouse/* --repository testpypi
+          twine upload wheelhouse/* --repository pypi
 
       - name: Build and publish for MacOS
         if: matrix.os == 'macos-latest'

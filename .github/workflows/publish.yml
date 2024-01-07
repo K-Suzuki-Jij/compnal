@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
+        python-version: [3.9]
 
     runs-on: ${{ matrix.os }}
 
@@ -19,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
@@ -36,12 +37,24 @@ jobs:
         run: |
           brew install eigen
 
-      - name: Build and publish
+      - name: Build and publish for Linux
+        if: matrix.os == 'ubuntu-latest'
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-          CIBW_BUILD: cp39-*
+          CIBW_BUILD: "cp${{ matrix.python-version }}-manylinux_x86_64"
           CIBW_ARCHS: x86_64
+          CIBW_BUILD_VERBOSITY: 3
+        run: |
+          cibuildwheel --output-dir wheelhouse
+          twine upload wheelhouse/* --repository testpypi
+
+      - name: Build and publish for MacOS
+        if: matrix.os == 'macos-latest'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          CIBW_BUILD: "cp${{ matrix.python-version }}-macosx_x86_64"
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse

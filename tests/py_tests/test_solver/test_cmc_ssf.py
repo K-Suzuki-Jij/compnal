@@ -506,7 +506,7 @@ def test_cmc_ssf_poly_ising_square():
         square = Square(x_size=4, y_size=3, boundary_condition=bc)
         ising = PolyIsing(
             lattice=square,
-            interaction={0: +3, 8: -12},
+            interaction={0: +3, 2: -12},
             spin_magnitude=1,
             spin_scale_factor=1,
         )

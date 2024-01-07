@@ -564,7 +564,7 @@ def test_cmc_pt_poly_ising_square():
         square = Square(x_size=4, y_size=3, boundary_condition=bc)
         ising = PolyIsing(
             lattice=square,
-            interaction={1: -1, 3: +2},
+            interaction={1: -1, 2: +2},
             spin_magnitude=1,
             spin_scale_factor=1,
         )
@@ -660,7 +660,7 @@ def test_cmc_pt_poly_ising_cubic():
         cubic = Cubic(x_size=3, y_size=4, z_size=3, boundary_condition=bc)
         ising = PolyIsing(
             lattice=cubic,
-            interaction={1: -1, 3: +2},
+            interaction={1: -1, 2: +2},
             spin_magnitude=1,
             spin_scale_factor=1,
         )

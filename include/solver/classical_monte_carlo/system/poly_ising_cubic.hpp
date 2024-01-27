@@ -582,18 +582,36 @@ private:
                double spin_prod_x = 1;
                double spin_prod_y = 1;
                double spin_prod_z = 1;
+               std::int32_t num_zero_x = 0;
+               std::int32_t num_zero_y = 0;
+               std::int32_t num_zero_z = 0;
                for (std::int32_t j = 0; j < it.first; ++j) {
                   const std::int32_t p_ind_x = coo_z*x_size_*y_size_ + coo_y*x_size_ + (coo_x - it.first + 1 + i + j + x_size_)%x_size_;
                   const std::int32_t p_ind_y = coo_z*x_size_*y_size_ + ((coo_y - it.first + 1 + i + j + y_size_)%y_size_)*x_size_ + coo_x;
                   const std::int32_t p_ind_z = ((coo_z - it.first + 1 + i + j + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
                   if (p_ind_x != index) {
-                     spin_prod_x *= this->sample_[p_ind_x].GetValue();
+                     if (this->sample_[p_ind_x].GetValue() != 0.0) {
+                        spin_prod_x *= this->sample_[p_ind_x].GetValue();
+                     }
+                     else {
+                        num_zero_x++;
+                     }
                   }
                   if (p_ind_y != index) {
-                     spin_prod_y *= this->sample_[p_ind_y].GetValue();
+                     if (this->sample_[p_ind_y].GetValue() != 0.0) {
+                        spin_prod_y *= this->sample_[p_ind_y].GetValue();
+                     }
+                     else {
+                        num_zero_y++;
+                     }
                   }
                   if (p_ind_z != index) {
-                     spin_prod_z *= this->sample_[p_ind_z].GetValue();
+                     if (this->sample_[p_ind_z].GetValue() != 0.0) {
+                        spin_prod_z *= this->sample_[p_ind_z].GetValue();
+                     }
+                     else {
+                        num_zero_z++;
+                     }
                   }
                }
                for (std::int32_t j = 0; j < it.first; ++j) {
@@ -601,13 +619,28 @@ private:
                   const std::int32_t p_ind_y = coo_z*x_size_*y_size_ + ((coo_y - it.first + 1 + i + j + y_size_)%y_size_)*x_size_ + coo_x;
                   const std::int32_t p_ind_z = ((coo_z - it.first + 1 + i + j + z_size_)%z_size_)*x_size_*y_size_ + coo_y*x_size_ + coo_x;
                   if (p_ind_x != index) {
-                     this->d_E_[p_ind_x] += val*spin_prod_x/this->sample_[p_ind_x].GetValue();
+                     if (num_zero_x == 0) {
+                        this->d_E_[p_ind_x] += val*spin_prod_x/this->sample_[p_ind_x].GetValue();
+                     }
+                     else if (num_zero_x == 1 && this->sample_[p_ind_x].GetValue() == 0.0) {
+                        this->d_E_[p_ind_x] += val*spin_prod_x;
+                     }
                   }
                   if (p_ind_y != index) {
-                     this->d_E_[p_ind_y] += val*spin_prod_y/this->sample_[p_ind_y].GetValue();
+                     if (num_zero_y == 0) {
+                        this->d_E_[p_ind_y] += val*spin_prod_y/this->sample_[p_ind_y].GetValue();
+                     }
+                     else if (num_zero_y == 1 && this->sample_[p_ind_y].GetValue() == 0.0) {
+                        this->d_E_[p_ind_y] += val*spin_prod_y;
+                     }
                   }
                   if (p_ind_z != index) {
-                     this->d_E_[p_ind_z] += val*spin_prod_z/this->sample_[p_ind_z].GetValue();
+                     if (num_zero_z == 0) {
+                        this->d_E_[p_ind_z] += val*spin_prod_z/this->sample_[p_ind_z].GetValue();
+                     }
+                     else if (num_zero_z == 1 && this->sample_[p_ind_z].GetValue() == 0.0) {
+                        this->d_E_[p_ind_z] += val*spin_prod_z;
+                     }
                   }
                }
             }
@@ -623,14 +656,25 @@ private:
                   break;
                }
                double spin_prod = 1;
+               std::int32_t num_zero_x = 0;
                for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j != coo_x) {
-                     spin_prod *= this->sample_[coo_z*x_size_*y_size_ + coo_y*x_size_ + j].GetValue();
+                     if (this->sample_[coo_z*x_size_*y_size_ + coo_y*x_size_ + j].GetValue() != 0.0) {
+                        spin_prod *= this->sample_[coo_z*x_size_*y_size_ + coo_y*x_size_ + j].GetValue();
+                     }
+                     else {
+                        num_zero_x++;
+                     }
                   }
                }
                for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j != coo_x) {
-                     this->d_E_[coo_z*x_size_*y_size_ + coo_y*x_size_ + j] += val*spin_prod/this->sample_[coo_z*x_size_*y_size_ + coo_y*x_size_ + j].GetValue();
+                     if (num_zero_x == 0) {
+                        this->d_E_[coo_z*x_size_*y_size_ + coo_y*x_size_ + j] += val*spin_prod/this->sample_[coo_z*x_size_*y_size_ + coo_y*x_size_ + j].GetValue();
+                     }
+                     else if (num_zero_x == 1 && this->sample_[coo_z*x_size_*y_size_ + coo_y*x_size_ + j].GetValue() == 0.0) {
+                        this->d_E_[coo_z*x_size_*y_size_ + coo_y*x_size_ + j] += val*spin_prod;
+                     }
                   }
                }
             }
@@ -641,14 +685,25 @@ private:
                   break;
                }
                double spin_prod = 1;
+               std::int32_t num_zero_y = 0;
                for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j != coo_y) {
-                     spin_prod *= this->sample_[coo_z*x_size_*y_size_ + j*x_size_ + coo_x].GetValue();
+                     if (this->sample_[coo_z*x_size_*y_size_ + j*x_size_ + coo_x].GetValue() != 0.0) {
+                        spin_prod *= this->sample_[coo_z*x_size_*y_size_ + j*x_size_ + coo_x].GetValue();
+                     }
+                     else {
+                        num_zero_y++;
+                     }
                   }
                }
                for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j != coo_y) {
-                     this->d_E_[coo_z*x_size_*y_size_ + j*x_size_ + coo_x] += val*spin_prod/this->sample_[coo_z*x_size_*y_size_ + j*x_size_ + coo_x].GetValue();
+                     if (num_zero_y == 0) {
+                        this->d_E_[coo_z*x_size_*y_size_ + j*x_size_ + coo_x] += val*spin_prod/this->sample_[coo_z*x_size_*y_size_ + j*x_size_ + coo_x].GetValue();
+                     }
+                     else if (num_zero_y == 1 && this->sample_[coo_z*x_size_*y_size_ + j*x_size_ + coo_x].GetValue() == 0.0) {
+                        this->d_E_[coo_z*x_size_*y_size_ + j*x_size_ + coo_x] += val*spin_prod;
+                     }
                   }
                }
             }
@@ -659,14 +714,25 @@ private:
                   break;
                }
                double spin_prod = 1;
+               std::int32_t num_zero_z = 0;
                for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j != coo_z) {
-                     spin_prod *= this->sample_[j*x_size_*y_size_ + coo_y*x_size_ + coo_x].GetValue();
+                     if (this->sample_[j*x_size_*y_size_ + coo_y*x_size_ + coo_x].GetValue() != 0.0) {
+                        spin_prod *= this->sample_[j*x_size_*y_size_ + coo_y*x_size_ + coo_x].GetValue();
+                     }
+                     else {
+                        num_zero_z++;
+                     }
                   }
                }
                for (std::int32_t j = i; j < i + it.first; ++j) {
                   if (j != coo_z) {
-                     this->d_E_[j*x_size_*y_size_ + coo_y*x_size_ + coo_x] += val*spin_prod/this->sample_[j*x_size_*y_size_ + coo_y*x_size_ + coo_x].GetValue();
+                     if (num_zero_z == 0) {
+                        this->d_E_[j*x_size_*y_size_ + coo_y*x_size_ + coo_x] += val*spin_prod/this->sample_[j*x_size_*y_size_ + coo_y*x_size_ + coo_x].GetValue();
+                     }
+                     else if (num_zero_z == 1 && this->sample_[j*x_size_*y_size_ + coo_y*x_size_ + coo_x].GetValue() == 0.0) {
+                        this->d_E_[j*x_size_*y_size_ + coo_y*x_size_ + coo_x] += val*spin_prod;
+                     }
                   }
                }
             }

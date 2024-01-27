@@ -17,7 +17,7 @@
 //  compnal
 //
 //  Created by kohei on 2023/05/03.
-//  
+//
 //
 
 #pragma once
@@ -467,15 +467,15 @@ private:
          for (std::int32_t index = 0; index < system_size; ++index) {
             double val = 0;
             for (const auto &it: interaction_) {
-               double spin_prod = 1;
-               for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                  spin_prod *= sample[(index - diff + system_size)%system_size].GetValue();
-               }
-               for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
+               for (std::int32_t base = 0; base < it.first; ++base) {
+                  double spin_prod = 1;
+                  for (std::int32_t diff = 0; diff < it.first; ++diff) {
+                     const auto target_index = (index - diff + base + system_size)%system_size;
+                     if (target_index != index) {
+                        spin_prod *= sample[target_index].GetValue();
+                     }
+                  }
                   val += it.second*spin_prod;
-                  const std::int32_t ind_1 = (index - diff + system_size)%system_size;
-                  const std::int32_t ind_2 = (index - diff + it.first + system_size)%system_size;
-                  spin_prod = spin_prod*sample[ind_2].GetValue()/sample[ind_1].GetValue();
                }
             }
             d_E_[index] += val;
@@ -485,17 +485,22 @@ private:
          for (std::int32_t index = 0; index < system_size; ++index) {
             double val = 0;
             for (const auto &it: interaction_) {
-               double spin_prod = 1;
-               for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                  spin_prod *= sample[(index - diff + system_size)%system_size].GetValue();
-               }
-               for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
-                  if (index - diff >= 0 && index - diff + it.first - 1 < system_size) {
+               for (std::int32_t base = 0; base < it.first; ++base) {
+                  double spin_prod = 1;
+                  bool include_flag = true;
+                  for (std::int32_t diff = 0; diff < it.first; ++diff) {
+                     const auto target_index = index - diff + base;
+                     if (target_index < 0 || target_index >= system_size) {
+                        include_flag = false;
+                        break;
+                     }
+                     if (target_index != index) {
+                        spin_prod *= sample[target_index].GetValue();
+                     }
+                  }
+                  if (include_flag) {
                      val += it.second*spin_prod;
                   }
-                  const std::int32_t ind_1 = (index - diff + system_size)%system_size;
-                  const std::int32_t ind_2 = (index - diff + it.first + system_size)%system_size;
-                  spin_prod = spin_prod*sample[ind_2].GetValue()/sample[ind_1].GetValue();
                }
             }
             d_E_[index] += val;
@@ -521,27 +526,26 @@ private:
          for (std::int32_t coo_x = 0; coo_x < x_size; ++coo_x) {
             for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
                double val = 0;
+               
                for (const auto &it: interaction_) {
-                  double spin_prod_x = 1;
-                  double spin_prod_y = 1;
-                  for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                     const std::int32_t i_x = coo_y*x_size + (coo_x - diff + x_size)%x_size;
-                     const std::int32_t i_y = ((coo_y - diff + y_size)%y_size)*x_size + coo_x;
-                     spin_prod_x *= sample[i_x].GetValue();
-                     spin_prod_y *= sample[i_y].GetValue();
-                  }
                   if (it.first == 1) {
                      val += it.second;
                   }
                   else {
-                     for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
+                     for (std::int32_t base = 0; base < it.first; ++base) {
+                        double spin_prod_x = 1;
+                        double spin_prod_y = 1;
+                        for (std::int32_t diff = 0; diff < it.first; ++diff) {
+                           const std::int32_t i_x = coo_y*x_size + (coo_x - diff + base + x_size)%x_size;
+                           const std::int32_t i_y = ((coo_y - diff + base + y_size)%y_size)*x_size + coo_x;
+                           if (i_x != coo_y*x_size + coo_x) {
+                              spin_prod_x *= sample[i_x].GetValue();
+                           }
+                           if (i_y != coo_y*x_size + coo_x) {
+                              spin_prod_y *= sample[i_y].GetValue();
+                           }
+                        }
                         val += it.second*(spin_prod_x + spin_prod_y);
-                        const std::int32_t i_x1 = coo_y*x_size + (coo_x - diff + x_size)%x_size;
-                        const std::int32_t i_x2 = coo_y*x_size + (coo_x - diff + it.first + x_size)%x_size;
-                        const std::int32_t i_y1 = ((coo_y - diff + y_size)%y_size)*x_size + coo_x;
-                        const std::int32_t i_y2 = ((coo_y - diff + it.first + y_size)%y_size)*x_size + coo_x;
-                        spin_prod_x = spin_prod_x*sample[i_x2].GetValue()/sample[i_x1].GetValue();
-                        spin_prod_y = spin_prod_y*sample[i_y2].GetValue()/sample[i_y1].GetValue();
                      }
                   }
                }
@@ -554,31 +558,38 @@ private:
             for (std::int32_t coo_y = 0; coo_y < y_size; ++coo_y) {
                double val = 0;
                for (const auto &it: interaction_) {
-                  double spin_prod_x = 1;
-                  double spin_prod_y = 1;
-                  for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                     const std::int32_t i_x = coo_y*x_size + (coo_x - diff + x_size)%x_size;
-                     const std::int32_t i_y = ((coo_y - diff + y_size)%y_size)*x_size + coo_x;
-                     spin_prod_x *= sample[i_x].GetValue();
-                     spin_prod_y *= sample[i_y].GetValue();
-                  }
                   if (it.first == 1) {
                      val += it.second;
                   }
                   else {
-                     for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
-                        if (coo_x - diff >= 0 && coo_x - diff + it.first - 1 < x_size) {
+                     for (std::int32_t base = 0; base < it.first; ++base) {
+                        double spin_prod_x = 1;
+                        double spin_prod_y = 1;
+                        bool include_flag_x = true;
+                        bool include_flag_y = true;
+                        for (std::int32_t diff = 0; diff < it.first; ++diff) {
+                           const std::int32_t i_x = coo_y*x_size + coo_x - diff + base;
+                           const std::int32_t i_y = (coo_y - diff + base)*x_size + coo_x;
+                           if (coo_x - diff + base < 0 || coo_x - diff + base >= x_size) {
+                              include_flag_x = false;
+                           }
+                           else if (i_x != coo_y*x_size + coo_x) {
+                              spin_prod_x *= sample[i_x].GetValue();
+                           }
+                           if (coo_y - diff + base < 0 || coo_y - diff + base >= y_size) {
+                              include_flag_y = false;
+                           }
+                           else if (i_y != coo_y*x_size + coo_x) {
+                              spin_prod_y *= sample[i_y].GetValue();
+                           }
+                        }
+                        
+                        if (include_flag_x) {
                            val += it.second*spin_prod_x;
                         }
-                        if (coo_y - diff >= 0 && coo_y - diff + it.first - 1 < y_size) {
+                        if (include_flag_y) {
                            val += it.second*spin_prod_y;
                         }
-                        const std::int32_t i_x1 = coo_y*x_size + (coo_x - diff + x_size)%x_size;
-                        const std::int32_t i_x2 = coo_y*x_size + (coo_x - diff + it.first + x_size)%x_size;
-                        const std::int32_t i_y1 = ((coo_y - diff + y_size)%y_size)*x_size + coo_x;
-                        const std::int32_t i_y2 = ((coo_y + it.first - diff + y_size)%y_size)*x_size + coo_x;
-                        spin_prod_x = spin_prod_x*sample[i_x2].GetValue()/sample[i_x1].GetValue();
-                        spin_prod_y = spin_prod_y*sample[i_y2].GetValue()/sample[i_y1].GetValue();
                      }
                   }
                }
@@ -610,32 +621,29 @@ private:
                for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
                   double val = 0;
                   for (const auto &it: interaction_) {
-                     double spin_prod_x = 1;
-                     double spin_prod_y = 1;
-                     double spin_prod_z = 1;
-                     for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                        const std::int32_t i_x = coo_z*x_size*y_size + coo_y*x_size + (coo_x - diff + x_size)%x_size;
-                        const std::int32_t i_y = coo_z*x_size*y_size + ((coo_y - diff + y_size)%y_size)*x_size + coo_x;
-                        const std::int32_t i_z = ((coo_z - diff + z_size)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
-                        spin_prod_x *= sample[i_x].GetValue();
-                        spin_prod_y *= sample[i_y].GetValue();
-                        spin_prod_z *= sample[i_z].GetValue();
-                     }
                      if (it.first == 1) {
                         val += it.second;
                      }
                      else {
-                        for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
+                        for (std::int32_t base = 0; base < it.first; ++base) {
+                           double spin_prod_x = 1;
+                           double spin_prod_y = 1;
+                           double spin_prod_z = 1;
+                           for (std::int32_t diff = 0; diff < it.first; ++diff) {
+                              const std::int32_t i_x = coo_z*x_size*y_size + coo_y*x_size + (coo_x - diff + base + x_size)%x_size;
+                              const std::int32_t i_y = coo_z*x_size*y_size + ((coo_y - diff + base + y_size)%y_size)*x_size + coo_x;
+                              const std::int32_t i_z = ((coo_z - diff + base + z_size)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
+                              if (i_x != coo_z*x_size*y_size + coo_y*x_size + coo_x) {
+                                 spin_prod_x *= sample[i_x].GetValue();
+                              }
+                              if (i_y != coo_z*x_size*y_size + coo_y*x_size + coo_x) {
+                                 spin_prod_y *= sample[i_y].GetValue();
+                              }
+                              if (i_z != coo_z*x_size*y_size + coo_y*x_size + coo_x) {
+                                 spin_prod_z *= sample[i_z].GetValue();
+                              }
+                           }
                            val += it.second*(spin_prod_x + spin_prod_y + spin_prod_z);
-                           const std::int32_t i_x1 = coo_z*x_size*y_size + coo_y*x_size + (coo_x - diff + x_size)%x_size;
-                           const std::int32_t i_x2 = coo_z*x_size*y_size + coo_y*x_size + (coo_x - diff + it.first + x_size)%x_size;
-                           const std::int32_t i_y1 = coo_z*x_size*y_size + ((coo_y - diff + y_size)%y_size)*x_size + coo_x;
-                           const std::int32_t i_y2 = coo_z*x_size*y_size + ((coo_y - diff + it.first + y_size)%y_size)*x_size + coo_x;
-                           const std::int32_t i_z1 = ((coo_z - diff + z_size)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
-                           const std::int32_t i_z2 = ((coo_z - diff + it.first + z_size)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
-                           spin_prod_x = spin_prod_x*sample[i_x2].GetValue()/sample[i_x1].GetValue();
-                           spin_prod_y = spin_prod_y*sample[i_y2].GetValue()/sample[i_y1].GetValue();
-                           spin_prod_z = spin_prod_z*sample[i_z2].GetValue()/sample[i_z1].GetValue();
                         }
                      }
                   }
@@ -650,40 +658,49 @@ private:
                for (std::int32_t coo_z = 0; coo_z < z_size; ++coo_z) {
                   double val = 0;
                   for (const auto &it: interaction_) {
-                     double spin_prod_x = 1;
-                     double spin_prod_y = 1;
-                     double spin_prod_z = 1;
-                     for (std::int32_t diff = 1; diff < it.first; ++diff) {
-                        const std::int32_t i_x = coo_z*x_size*y_size + coo_y*x_size + (coo_x - diff + x_size)%x_size;
-                        const std::int32_t i_y = coo_z*x_size*y_size + ((coo_y - diff + y_size)%y_size)*x_size + coo_x;
-                        const std::int32_t i_z = ((coo_z - diff + z_size)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
-                        spin_prod_x *= sample[i_x].GetValue();
-                        spin_prod_y *= sample[i_y].GetValue();
-                        spin_prod_z *= sample[i_z].GetValue();
-                     }
                      if (it.first == 1) {
                         val += it.second;
                      }
                      else {
-                        for (std::int32_t diff = it.first - 1; diff >= 0; --diff) {
-                           if (coo_x - diff >= 0 && coo_x - diff + it.first - 1 < x_size) {
+                        for (std::int32_t base = 0; base < it.first; ++base) {
+                           double spin_prod_x = 1;
+                           double spin_prod_y = 1;
+                           double spin_prod_z = 1;
+                           bool include_flag_x = true;
+                           bool include_flag_y = true;
+                           bool include_flag_z = true;
+                           for (std::int32_t diff = 0; diff < it.first; ++diff) {
+                              const std::int32_t i_x = coo_z*x_size*y_size + coo_y*x_size + coo_x - diff + base;
+                              const std::int32_t i_y = coo_z*x_size*y_size + (coo_y - diff + base)*x_size + coo_x;
+                              const std::int32_t i_z = (coo_z - diff + base)*x_size*y_size + coo_y*x_size + coo_x;
+                              if (coo_x - diff + base < 0 || coo_x - diff + base >= x_size) {
+                                 include_flag_x = false;
+                              }
+                              else if (i_x != coo_z*x_size*y_size + coo_y*x_size + coo_x) {
+                                 spin_prod_x *= sample[i_x].GetValue();
+                              }
+                              if (coo_y - diff + base < 0 || coo_y - diff + base >= y_size) {
+                                 include_flag_y = false;
+                              }
+                              else if (i_y != coo_z*x_size*y_size + coo_y*x_size + coo_x) {
+                                 spin_prod_y *= sample[i_y].GetValue();
+                              }
+                              if (coo_z - diff + base < 0 || coo_z - diff + base >= z_size) {
+                                 include_flag_z = false;
+                              }
+                              else if (i_z != coo_z*x_size*y_size + coo_y*x_size + coo_x) {
+                                 spin_prod_z *= sample[i_z].GetValue();
+                              }
+                           }
+                           if (include_flag_x) {
                               val += it.second*spin_prod_x;
                            }
-                           if (coo_y - diff >= 0 && coo_y - diff + it.first - 1 < y_size) {
+                           if (include_flag_y) {
                               val += it.second*spin_prod_y;
                            }
-                           if (coo_z - diff >= 0 && coo_z - diff + it.first - 1 < z_size) {
+                           if (include_flag_z) {
                               val += it.second*spin_prod_z;
                            }
-                           const std::int32_t i_x1 = coo_z*x_size*y_size + coo_y*x_size + (coo_x - diff + x_size)%x_size;
-                           const std::int32_t i_x2 = coo_z*x_size*y_size + coo_y*x_size + (coo_x - diff + it.first + x_size)%x_size;
-                           const std::int32_t i_y1 = coo_z*x_size*y_size + ((coo_y - diff + y_size)%y_size)*x_size + coo_x;
-                           const std::int32_t i_y2 = coo_z*x_size*y_size + ((coo_y - diff + it.first + y_size)%y_size)*x_size + coo_x;
-                           const std::int32_t i_z1 = ((coo_z - diff + z_size)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
-                           const std::int32_t i_z2 = ((coo_z - diff + it.first + z_size)%z_size)*x_size*y_size + coo_y*x_size + coo_x;
-                           spin_prod_x = spin_prod_x*sample[i_x2].GetValue()/sample[i_x1].GetValue();
-                           spin_prod_y = spin_prod_y*sample[i_y2].GetValue()/sample[i_y1].GetValue();
-                           spin_prod_z = spin_prod_z*sample[i_z2].GetValue()/sample[i_z1].GetValue();
                         }
                      }
                   }

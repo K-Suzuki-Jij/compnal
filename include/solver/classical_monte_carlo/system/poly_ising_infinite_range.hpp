@@ -274,21 +274,42 @@ private:
                indices[size++] = i;
                if (size == it.first - 1) {
                   double spin_prod = 1;
+                  std::int32_t num_zero = 0;
                   for (std::int32_t j = 0; j < it.first - 1; ++j) {
                      if (indices[j] >= index) {
-                        spin_prod *= this->sample_[indices[j] + 1].GetValue();
+                        if (this->sample_[indices[j] + 1].GetValue() != 0.0) {
+                           spin_prod *= this->sample_[indices[j] + 1].GetValue();
+                        }
+                        else {
+                           num_zero++;
+                        }
                      }
                      else {
-                        spin_prod *= this->sample_[indices[j]].GetValue();
+                        if (this->sample_[indices[j]].GetValue() != 0.0) {
+                           spin_prod *= this->sample_[indices[j]].GetValue();
+                        }
+                        else {
+                           num_zero++;
+                        }
                      }
                   }
 
                   for (std::int32_t j = 0; j < it.first - 1; ++j) {
                      if (indices[j] >= index) {
-                        this->d_E_[indices[j] + 1] += val*spin_prod/this->sample_[indices[j] + 1].GetValue();
+                        if (num_zero == 0) {
+                           this->d_E_[indices[j] + 1] += val*spin_prod/this->sample_[indices[j] + 1].GetValue();
+                        }
+                        else if (num_zero == 1 && this->sample_[indices[j] + 1].GetValue() == 0.0) {
+                           this->d_E_[indices[j] + 1] += val*spin_prod;
+                        }
                      }
                      else {
-                        this->d_E_[indices[j]] += val*spin_prod/this->sample_[indices[j]].GetValue();
+                        if (num_zero == 0) {
+                           this->d_E_[indices[j]] += val*spin_prod/this->sample_[indices[j]].GetValue();
+                        }
+                        else if (num_zero == 1 && this->sample_[indices[j]].GetValue() == 0.0) {
+                           this->d_E_[indices[j]] += val*spin_prod;
+                        }
                      }
                   }
                   break;

@@ -8,7 +8,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, macos-14]
 
     runs-on: ${{ matrix.os }}
 
@@ -26,6 +26,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install cibuildwheel twine
 
+      - name: Install libomp on MacOS
+        if: matrix.os == 'macos-14'
+        run: |
+          brew install libomp
+
       - name: Build and publish for Linux
         if: matrix.os == 'ubuntu-latest'
         env:
@@ -35,9 +40,9 @@ jobs:
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse
-          twine upload wheelhouse/* --repository pypi
+          twine upload wheelhouse/* --repository
 
-      - name: Build and publish for MacOS
+      - name: Build and publish for MacOS (Intel)
         if: matrix.os == 'macos-latest'
         env:
           TWINE_USERNAME: __token__
@@ -46,4 +51,15 @@ jobs:
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse
-          twine upload wheelhouse/* --repository pypi
+          twine upload wheelhouse/* --repository
+
+      - name: Build and publish for MacOS (M1)
+        if: matrix.os == 'macos-14'
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+          CIBW_BUILD: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
+          CIBW_BUILD_VERBOSITY: 3 
+        run: |
+          cibuildwheel --output-dir wheelhouse
+          twine upload wheelhouse/* --repository

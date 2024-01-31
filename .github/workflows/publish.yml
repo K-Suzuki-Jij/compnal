@@ -40,7 +40,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse
-          twine upload wheelhouse/* --repository
+          twine upload wheelhouse/* --repository pypi
 
       - name: Build and publish for MacOS (Intel)
         if: matrix.os == 'macos-latest'
@@ -51,7 +51,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse
-          twine upload wheelhouse/* --repository
+          twine upload wheelhouse/* --repository pypi
 
       - name: Build and publish for MacOS (M1)
         if: matrix.os == 'macos-14'
@@ -62,4 +62,4 @@ jobs:
           CIBW_BUILD_VERBOSITY: 3 
         run: |
           cibuildwheel --output-dir wheelhouse
-          twine upload wheelhouse/* --repository
+          twine upload wheelhouse/* --repository pypi

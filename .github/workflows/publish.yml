@@ -35,31 +35,31 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           CIBW_BUILD: cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse
-          twine upload wheelhouse/* --repository testpypi
+          twine upload wheelhouse/* --repository
 
       - name: Build and publish for MacOS (Intel)
         if: matrix.os == 'macos-latest'
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           CIBW_BUILD: cp39-macosx_x86_64 cp310-macosx_x86_64 cp311-macosx_x86_64 cp312-macosx_x86_64
           CIBW_BUILD_VERBOSITY: 3
         run: |
           cibuildwheel --output-dir wheelhouse
-          twine upload wheelhouse/* --repository testpypi
+          twine upload wheelhouse/* --repository
 
       - name: Build and publish for MacOS (M1)
         if: matrix.os == 'macos-14'
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           CIBW_BUILD: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
           CIBW_BUILD_VERBOSITY: 3 
         run: |
           cibuildwheel --output-dir wheelhouse
-          twine upload wheelhouse/* --repository testpypi
+          twine upload wheelhouse/* --repository

@@ -58,7 +58,7 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-          CIBW_BUILD: cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
+          CIBW_BUILD: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
           CIBW_BUILD_VERBOSITY: 3 
         run: |
           cibuildwheel --output-dir wheelhouse

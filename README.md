@@ -56,11 +56,10 @@ We are actively working on expanding `COMPNAL` with the following upcoming featu
 
 # Installation
 ## Install from PyPI
-Only for Linux and MacOS on x86_64.
+Only for Linux and MacOS.
 ```bash
 pip install compnal
 ```
-For MacOS on Apple Silicon, please follow the instructions below.
 
 ## Install from GitHub
 To install the latest release of `compnal` from the source, use the following command:

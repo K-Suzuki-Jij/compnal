@@ -62,7 +62,7 @@ void HeatBathUpdater(SystemType *system,
                               const double dist_real) {
       double prob_sum = 0.0;
       for (std::int32_t state = 0; state < num_stete; state++) {
-         if (dist_real < prob_list[state]/norm) {
+         if (dist_real < prob_list[state]/norm + prob_sum) {
             return state;
          }
          prob_sum += prob_list[state]/norm;
@@ -78,7 +78,7 @@ void HeatBathUpdater(SystemType *system,
             const std::int32_t num_state = system->GetNumState(index);
             double z = 0.0;
             for (std::int32_t state = 0; state < num_state; ++state) {
-               prob_list[state] = std::exp(-system->GetEnergyDifference(index, state));
+               prob_list[state] = std::exp(-beta*system->GetEnergyDifference(index, state));
                z += prob_list[state];
             }
             system->Flip(index, trans_prob(prob_list, num_state, z, dist_real(random_number_engine)));
@@ -91,7 +91,7 @@ void HeatBathUpdater(SystemType *system,
             const std::int32_t num_state = system->GetNumState(i);
             double z = 0.0;
             for (std::int32_t state = 0; state < num_state; ++state) {
-               prob_list[state] = std::exp(-system->GetEnergyDifference(i, state));
+               prob_list[state] = std::exp(-beta*system->GetEnergyDifference(i, state));
                z += prob_list[state];
             }
             system->Flip(i, trans_prob(prob_list, num_state, z, dist_real(random_number_engine)));

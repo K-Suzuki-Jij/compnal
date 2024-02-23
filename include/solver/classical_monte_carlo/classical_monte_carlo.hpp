@@ -25,7 +25,8 @@
 #include "../../utility/random.hpp"
 #include "../parameter_class.hpp"
 #include "system/all.hpp"
-#include "single_updater.hpp"
+#include "metropolis_updater.hpp"
+#include "heat_bath_updater.hpp"
 #include "parallel_tempering.hpp"
 #include <random>
 #include <Eigen/Dense>
@@ -228,7 +229,16 @@ private:
          if (initial_sample_list.size() != 0) {
             system.SetSampleByValue(initial_sample_list.row(i));
          }
-         SingleUpdater<SystemType, RandType>(&system, num_sweeps, 1.0/temperature, updater_seed[i], updater, spin_selector);
+         if (updater == StateUpdateMethod::METROPOLIS) {
+            MetropolisUpdater<SystemType, RandType>(&system, num_sweeps, 1.0/temperature, updater_seed[i], spin_selector);
+         }
+         else if (updater == StateUpdateMethod::HEAT_BATH) {
+            HeatBathUpdater<SystemType, RandType>(&system, num_sweeps, 1.0/temperature, updater_seed[i], spin_selector);
+         }
+         else {
+            
+         }
+         
          samples.row(i) = system.ExtractSample();
       }
       return samples;

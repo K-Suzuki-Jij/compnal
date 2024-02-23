@@ -108,6 +108,13 @@ public:
       return sample_;
    }
    
+   //! @brief Get the number of state.
+   //! @param index The index of the variable.
+   //! @return The number of state.
+   std::int32_t GetNumState(const std::int32_t index) const {
+      return sample_[index].GetNumState();
+   }
+   
    //! @brief Generate candidate state.
    //! @param index The index of the variable.
    //! @return The candidate state.

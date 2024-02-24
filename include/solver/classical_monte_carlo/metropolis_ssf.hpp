@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  metropolis_updater.hpp
+//  metropolis_ssf.hpp
 //  compnal
 //
 //  Created by kohei on 2023/06/14.
@@ -35,11 +35,11 @@ namespace classical_monte_carlo {
 //! @param seed Seed of random number engine.
 //! @param spin_selector Spin selection method.
 template<class SystemType, typename RandType>
-void MetropolisUpdater(SystemType *system,
-                       const std::int32_t num_sweeps,
-                       const double beta,
-                       const typename RandType::result_type seed,
-                       const SpinSelectionMethod spin_selector) {
+void MetropolisSSF(SystemType *system,
+                   const std::int32_t num_sweeps,
+                   const double beta,
+                   const typename RandType::result_type seed,
+                   const SpinSelectionMethod spin_selector) {
    
    const std::int32_t system_size = system->GetSystemSize();
    

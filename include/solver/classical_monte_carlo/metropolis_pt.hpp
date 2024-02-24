@@ -13,11 +13,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  parallel_tempering.hpp
+//  metropolis_pt.hpp
 //  compnal
 //
 //  Created by kohei on 2023/07/04.
-//  
+//
 //
 
 #pragma once
@@ -34,16 +34,14 @@ namespace classical_monte_carlo {
 //! @param num_swaps The number of swaps for each replica.
 //! @param seed Seed of random number engine.
 //! @param beta_list List of inverse temperature.
-//! @param updater State update method.
 //! @param spin_selector Spin selection method.
 template<class SystemType, typename RandType>
-void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
-                       const std::int32_t num_sweeps,
-                       const std::int32_t num_swaps,
-                       const typename RandType::result_type seed,
-                       const std::vector<double> &beta_list,
-                       const StateUpdateMethod updater,
-                       const SpinSelectionMethod spin_selector) {
+void MetropolisPT(std::vector<SystemType*> *system_list_pointer,
+                  const std::int32_t num_sweeps,
+                  const std::int32_t num_swaps,
+                  const typename RandType::result_type seed,
+                  const std::vector<double> &beta_list,
+                  const SpinSelectionMethod spin_selector) {
    
    if (system_list_pointer->size() != beta_list.size()) {
       throw std::invalid_argument("The size of system_list is not equal to beta_list.");
@@ -54,21 +52,9 @@ void ParallelTempering(std::vector<SystemType*> *system_list_pointer,
    std::uniform_real_distribution<double> dist_real(0, 1);
    
    // Set update function
-   std::function<bool(double, double)> trans_prob;
-   if (updater == StateUpdateMethod::METROPOLIS) {
-      trans_prob = [](const double delta_S, const double dist_real) {
-         return delta_S <= 0.0 || std::exp(-delta_S) > dist_real;
-      };
-   }
-   else if (updater == StateUpdateMethod::HEAT_BATH) {
-      trans_prob = [](const double delta_S, const double dist_real) {
-         return 1.0/(1.0 + std::exp(delta_S)) > dist_real;
-      };
-   }
-   else {
-      throw std::invalid_argument("Unknown UpdateMethod");
-   }
-   
+   std::function<bool(double, double)> trans_prob = [](const double delta_S, const double dist_real) {
+      return delta_S <= 0.0 || std::exp(-delta_S) > dist_real;
+   };
    
    const std::int32_t num_total = num_sweeps + num_swaps;
    std::int32_t sweep_count = num_sweeps;

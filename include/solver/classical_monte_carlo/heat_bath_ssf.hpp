@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  heat_bath_updater.hpp
+//  heat_bath_ssf.hpp
 //  compnal
 //
 //  Created by 鈴木浩平 on 2024/02/23.
@@ -34,11 +34,11 @@ namespace classical_monte_carlo {
 //! @param seed Seed of random number engine.
 //! @param spin_selector Spin selection method.
 template<class SystemType, typename RandType>
-void HeatBathUpdater(SystemType *system,
-                     const std::int32_t num_sweeps,
-                     const double beta,
-                     const typename RandType::result_type seed,
-                     const SpinSelectionMethod spin_selector) {
+void HeatBathSSF(SystemType *system,
+                 const std::int32_t num_sweeps,
+                 const double beta,
+                 const typename RandType::result_type seed,
+                 const SpinSelectionMethod spin_selector) {
    
    const std::int32_t system_size = system->GetSystemSize();
    
@@ -56,10 +56,10 @@ void HeatBathUpdater(SystemType *system,
    
    std::vector<double> prob_list(max_num_state);
    
-   const auto trans_prob = [](const std::vector<double> &prob_list,
-                              const std::int32_t num_stete,
-                              const double norm,
-                              const double dist_real) {
+   const auto get_new_state = [](const std::vector<double> &prob_list,
+                                 const std::int32_t num_stete,
+                                 const double norm,
+                                 const double dist_real) {
       double prob_sum = 0.0;
       for (std::int32_t state = 0; state < num_stete; state++) {
          if (dist_real < prob_list[state]/norm + prob_sum) {
@@ -81,7 +81,7 @@ void HeatBathUpdater(SystemType *system,
                prob_list[state] = std::exp(-beta*system->GetEnergyDifference(index, state));
                z += prob_list[state];
             }
-            system->Flip(index, trans_prob(prob_list, num_state, z, dist_real(random_number_engine)));
+            system->Flip(index, get_new_state(prob_list, num_state, z, dist_real(random_number_engine)));
          }
       }
    }
@@ -94,7 +94,7 @@ void HeatBathUpdater(SystemType *system,
                prob_list[state] = std::exp(-beta*system->GetEnergyDifference(i, state));
                z += prob_list[state];
             }
-            system->Flip(i, trans_prob(prob_list, num_state, z, dist_real(random_number_engine)));
+            system->Flip(i, get_new_state(prob_list, num_state, z, dist_real(random_number_engine)));
          }
       }
    }

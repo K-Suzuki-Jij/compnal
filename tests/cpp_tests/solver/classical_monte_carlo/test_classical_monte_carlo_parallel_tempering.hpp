@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  test_classicalmonte_carlo_parallel_tempering.hpp
+//  test_classicalmonte_carlo_metropolis_pt.hpp
 //  compnal
 //
 //  Created by kohei on 2023/07/08.

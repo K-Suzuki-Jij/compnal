@@ -25,8 +25,10 @@
 #include "../../utility/random.hpp"
 #include "../parameter_class.hpp"
 #include "system/all.hpp"
-#include "single_updater.hpp"
-#include "parallel_tempering.hpp"
+#include "metropolis_ssf.hpp"
+#include "metropolis_pt.hpp"
+#include "heat_bath_ssf.hpp"
+#include "heat_bath_pt.hpp"
 #include <random>
 #include <Eigen/Dense>
 
@@ -228,7 +230,16 @@ private:
          if (initial_sample_list.size() != 0) {
             system.SetSampleByValue(initial_sample_list.row(i));
          }
-         SingleUpdater<SystemType, RandType>(&system, num_sweeps, 1.0/temperature, updater_seed[i], updater, spin_selector);
+         if (updater == StateUpdateMethod::METROPOLIS) {
+            MetropolisSSF<SystemType, RandType>(&system, num_sweeps, 1.0/temperature, updater_seed[i], spin_selector);
+         }
+         else if (updater == StateUpdateMethod::HEAT_BATH) {
+            HeatBathSSF<SystemType, RandType>(&system, num_sweeps, 1.0/temperature, updater_seed[i], spin_selector);
+         }
+         else {
+            throw std::invalid_argument("Unknown updater");
+         }
+         
          samples.row(i) = system.ExtractSample();
       }
       return samples;
@@ -296,10 +307,21 @@ private:
             system_list_pointer.push_back(&system_list[j]);
          }
          
-         ParallelTempering<SystemType, RandType>(&system_list_pointer,
-                                                 num_sweeps, num_swaps,
-                                                 updater_seed[sample_count], beta_list,
-                                                 updater, spin_selector);
+         if (updater == StateUpdateMethod::METROPOLIS) {
+            MetropolisPT<SystemType, RandType>(&system_list_pointer,
+                                               num_sweeps, num_swaps,
+                                               updater_seed[sample_count], 
+                                               beta_list, spin_selector);
+         }
+         else if (updater == StateUpdateMethod::HEAT_BATH) {
+            HeatBathPT<SystemType, RandType>(&system_list_pointer,
+                                             num_sweeps, num_swaps,
+                                             updater_seed[sample_count],
+                                             beta_list, spin_selector);
+         }
+         else {
+            throw std::invalid_argument("Unknown updater");
+         }
          
          for (std::int64_t replica_count = 0; replica_count < num_replicas; ++replica_count) {
             const auto &vec = system_list_pointer[replica_count]->GetSample();

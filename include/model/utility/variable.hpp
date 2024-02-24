@@ -53,6 +53,12 @@ public:
          throw std::invalid_argument("spin_scale_factor must positive-integer");
       }
    }
+   
+   //! @brief Get the number of state.
+   //! @return The number of state.
+   std::int32_t GetNumState() const {
+      return num_state_;
+   }
       
    //! @brief Get the value of the spin variable from the state number.
    //! @param state_number The state number of the spin variable.

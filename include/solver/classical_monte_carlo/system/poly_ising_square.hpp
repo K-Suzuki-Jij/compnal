@@ -51,6 +51,9 @@ public:
    //! @param index The index of the variable to be flipped.
    //! @param update_state The state number to be updated.
    void Flip(const std::int32_t index, const std::int32_t update_state) {
+      if (update_state == this->sample_[index].GetStateNumber()) {
+         return;
+      }
       this->energy_ += this->GetEnergyDifference(index, update_state);
       if (degree_ == 2) {
          Flip2Body(index, update_state);

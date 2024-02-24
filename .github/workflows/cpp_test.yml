@@ -31,7 +31,7 @@ jobs:
       - name: Install requirements on Ubuntu
         if: matrix.os == 'ubuntu-latest'
         run: |
-          sudo apt install cmake libgtest-dev libeigen3-dev lcov
+          sudo apt install libgtest-dev libeigen3-dev lcov
 
       - name: Compile on MacOS
         if: matrix.os == 'macos-latest' || matrix.os == 'macos-14'

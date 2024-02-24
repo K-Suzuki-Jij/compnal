@@ -72,7 +72,7 @@ TEST(SolverClassicalMonteCarloSF, IsingOnChain) {
    
    
    for (const auto &bc: std::vector<BC>{BC::OBC, BC::PBC}) {
-      const Ising ising{Chain{3, bc}, -1.0, -4.0, 1.5, 2};
+      const Ising ising{Chain{3, bc}, -1.0, -4.0, 1, 0.5};
       
       EXPECT_NO_THROW(cmc.RunSingleFlip(ising, 500, 10, 2, 0.1, 0,
                                         solver::StateUpdateMethod::METROPOLIS,

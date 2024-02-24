@@ -53,7 +53,7 @@ void PyBindClassicalIsing(py::module &m, const std::string &post_name = "") {
                           const double linear,
                           const double quadratic,
                           const double spin_magnitude,
-                          const std::int32_t spin_scale_factor) {
+                          const double spin_scale_factor) {
       return model::classical::make_ising<LatticeType>(lattice, linear, quadratic, spin_magnitude, spin_scale_factor);
    }, "lattice"_a, "linear"_a, "quadratic"_a, "spin_magnitude"_a, "spin_scale_factor"_a);
 
@@ -79,7 +79,7 @@ void PyBindClassicalPolynomialIsing(py::module &m, const std::string &post_name 
    m.def("make_polynomial_ising", [](const LatticeType &lattice,
                                      const std::unordered_map<std::int32_t, double> &interaction,
                                      const double spin_magnitude,
-                                     const std::int32_t spin_scale_factor) {
+                                     const double spin_scale_factor) {
       return model::classical::make_polynomial_ising<LatticeType>(lattice, interaction, spin_magnitude, spin_scale_factor);
    }, "lattice"_a, "interaction"_a, "spin_magnitude"_a, "spin_scale_factor"_a);
 

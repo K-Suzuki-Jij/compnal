@@ -25,7 +25,7 @@
 #include "../../utility/random.hpp"
 #include "../parameter_class.hpp"
 #include "system/all.hpp"
-#include "metropolis_ssf.hpp"
+#include "metropolis_ssf.hpp"
 #include "metropolis_pt.hpp"
 #include "heat_bath_ssf.hpp"
 #include "heat_bath_pt.hpp"

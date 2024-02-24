@@ -144,7 +144,7 @@ def test_cmc_ssf_ising_square():
             linear=1.0,
             quadratic=-1.0,
             spin_magnitude=1,
-            spin_scale_factor=1,
+            spin_scale_factor=0.7,
         )
         result_set = CMC.run_single_flip(
             model=ising,
@@ -156,12 +156,12 @@ def test_cmc_ssf_ising_square():
             random_number_engine=rne,
             spin_selection_method=ssm,
             seed=0,
-            initial_state_list=np.full((1, 12), 1)
+            initial_state_list=np.full((1, 12), 0.7)
         )
 
         assert len(result_set) == 1
         assert result_set[0].samples.shape == (1, 12)
-        assert result_set[0].samples.dtype == np.int8
+        assert result_set[0].samples.dtype == np.float64
         assert result_set[0].energies.shape == (1,)
         assert result_set[0].coordinate_to_index == {
             (i, j): j * 4 + i for i in range(4) for j in range(3)
@@ -173,7 +173,7 @@ def test_cmc_ssf_ising_square():
         assert result_set[0].model_info.spin_magnitude == {
             (i, j): 1 for i in range(4) for j in range(3)
         }
-        assert result_set[0].model_info.spin_scale_factor == 1
+        assert result_set[0].model_info.spin_scale_factor == 0.7
         assert result_set[0].model_info.lattice.lattice_type == LatticeType.SQUARE
         assert result_set[0].model_info.lattice.system_size == 12
         assert result_set[0].model_info.lattice.shape == (4, 3)

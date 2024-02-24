@@ -41,7 +41,7 @@ public:
    //! The default value is 1.0, which represents the usual spin, taking value \f[ s\in\{-1/2,+1/2\} \f].
    //! By changing this value, you can represent spins of different values,
    //! such as \f[ s\in\{-1,+1\} \f] by setting spin_scale_factor=2.
-   Spin(const double spin_magnitude, const std::int32_t spin_scale_factor):
+   Spin(const double spin_magnitude, const double spin_scale_factor):
    state_number_(0),
    twice_spin_magnitude_(static_cast<std::int32_t>(2*spin_magnitude)),
    spin_scale_factor_(spin_scale_factor),
@@ -49,8 +49,8 @@ public:
       if (std::floor(2*spin_magnitude) != 2*spin_magnitude || spin_magnitude <= 0) {
          throw std::invalid_argument("spin_magnitude must be positive half-integer.");
       }
-      if (spin_scale_factor < 1) {
-         throw std::invalid_argument("spin_scale_factor must positive-integer");
+      if (spin_scale_factor <= 0.0) {
+         throw std::invalid_argument("spin_scale_factor must positive value");
       }
    }
    
@@ -66,7 +66,7 @@ public:
    double GetValueFromState(const std::int32_t state_number) const {
       if (state_number < 0 || state_number >= num_state_) {
          std::stringstream ss;
-         ss << "state_number must be in [0," << num_state_ << ")." << std::endl;
+         ss << "state_number must be in [0," << num_state_ - 1 << "]." << std::endl;
          ss << "But state_number=" << state_number;
          throw std::invalid_argument(ss.str());
       }
@@ -108,7 +108,7 @@ public:
    void SetState(const std::int32_t state_number) {
       if (state_number < 0 || state_number >= num_state_) {
          std::stringstream ss;
-         ss << "state_number must be in [0," << num_state_ << ")." << std::endl;
+         ss << "state_number must be in [0," << num_state_ - 1 << "]." << std::endl;
          ss << "But state_number=" << state_number;
          throw std::invalid_argument(ss.str());
       }
@@ -151,7 +151,7 @@ private:
    //! The default value is 1.0, which represents the usual spin, taking value \f[ s\in\{-1/2,+1/2\} \f].
    //! By changing this value, you can represent spins of different values,
    //! such as \f[ s\in\{-1,+1\} \f] by setting spin_scale_factor=2.
-   const std::int32_t spin_scale_factor_ = 1;
+   const double spin_scale_factor_ = 1.0;
 
    //! @brief The number of candidate states.
    const std::int32_t num_state_ = twice_spin_magnitude_ + 1;

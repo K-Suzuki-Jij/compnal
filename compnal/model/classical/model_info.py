@@ -46,7 +46,7 @@ class ClassicalModelInfo:
     model_type: Optional[ClassicalModelType] = None
     interactions: Optional[dict[int, float]] = None
     spin_magnitude: Optional[dict[Union[list, tuple], float]] = None
-    spin_scale_factor: Optional[int] = None
+    spin_scale_factor: Optional[float] = None
     lattice: Optional[LatticeInfo] = None
 
     def to_serializable(self) -> dict:

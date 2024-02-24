@@ -37,7 +37,7 @@ class PolyIsing:
         lattice: Union[Chain, Square, Cubic, InfiniteRange],
         interaction: dict[int, float],
         spin_magnitude: float = 0.5,
-        spin_scale_factor: int = 1,
+        spin_scale_factor: float = 1.0,
     ) -> None:
         """Initialize PolyIsing class.
 
@@ -45,7 +45,7 @@ class PolyIsing:
             lattice (Union[Chain, Square, Cubic, InfiniteRange]): Lattice.
             interaction (dict[int, float]): Interaction. The key is the degree of the interaction and the value is the interaction.
             spin_magnitude (float, optional): Magnitude of spins. This must be half-integer. Defaults to 0.5.
-            spin_scale_factor (int, optional):
+            spin_scale_factor (float, optional):
                 A scaling factor used to adjust the value taken by the spin.
                 The default value is 1.0, which represents the usual spin, taking value s in {-1/2, +1/2}.
                 By changing this value, you can represent spins of different values,
@@ -92,7 +92,7 @@ class PolyIsing:
             )
         )
 
-    def get_spin_scale_factor(self) -> int:
+    def get_spin_scale_factor(self) -> float:
         """Get the spin scale factor.
 
         Returns:

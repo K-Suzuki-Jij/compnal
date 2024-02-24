@@ -64,13 +64,13 @@ public:
    PolynomialIsing(const LatticeType &lattice,
                    const std::unordered_map<std::int32_t, double> &interaction,
                    const double spin_magnitude = 0.5,
-                   const std::int32_t spin_scale_factor = 1):
+                   const double spin_scale_factor = 1.0):
    lattice_(lattice) {
       if (std::floor(2*spin_magnitude) != 2*spin_magnitude || spin_magnitude <= 0) {
          throw std::invalid_argument("spin_magnitude must be positive half-integer.");
       }
-      if (spin_scale_factor < 1) {
-         throw std::invalid_argument("spin_scale_factor must positive-integer");
+      if (spin_scale_factor <= 0.0) {
+         throw std::invalid_argument("spin_scale_factor must positive value");
       }
       spin_scale_factor_ = spin_scale_factor;
       twice_spin_magnitude_.resize(lattice.GetSystemSize());
@@ -116,7 +116,7 @@ public:
    
    //! @brief Get spin-scale factor.
    //! @return Spin-scale factor.
-   std::int32_t GetSpinScaleFactor() const {
+   double GetSpinScaleFactor() const {
       return spin_scale_factor_;
    }
    
@@ -180,7 +180,7 @@ private:
    //! The default value is 1.0, which represents the usual spin, taking value \f] s\in\{-1/2,+1/2\} \f].
    //! By changing this value, you can represent spins of different values,
    //! such as \f[ s\in\{-1,+1\} \f] by setting spin_scale_factor=2.
-   std::int32_t spin_scale_factor_ = 1;
+   double spin_scale_factor_ = 1;
    
    //! @brief Calculate energy corresponding to the spin configuration on the one-dimensional chain.
    //! @param lattice The one-dimensional chain.
@@ -780,7 +780,7 @@ template<class LatticeType>
 auto make_polynomial_ising(const LatticeType &lattice,
                            const std::unordered_map<std::int32_t, double> &interaction,
                            const double spin_magnitude = 0.5,
-                           const std::int32_t spin_scale_factor = 1) {
+                           const double spin_scale_factor = 1.0) {
    return PolynomialIsing<LatticeType>{lattice, interaction, spin_magnitude, spin_scale_factor};
 }
 

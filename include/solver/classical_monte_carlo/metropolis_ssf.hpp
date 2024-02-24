@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  metropolis_ssf.hpp
+//  metropolis_ssf.hpp
 //  compnal
 //
 //  Created by kohei on 2023/06/14.

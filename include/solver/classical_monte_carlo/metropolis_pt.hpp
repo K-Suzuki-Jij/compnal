@@ -52,7 +52,7 @@ void MetropolisPT(std::vector<SystemType*> *system_list_pointer,
    std::uniform_real_distribution<double> dist_real(0, 1);
    
    // Set update function
-   std::function<bool(double, double)> trans_prob = [](const double delta_S, const double dist_real) {
+   const auto trans_prob = [](const double delta_S, const double dist_real) {
       return delta_S <= 0.0 || std::exp(-delta_S) > dist_real;
    };
    

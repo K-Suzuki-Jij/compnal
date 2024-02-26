@@ -31,7 +31,10 @@ enum class StateUpdateMethod {
    METROPOLIS,
    
    //! @brief Heat bath updater, single spin flip.
-   HEAT_BATH
+   HEAT_BATH,
+   
+   //! @brief Suwa-Todo updater, single spin flip.
+   SUWA_TODO
 
 };
 

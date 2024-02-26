@@ -25,10 +25,12 @@ class StateUpdateMethod(str, Enum):
     Args:
         METROPOLIS: Metropolis algorithm.
         HEAT_BATH: Heat bath algorithm.
+        SUWA_TODO: Suwa Todo algorithm.
     """
 
     METROPOLIS = "METROPOLIS"
     HEAT_BATH = "HEAT_BATH"
+    SUWA_TODO = "SUWA_TODO"
 
 
 class RandomNumberEngine(str, Enum):
@@ -110,6 +112,12 @@ def _to_state_update_method(
         "HEAT_BATH",
     ):
         return StateUpdateMethod.HEAT_BATH
+    elif base_state_update_method in (
+        base_solver.StateUpdateMethod.SUWA_TODO,
+        StateUpdateMethod.SUWA_TODO,
+        "SUWA_TODO",
+    ):
+        return StateUpdateMethod.SUWA_TODO
     else:
         raise ValueError("Invalid state update method.")
 
@@ -141,6 +149,12 @@ def _to_base_state_update_method(
         base_solver.StateUpdateMethod.HEAT_BATH,
     ):
         return base_solver.StateUpdateMethod.HEAT_BATH
+    elif state_update_method in (
+        "SUWA_TODO",
+        StateUpdateMethod.SUWA_TODO,
+        base_solver.StateUpdateMethod.SUWA_TODO,
+    ):
+        return base_solver.StateUpdateMethod.SUWA_TODO
     else:
         raise ValueError("Invalid state update method.")
 

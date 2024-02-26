@@ -36,7 +36,8 @@ using namespace pybind11::literals;
 void PyBindStateUpdateMethod(py::module &m) {
    py::enum_<compnal::solver::StateUpdateMethod>(m, "StateUpdateMethod")
       .value("METROPOLIS", compnal::solver::StateUpdateMethod::METROPOLIS)
-      .value("HEAT_BATH", compnal::solver::StateUpdateMethod::HEAT_BATH);
+      .value("HEAT_BATH", compnal::solver::StateUpdateMethod::HEAT_BATH)
+      .value("SUWA_TODO", compnal::solver::StateUpdateMethod::SUWA_TODO);
 }
 
 void PyBindRandomNumberEngine(py::module &m) {

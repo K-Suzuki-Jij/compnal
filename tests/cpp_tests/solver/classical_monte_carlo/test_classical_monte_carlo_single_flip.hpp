@@ -84,7 +84,7 @@ TEST(SolverClassicalMonteCarloSF, IsingOnChain) {
                                         solver::RandomNumberEngine::MT,
                                         solver::SpinSelectionMethod::RANDOM));
       
-      EXPECT_NO_THROW(cmc.RunSingleFlip(ising, 500, 10, 2, 0.1, 0,
+      EXPECT_NO_THROW(cmc.RunSingleFlip(ising, 500, 10, 1, 0.1, 0,
                                         solver::StateUpdateMethod::SUWA_TODO,
                                         solver::RandomNumberEngine::XORSHIFT,
                                         solver::SpinSelectionMethod::RANDOM));

@@ -45,32 +45,74 @@ void SuwaTodoSSF(SystemType *system,
    // Set random number engine
    RandType random_number_engine(seed);
    std::uniform_real_distribution<double> dist_real(0, 1);
-   
-   //Find max spin
-   std::int32_t max_num_state = 0;
-   for (std::int32_t i = 0; i < system_size; i++) {
-      if (max_num_state < system->GetNumState(i)) {
-         max_num_state = system->GetNumState(i);
+
+   const auto suwa_todo =[](std::vector<double> &w, std::int32_t now_state, std::vector<double> &work) {
+      const std::int32_t num_state = static_cast<std::int32_t>(w.size());
+      const std::int32_t max_ind = std::distance(w.begin(), std::max_element(w.begin(), w.end()));
+
+      std::swap(w[0], w[max_ind]);
+
+      if (now_state == max_ind) {
+         now_state = 0;
+      } 
+      else if (now_state == 0) {
+         now_state = max_ind;
       }
-   }
+
+      work[1] = w[0];
+      for (int i = 1; i < num_state; ++i) {
+         work[i + 1] = work[i] + w[i];
+      }
+      work[0] = work[num_state];
+
+      std::vector<double> prob(num_state);
+
+      double prob_sum = 0.0;
+      for (int j = 0; j < num_state; ++j) {
+         double d_ij = work[now_state + 1] - work[j] + w[0];
+         double a = std::min({d_ij, w[now_state] + w[j] - d_ij, w[now_state], w[j]});
+         if (j == 0) {
+            prob[max_ind] = std::max(0.0, a);
+            prob_sum += prob[max_ind];
+         }
+         else if (j == max_ind) {
+            prob[0] = std::max(0.0, a);
+            prob_sum += prob[0];
+         }
+         else {
+            prob[j] = std::max(0.0, a);
+            prob_sum += prob[j];
+         }
+      }
+
+      for (int j = 0; j < num_state; ++j) {
+         prob[j] /= prob_sum;
+      }
+
+      return prob;
+   };
    
    const auto get_new_state = [](const std::vector<double> &prob_list,
-                                 const std::int32_t num_stete,
                                  const double dist_real) {
+      const std::int32_t num_state = static_cast<std::int32_t>(prob_list.size());
       double prob_sum = 0.0;
-      for (std::int32_t state = 1; state <= num_stete; state++) {
+      for (std::int32_t state = 0; state < num_state; state++) {
          if (dist_real < prob_list[state] + prob_sum) {
-            return state - 1;
+            return state;
          }
          prob_sum += prob_list[state];
       }
-      return num_stete - 1;
+      return num_state - 1;
    };
+
+   // Find Max number of state
+   std::int32_t max_num_state = 0;
+   for (std::int32_t i = 0; i < system_size; i++) {
+      max_num_state = std::max(max_num_state, system->GetNumState(i));
+   }
    
-   std::vector<double> dW(max_num_state + 1);
+   std::vector<double> dW(max_num_state);
    std::vector<double> S(max_num_state + 1);
-   std::vector<std::int32_t> s_ind(max_num_state + 1);
-   std::vector<double> prob_list(max_num_state + 1);
    
    if (spin_selector == SpinSelectionMethod::RANDOM) {
       std::uniform_int_distribution<std::int32_t> dist_system_size(0, system_size - 1);
@@ -78,41 +120,27 @@ void SuwaTodoSSF(SystemType *system,
          for (std::int32_t i = 0; i < system_size; i++) {
             const std::int32_t index = dist_system_size(random_number_engine);
             const std::int32_t num_state = system->GetNumState(index);
-            double max_weight_index = 1;
-            // Set wieight
-            for (std::int32_t state = 1; state <= num_state; ++state) {
-               dW[state] = std::exp(-beta*system->GetEnergyDifference(index, state - 1));
-               s_ind[state] = state;
-               if (dW[max_weight_index] < dW[state]) {
-                  max_weight_index = state;
-               }
-            }
-            
-            // Assume dW[1] is the maximum
-            std::swap(s_ind[1], s_ind[max_weight_index]);
-            
-            // Set weight sum
-            S[1] = dW[s_ind[1]];
-            for (std::int32_t state = 1; state < num_state; ++state) {
-               S[state + 1] = dW[s_ind[state + 1]] + S[state];
-            }
-            S[0] = S[num_state];
-            
-            // Set probability
-            std::int32_t now_state = system->GetStateNumber(index);
-            for (std::int32_t state = 1; state < num_state; ++state) {
-               double d = S[now_state] - S[state - 1] + dW[s_ind[1]];
-               double p2 = dW[s_ind[now_state]] + dW[s_ind[state]] - d;
-               const double x = std::min({d, p2, dW[s_ind[now_state]], dW[s_ind[state]]});
-               prob_list[state] = std::max({0.0, x});
-            }
-            system->Flip(index, get_new_state(prob_list, num_state, dist_real(random_number_engine)));
+            for (std::int32_t state = 0; state < num_state; ++state) {
+               dW[state] = std::exp(-beta*system->GetEnergyDifference(index, state));
+            }    
+            const auto &prob_list = suwa_todo(dW, system->GetStateNumber(index), S);
+            std::int32_t new_state = get_new_state(prob_list, dist_real(random_number_engine));
+            system->Flip(index, new_state);
          }
       }
    }
    else if (spin_selector == SpinSelectionMethod::SEQUENTIAL) {
-      
-      
+      for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
+         for (std::int32_t i = 0; i < system_size; i++) {
+            const std::int32_t num_state = system->GetNumState(i);
+            for (std::int32_t state = 0; state < num_state; ++state) {
+               dW[state] = std::exp(-beta*system->GetEnergyDifference(i, state));
+            }    
+            const auto &prob_list = suwa_todo(dW, system->GetStateNumber(i), S);
+            std::int32_t new_state = get_new_state(prob_list, dist_real(random_number_engine));
+            system->Flip(i, new_state);
+         }
+      }
    }
    else {
       throw std::invalid_argument("Unknown SpinSelectionMethod");

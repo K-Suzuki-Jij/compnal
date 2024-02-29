@@ -69,8 +69,8 @@ void SuwaTodoSSF(SystemType *system,
    std::vector<double> dW(max_num_state);
    std::vector<double> S(max_num_state + 1);
    std::vector<double> prob_list(max_num_state);
-   std::vector<std::int32_t> indices(max_num_state);
-   std::iota(indices.begin(), indices.end(), 0);
+   //std::vector<std::int32_t> indices(max_num_state);
+   //std::iota(indices.begin(), indices.end(), 0);
 
    
    if (spin_selector == SpinSelectionMethod::RANDOM) {
@@ -99,28 +99,41 @@ void SuwaTodoSSF(SystemType *system,
                   max_ind = state;
                }
             }
-            const std::int32_t now_state = system->GetStateNumber(i);
-            indices[0] = max_ind;
-            indices[max_ind] = 0;
+            std::swap(dW[0], dW[max_ind]);
             
             S[1] = dW[0];
             for (std::int32_t i = 1; i < num_state; ++i) {
-               S[i + 1] = S[i] + dW[indices[i]];
+               S[i + 1] = S[i] + dW[i];
             }
             S[0] = S[num_state];
             
+            std::int32_t now_state = system->GetStateNumber(i);
+            if (now_state == 0) {
+               now_state = max_ind;
+            }
+            else if (now_state == max_ind) {
+               now_state = 0;
+            }
+               
             double prob_sum = 0.0;
             for (std::int32_t j = 0; j < num_state; ++j) {
-               const double d_ij = S[indices[now_state] + 1] - S[j] + dW[indices[0]];
-               const double a = std::min({d_ij, dW[now_state] + dW[indices[j]] - d_ij, dW[now_state], dW[indices[j]]});
-               prob_list[indices[j]] = std::max(0.0, a);
-               prob_sum += prob_list[indices[j]];
+               const double d_ij = S[now_state + 1] - S[j] + dW[0];
+               const double a = std::min({d_ij, dW[now_state] + dW[j] - d_ij, dW[now_state], dW[j]});
+               if (j == 0) {
+                  prob_list[max_ind] = std::max(0.0, a);
+                  prob_sum += prob_list[max_ind];
+               }
+               else if (j == max_ind) {
+                  prob_list[0] = std::max(0.0, a);
+                  prob_sum += prob_list[0];
+               }
+               else {
+                  prob_list[j] = std::max(0.0, a);
+                  prob_sum += prob_list[j];
+               }
             }
             
             system->Flip(i, get_new_state(prob_list, prob_sum, num_state, dist_real(random_number_engine)));
-            indices[0] = 0;
-            indices[max_ind] = max_ind;
-
          }
       }
    }

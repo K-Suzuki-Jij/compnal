@@ -46,22 +46,17 @@ void SuwaTodoSSF(SystemType *system,
    RandType random_number_engine(seed);
    std::uniform_real_distribution<double> dist_real(0, 1);
 
-   const auto suwa_todo =[](std::vector<double> &w, std::int32_t now_state, std::vector<double> &work) {
+   const auto suwa_todo = [](const std::vector<double> &w, const std::int32_t now_state, std::vector<double> &work) {
       const std::int32_t num_state = static_cast<std::int32_t>(w.size());
-      const std::int32_t max_ind = std::distance(w.begin(), std::max_element(w.begin(), w.end()));
-
-      std::swap(w[0], w[max_ind]);
-
-      if (now_state == max_ind) {
-         now_state = 0;
-      } 
-      else if (now_state == 0) {
-         now_state = max_ind;
-      }
-
+      const std::int32_t max_ind = static_cast<std::int32_t>(std::distance(w.begin(), std::max_element(w.begin(), w.end())));
+      std::vector<std::int32_t> indices(num_state);
+      std::iota(indices.begin(), indices.end(), 0);
+      indices[0] = max_ind;
+      indices[max_ind] = 0;
+      
       work[1] = w[0];
       for (int i = 1; i < num_state; ++i) {
-         work[i + 1] = work[i] + w[i];
+         work[i + 1] = work[i] + w[indices[i]];
       }
       work[0] = work[num_state];
 
@@ -69,20 +64,10 @@ void SuwaTodoSSF(SystemType *system,
 
       double prob_sum = 0.0;
       for (int j = 0; j < num_state; ++j) {
-         double d_ij = work[now_state + 1] - work[j] + w[0];
-         double a = std::min({d_ij, w[now_state] + w[j] - d_ij, w[now_state], w[j]});
-         if (j == 0) {
-            prob[max_ind] = std::max(0.0, a);
-            prob_sum += prob[max_ind];
-         }
-         else if (j == max_ind) {
-            prob[0] = std::max(0.0, a);
-            prob_sum += prob[0];
-         }
-         else {
-            prob[j] = std::max(0.0, a);
-            prob_sum += prob[j];
-         }
+         double d_ij = work[indices[now_state] + 1] - work[j] + w[indices[0]];
+         double a = std::min({d_ij, w[now_state] + w[indices[j]] - d_ij, w[now_state], w[indices[j]]});
+         prob[indices[j]] = std::max(0.0, a);
+         prob_sum += prob[indices[j]];
       }
 
       for (int j = 0; j < num_state; ++j) {
@@ -93,14 +78,15 @@ void SuwaTodoSSF(SystemType *system,
    };
    
    const auto get_new_state = [](const std::vector<double> &prob_list,
+                                 const double z,
+                                 const std::int32_t num_state,
                                  const double dist_real) {
-      const std::int32_t num_state = static_cast<std::int32_t>(prob_list.size());
       double prob_sum = 0.0;
       for (std::int32_t state = 0; state < num_state; state++) {
-         if (dist_real < prob_list[state] + prob_sum) {
+         if (dist_real < prob_list[state]/z + prob_sum) {
             return state;
          }
-         prob_sum += prob_list[state];
+         prob_sum += prob_list[state]/z;
       }
       return num_state - 1;
    };
@@ -113,19 +99,23 @@ void SuwaTodoSSF(SystemType *system,
    
    std::vector<double> dW(max_num_state);
    std::vector<double> S(max_num_state + 1);
+   std::vector<double> prob_list(max_num_state);
+   std::vector<std::int32_t> indices(max_num_state);
+   std::iota(indices.begin(), indices.end(), 0);
+
    
    if (spin_selector == SpinSelectionMethod::RANDOM) {
       std::uniform_int_distribution<std::int32_t> dist_system_size(0, system_size - 1);
       for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
          for (std::int32_t i = 0; i < system_size; i++) {
-            const std::int32_t index = dist_system_size(random_number_engine);
-            const std::int32_t num_state = system->GetNumState(index);
-            for (std::int32_t state = 0; state < num_state; ++state) {
-               dW[state] = std::exp(-beta*system->GetEnergyDifference(index, state));
-            }    
-            const auto &prob_list = suwa_todo(dW, system->GetStateNumber(index), S);
-            std::int32_t new_state = get_new_state(prob_list, dist_real(random_number_engine));
-            system->Flip(index, new_state);
+//            const std::int32_t index = dist_system_size(random_number_engine);
+//            const std::int32_t num_state = system->GetNumState(index);
+//            for (std::int32_t state = 0; state < num_state; ++state) {
+//               dW[state] = std::exp(-beta*system->GetEnergyDifference(index, state));
+//            }    
+//            const auto &prob_list = suwa_todo(dW, system->GetStateNumber(index), S);
+//            std::int32_t new_state = get_new_state(prob_list, dist_real(random_number_engine));
+//            system->Flip(index, new_state);
          }
       }
    }
@@ -136,9 +126,29 @@ void SuwaTodoSSF(SystemType *system,
             for (std::int32_t state = 0; state < num_state; ++state) {
                dW[state] = std::exp(-beta*system->GetEnergyDifference(i, state));
             }    
-            const auto &prob_list = suwa_todo(dW, system->GetStateNumber(i), S);
-            std::int32_t new_state = get_new_state(prob_list, dist_real(random_number_engine));
-            system->Flip(i, new_state);
+            const std::int32_t now_state = system->GetStateNumber(i);
+            const std::int32_t max_ind = static_cast<std::int32_t>(std::distance(dW.begin(), std::max_element(dW.begin(), dW.end())));
+            indices[0] = max_ind;
+            indices[max_ind] = 0;
+            
+            S[1] = dW[0];
+            for (std::int32_t i = 1; i < num_state; ++i) {
+               S[i + 1] = S[i] + dW[indices[i]];
+            }
+            S[0] = S[num_state];
+            
+            double prob_sum = 0.0;
+            for (std::int32_t j = 0; j < num_state; ++j) {
+               const double d_ij = S[indices[now_state] + 1] - S[j] + dW[indices[0]];
+               const double a = std::min({d_ij, dW[now_state] + dW[indices[j]] - d_ij, dW[now_state], dW[indices[j]]});
+               prob_list[indices[j]] = std::max(0.0, a);
+               prob_sum += prob_list[indices[j]];
+            }
+            
+            system->Flip(i, get_new_state(prob_list, prob_sum, num_state, dist_real(random_number_engine)));
+            indices[0] = 0;
+            indices[max_ind] = max_ind;
+
          }
       }
    }

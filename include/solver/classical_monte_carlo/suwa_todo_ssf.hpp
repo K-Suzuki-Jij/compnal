@@ -116,23 +116,17 @@ void SuwaTodoSSF(SystemType *system,
             }
                
             double prob_sum = 0.0;
-            for (std::int32_t j = 0; j < num_state; ++j) {
+            
+            // j = 0
+            prob_list[max_ind] = std::max(0.0, std::min({S[now_state + 1] - S[0] + dW[0], dW[now_state] + dW[0] - (S[now_state + 1] - S[0] + dW[0]), dW[now_state], dW[0]}));
+            prob_sum += prob_list[max_ind];
+            for (std::int32_t j = 1; j < num_state; ++j) {
                const double d_ij = S[now_state + 1] - S[j] + dW[0];
                const double a = std::min({d_ij, dW[now_state] + dW[j] - d_ij, dW[now_state], dW[j]});
-               if (j == 0) {
-                  prob_list[max_ind] = std::max(0.0, a);
-                  prob_sum += prob_list[max_ind];
-               }
-               else if (j == max_ind) {
-                  prob_list[0] = std::max(0.0, a);
-                  prob_sum += prob_list[0];
-               }
-               else {
-                  prob_list[j] = std::max(0.0, a);
-                  prob_sum += prob_list[j];
-               }
+               const std::int32_t state = (j == max_ind) ? 0 : j;
+               prob_list[state] = std::max(0.0, a);
+               prob_sum += prob_list[state];
             }
-            
             system->Flip(i, get_new_state(prob_list, prob_sum, num_state, dist_real(random_number_engine)));
          }
       }

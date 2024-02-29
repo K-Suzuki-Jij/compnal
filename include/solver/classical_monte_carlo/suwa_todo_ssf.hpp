@@ -47,15 +47,14 @@ void SuwaTodoSSF(SystemType *system,
    std::uniform_real_distribution<double> dist_real(0, 1);
    
    const auto get_new_state = [](const std::vector<double> &prob_list,
-                                 const double z,
                                  const std::int32_t num_state,
                                  const double dist_real) {
       double prob_sum = 0.0;
       for (std::int32_t state = 0; state < num_state; state++) {
-         if (dist_real < prob_list[state]/z + prob_sum) {
+         if (dist_real < prob_list[state] + prob_sum) {
             return state;
          }
-         prob_sum += prob_list[state]/z;
+         prob_sum += prob_list[state];
       }
       return num_state - 1;
    };
@@ -107,27 +106,22 @@ void SuwaTodoSSF(SystemType *system,
             }
             S[0] = S[num_state];
             
-            std::int32_t now_state = system->GetStateNumber(i);
-            if (now_state == 0) {
-               now_state = max_ind;
-            }
-            else if (now_state == max_ind) {
-               now_state = 0;
-            }
-               
+            const std::int32_t now_state = (system->GetStateNumber(i) == 0) ? max_ind : ((system->GetStateNumber(i) == max_ind) ? 0 : system->GetStateNumber(i));
+            std::int32_t new_state = num_state - 1;
             double prob_sum = 0.0;
-            
-            // j = 0
-            prob_list[max_ind] = std::max(0.0, std::min({S[now_state + 1] - S[0] + dW[0], dW[now_state] + dW[0] - (S[now_state + 1] - S[0] + dW[0]), dW[now_state], dW[0]}));
-            prob_sum += prob_list[max_ind];
-            for (std::int32_t j = 1; j < num_state; ++j) {
+            const double dist = dist_real(random_number_engine);
+            for (std::int32_t j = 0; j < num_state; ++j) {
                const double d_ij = S[now_state + 1] - S[j] + dW[0];
                const double a = std::min({d_ij, dW[now_state] + dW[j] - d_ij, dW[now_state], dW[j]});
-               const std::int32_t state = (j == max_ind) ? 0 : j;
+               const std::int32_t state = (j == max_ind) ? 0 : ((j == 0) ? max_ind : j);
                prob_list[state] = std::max(0.0, a);
+               if (dist < prob_list[state] + prob_sum) {
+                  new_state = state;
+                  break;
+               }
                prob_sum += prob_list[state];
             }
-            system->Flip(i, get_new_state(prob_list, prob_sum, num_state, dist_real(random_number_engine)));
+            system->Flip(i, new_state);
          }
       }
    }

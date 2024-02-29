@@ -45,37 +45,6 @@ void SuwaTodoSSF(SystemType *system,
    // Set random number engine
    RandType random_number_engine(seed);
    std::uniform_real_distribution<double> dist_real(0, 1);
-
-   const auto suwa_todo = [](const std::vector<double> &w, const std::int32_t now_state, std::vector<double> &work) {
-      const std::int32_t num_state = static_cast<std::int32_t>(w.size());
-      const std::int32_t max_ind = static_cast<std::int32_t>(std::distance(w.begin(), std::max_element(w.begin(), w.end())));
-      std::vector<std::int32_t> indices(num_state);
-      std::iota(indices.begin(), indices.end(), 0);
-      indices[0] = max_ind;
-      indices[max_ind] = 0;
-      
-      work[1] = w[0];
-      for (int i = 1; i < num_state; ++i) {
-         work[i + 1] = work[i] + w[indices[i]];
-      }
-      work[0] = work[num_state];
-
-      std::vector<double> prob(num_state);
-
-      double prob_sum = 0.0;
-      for (int j = 0; j < num_state; ++j) {
-         double d_ij = work[indices[now_state] + 1] - work[j] + w[indices[0]];
-         double a = std::min({d_ij, w[now_state] + w[indices[j]] - d_ij, w[now_state], w[indices[j]]});
-         prob[indices[j]] = std::max(0.0, a);
-         prob_sum += prob[indices[j]];
-      }
-
-      for (int j = 0; j < num_state; ++j) {
-         prob[j] /= prob_sum;
-      }
-
-      return prob;
-   };
    
    const auto get_new_state = [](const std::vector<double> &prob_list,
                                  const double z,
@@ -123,11 +92,14 @@ void SuwaTodoSSF(SystemType *system,
       for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
          for (std::int32_t i = 0; i < system_size; i++) {
             const std::int32_t num_state = system->GetNumState(i);
+            std::int32_t max_ind = 0;
             for (std::int32_t state = 0; state < num_state; ++state) {
                dW[state] = std::exp(-beta*system->GetEnergyDifference(i, state));
-            }    
+               if (dW[max_ind] < dW[state]) {
+                  max_ind = state;
+               }
+            }
             const std::int32_t now_state = system->GetStateNumber(i);
-            const std::int32_t max_ind = static_cast<std::int32_t>(std::distance(dW.begin(), std::max_element(dW.begin(), dW.end())));
             indices[0] = max_ind;
             indices[max_ind] = 0;
             

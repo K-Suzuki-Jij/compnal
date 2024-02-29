@@ -67,7 +67,6 @@ void SuwaTodoSSF(SystemType *system,
    
    std::vector<double> dW(max_num_state);
    std::vector<double> S(max_num_state + 1);
-   std::vector<double> prob_list(max_num_state);
    //std::vector<std::int32_t> indices(max_num_state);
    //std::iota(indices.begin(), indices.end(), 0);
 
@@ -112,14 +111,11 @@ void SuwaTodoSSF(SystemType *system,
             const double dist = dist_real(random_number_engine);
             for (std::int32_t j = 0; j < num_state; ++j) {
                const double d_ij = S[now_state + 1] - S[j] + dW[0];
-               const double a = std::min({d_ij, dW[now_state] + dW[j] - d_ij, dW[now_state], dW[j]});
-               const std::int32_t state = (j == max_ind) ? 0 : ((j == 0) ? max_ind : j);
-               prob_list[state] = std::max(0.0, a);
-               if (dist < prob_list[state] + prob_sum) {
-                  new_state = state;
+               prob_sum += std::max(0.0, std::min({d_ij, dW[now_state] + dW[j] - d_ij, dW[now_state], dW[j]}));
+               if (dist < prob_sum) {
+                  new_state = (j == max_ind) ? 0 : ((j == 0) ? max_ind : j);
                   break;
                }
-               prob_sum += prob_list[state];
             }
             system->Flip(i, new_state);
          }

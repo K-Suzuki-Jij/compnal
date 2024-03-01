@@ -32,25 +32,13 @@ public:
    SuwaTodoUpdater(const SystemType &system,
                    const double beta,
                    const typename RandType::result_type seed):
-   system_(system), beta_(beta), random_number_engine_(seed), dist_real(0, 1) {
+   system_(system), beta_(beta), random_number_engine_(seed), dist_real_(0, 1) {
       const std::int32_t max_num_state = system_.GetMaxNumState();
       weight_list_.resize(max_num_state);
       sum_weight_list_.resize(max_num_state + 1);
    }
    
    std::int32_t GetNewState(const std::int32_t index) {
-      return GetNewStateAny(index);
-   }
-   
-private:
-   const SystemType &system_;
-   const double beta_;
-   RandType random_number_engine_;
-   std::uniform_real_distribution<double> dist_real;
-   std::vector<double> weight_list_;
-   std::vector<double> sum_weight_list_;
-   
-   std::int32_t GetNewStateAny(const std::int32_t index) {
       const std::int32_t num_state = system_.GetNumState(index);
       const std::int32_t max_weight_state = system_.GetMaxBoltzmannWeightStateNumber(index);
       
@@ -71,7 +59,7 @@ private:
       const std::int32_t temp = system_.GetStateNumber(index);
       const std::int32_t now_state = (temp == 0) ? max_weight_state : ((temp == max_weight_state) ? 0 : temp);
       double prob_sum = 0.0;
-      const double dist = dist_real(random_number_engine_);
+      const double dist = dist_real_(random_number_engine_);
       for (std::int32_t j = 0; j < num_state; ++j) {
          const double d_ij = sum_weight_list_[now_state + 1] - sum_weight_list_[j] + sum_weight_list_[1];
          prob_sum += std::max(0.0, std::min({d_ij, 1.0 + weight_list_[j] - d_ij, 1.0, weight_list_[j]}));
@@ -81,6 +69,14 @@ private:
       }
       return num_state - 1;
    }
+   
+private:
+   const SystemType &system_;
+   const double beta_;
+   RandType random_number_engine_;
+   std::uniform_real_distribution<double> dist_real_;
+   std::vector<double> weight_list_;
+   std::vector<double> sum_weight_list_;
 
 };
 

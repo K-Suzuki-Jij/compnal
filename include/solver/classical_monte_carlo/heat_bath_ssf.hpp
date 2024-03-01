@@ -25,6 +25,40 @@ namespace compnal {
 namespace solver {
 namespace classical_monte_carlo {
 
+template<class SystemType, typename RandType>
+class HeatBathUpdater {
+   
+public:
+   HeatBathUpdater(const SystemType &system,
+                   const double beta,
+                   const typename RandType::result_type seed):
+   system_(system), beta_(beta), random_number_engine_(seed), dist_real_(0, 1) {}
+   
+   std::int32_t GetNewState(const std::int32_t index) {
+      const std::int32_t num_state = system_.GetNumState(index);
+      double z = 0.0;
+      for (std::int32_t state = 0; state < num_state; ++state) {
+         z += std::exp(-beta_*system_.GetEnergyDifference(index, state));
+      }
+      double prob_sum = 0.0;
+      const double dist = dist_real_(random_number_engine_);
+      for (std::int32_t state = 0; state < num_state; ++state) {
+         prob_sum += std::exp(-beta_*system_.GetEnergyDifference(index, state))/z;
+         if (dist < prob_sum) {
+            return state;
+         }
+      }
+      return num_state - 1;
+   }
+   
+private:
+   const SystemType &system_;
+   const double beta_;
+   RandType random_number_engine_;
+   std::uniform_real_distribution<double> dist_real_;
+   
+};
+
 //! @brief Run classical monte carlo simulation using heat bath method.
 //! @tparam SystemType System class.
 //! @tparam RandType Random number engine class.
@@ -41,60 +75,23 @@ void HeatBathSSF(SystemType *system,
                  const SpinSelectionMethod spin_selector) {
    
    const std::int32_t system_size = system->GetSystemSize();
-   
-   // Set random number engine
-   RandType random_number_engine(seed);
-   std::uniform_real_distribution<double> dist_real(0, 1);
-   
-   //Find max spin
-   std::int32_t max_num_state = 0;
-   for (std::int32_t i = 0; i < system_size; i++) {
-      if (max_num_state < system->GetNumState(i)) {
-         max_num_state = system->GetNumState(i);
-      }
-   }
-   
-   std::vector<double> prob_list(max_num_state);
-   
-   const auto get_new_state = [](const std::vector<double> &prob_list,
-                                 const std::int32_t num_stete,
-                                 const double norm,
-                                 const double dist_real) {
-      double prob_sum = 0.0;
-      for (std::int32_t state = 0; state < num_stete; state++) {
-         if (dist_real < prob_list[state]/norm + prob_sum) {
-            return state;
-         }
-         prob_sum += prob_list[state]/norm;
-      }
-      return num_stete - 1;
-   };
-   
+      
    if (spin_selector == SpinSelectionMethod::RANDOM) {
+      RandType random_number_engine(seed);
       std::uniform_int_distribution<std::int32_t> dist_system_size(0, system_size - 1);
+      auto updater = HeatBathUpdater<SystemType, RandType>(*system, beta, random_number_engine());
       for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
          for (std::int32_t i = 0; i < system_size; i++) {
             const std::int32_t index = dist_system_size(random_number_engine);
-            const std::int32_t num_state = system->GetNumState(index);
-            double z = 0.0;
-            for (std::int32_t state = 0; state < num_state; ++state) {
-               prob_list[state] = std::exp(-beta*system->GetEnergyDifference(index, state));
-               z += prob_list[state];
-            }
-            system->Flip(index, get_new_state(prob_list, num_state, z, dist_real(random_number_engine)));
+            system->Flip(index, updater.GetNewState(index));
          }
       }
    }
    else if (spin_selector == SpinSelectionMethod::SEQUENTIAL) {
+      auto updater = HeatBathUpdater<SystemType, RandType>(*system, beta, seed);
       for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
          for (std::int32_t i = 0; i < system_size; i++) {
-            const std::int32_t num_state = system->GetNumState(i);
-            double z = 0.0;
-            for (std::int32_t state = 0; state < num_state; ++state) {
-               prob_list[state] = std::exp(-beta*system->GetEnergyDifference(i, state));
-               z += prob_list[state];
-            }
-            system->Flip(i, get_new_state(prob_list, num_state, z, dist_real(random_number_engine)));
+            system->Flip(i, updater.GetNewState(i));
          }
       }
    }

@@ -134,6 +134,16 @@ public:
       }
    }
    
+   //! @brief Get the max number of state.
+   //! @return The max number of state.
+   std::int32_t GetMaxNumState() const {
+      std::int32_t max_num_state = 0;
+      for (std::int32_t i = 0; i < system_size_; i++) {
+         max_num_state = std::max(max_num_state, this->GetNumState(i));
+      }
+      return max_num_state;
+   }
+   
    //! @brief Generate candidate state.
    //! @param index The index of the variable.
    //! @return The candidate state.

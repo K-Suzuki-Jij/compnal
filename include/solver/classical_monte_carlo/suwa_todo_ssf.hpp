@@ -29,11 +29,11 @@ template<class SystemType, typename RandType>
 class SuwaTodoUpdater {
   
 public:
-   SuwaTodoUpdater(const std::int32_t max_num_state,
-                   const SystemType &system,
+   SuwaTodoUpdater(const SystemType &system,
                    const double beta,
                    const typename RandType::result_type seed):
    system_(system), beta_(beta), random_number_engine_(seed), dist_real(0, 1) {
+      const std::int32_t max_num_state = system_.GetMaxNumState();
       weight_list_.resize(max_num_state);
       sum_weight_list_.resize(max_num_state + 1);
    }
@@ -100,17 +100,11 @@ void SuwaTodoSSF(SystemType *system,
                  const SpinSelectionMethod spin_selector) {
    
    const std::int32_t system_size = system->GetSystemSize();
-   
-   // Find Max number of state
-   std::int32_t max_num_state = 0;
-   for (std::int32_t i = 0; i < system_size; i++) {
-      max_num_state = std::max(max_num_state, system->GetNumState(i));
-   }
-   
+
    if (spin_selector == SpinSelectionMethod::RANDOM) {
       RandType random_number_engine(seed);
       std::uniform_int_distribution<std::int32_t> dist_system_size(0, system_size - 1);
-      auto updater = SuwaTodoUpdater<SystemType, RandType>(max_num_state, *system, beta, random_number_engine());
+      auto updater = SuwaTodoUpdater<SystemType, RandType>(*system, beta, random_number_engine());
       for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
          for (std::int32_t i = 0; i < system_size; i++) {
             const std::int32_t index = dist_system_size(random_number_engine);
@@ -119,7 +113,7 @@ void SuwaTodoSSF(SystemType *system,
       }
    }
    else if (spin_selector == SpinSelectionMethod::SEQUENTIAL) {
-      auto updater = SuwaTodoUpdater<SystemType, RandType>(max_num_state, *system, beta, seed);
+      auto updater = SuwaTodoUpdater<SystemType, RandType>(*system, beta, seed);
       for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
          for (std::int32_t i = 0; i < system_size; i++) {
             system->Flip(i, updater.GetNewState(i));

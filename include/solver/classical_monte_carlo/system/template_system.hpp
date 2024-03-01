@@ -122,6 +122,18 @@ public:
       return sample_[index].GetStateNumber();
    }
    
+   //! @brief Get the state number, which has the maximum Boltzmann Weight: exp(-beta ΔE).
+   //! @param index The index of the variable.
+   //! @return The state number.
+   std::int32_t GetMaxBoltzmannWeightStateNumber(const std::int32_t index) const {
+      if (d_E_[index] >= 0) {
+         return 0;
+      }
+      else {
+         return sample_[index].GetNumState() - 1;
+      }
+   }
+   
    //! @brief Generate candidate state.
    //! @param index The index of the variable.
    //! @return The candidate state.

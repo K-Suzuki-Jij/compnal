@@ -340,12 +340,12 @@ TEST(SolverClassicalMonteCarloSF, PolyIsingOnInfiniteRange) {
                                      solver::SpinSelectionMethod::RANDOM));
    
    EXPECT_NO_THROW(cmc.RunSingleFlip(poly_ising, 50, 10, 2, 0.1, 0,
-                                     solver::StateUpdateMethod::HEAT_BATH,
+                                     solver::StateUpdateMethod::SUWA_TODO,
                                      solver::RandomNumberEngine::MT_64,
                                      solver::SpinSelectionMethod::RANDOM));
    
    EXPECT_NO_THROW(cmc.RunSingleFlip(poly_ising, 50, 10, 2, 0.1, 0,
-                                     solver::StateUpdateMethod::HEAT_BATH,
+                                     solver::StateUpdateMethod::SUWA_TODO,
                                      solver::RandomNumberEngine::MT_64,
                                      solver::SpinSelectionMethod::SEQUENTIAL));
 }

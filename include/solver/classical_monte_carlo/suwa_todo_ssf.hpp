@@ -90,22 +90,21 @@ void SuwaTodoSSF(SystemType *system,
       for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
          for (std::int32_t i = 0; i < system_size; i++) {
             const std::int32_t num_state = system->GetNumState(i);
-            std::int32_t max_ind = 0;
-            for (std::int32_t state = 0; state < num_state; ++state) {
-               dW[state] = std::exp(-beta*system->GetEnergyDifference(i, state));
-               if (dW[max_ind] < dW[state]) {
-                  max_ind = state;
-               }
-            }
-            std::swap(dW[0], dW[max_ind]);
-            
+            const std::int32_t max_weight_state = system->GetMaxBoltzmannWeightStateNumber(i);
+            dW[0] = std::exp(-beta*system->GetEnergyDifference(i, max_weight_state));
             S[1] = dW[0];
-            for (std::int32_t i = 1; i < num_state; ++i) {
-               S[i + 1] = S[i] + dW[i];
+            for (std::int32_t state = 1; state < num_state; ++state) {
+               if (state == max_weight_state) {
+                  dW[state] = std::exp(-beta*system->GetEnergyDifference(i, 0));
+               }
+               else {
+                  dW[state] = std::exp(-beta*system->GetEnergyDifference(i, state));
+               }
+               S[state + 1] = S[state] + dW[state];
             }
             S[0] = S[num_state];
             
-            const std::int32_t now_state = (system->GetStateNumber(i) == 0) ? max_ind : ((system->GetStateNumber(i) == max_ind) ? 0 : system->GetStateNumber(i));
+            const std::int32_t now_state = (system->GetStateNumber(i) == 0) ? max_weight_state : ((system->GetStateNumber(i) == max_weight_state) ? 0 : system->GetStateNumber(i));
             std::int32_t new_state = num_state - 1;
             double prob_sum = 0.0;
             const double dist = dist_real(random_number_engine);
@@ -113,7 +112,7 @@ void SuwaTodoSSF(SystemType *system,
                const double d_ij = S[now_state + 1] - S[j] + dW[0];
                prob_sum += std::max(0.0, std::min({d_ij, dW[now_state] + dW[j] - d_ij, dW[now_state], dW[j]}));
                if (dist < prob_sum) {
-                  new_state = (j == max_ind) ? 0 : ((j == 0) ? max_ind : j);
+                  new_state = (j == max_weight_state) ? 0 : ((j == 0) ? max_weight_state : j);
                   break;
                }
             }

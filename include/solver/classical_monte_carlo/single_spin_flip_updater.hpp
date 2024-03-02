@@ -25,12 +25,21 @@ namespace compnal {
 namespace solver {
 namespace classical_monte_carlo {
 
-
+//! @brief Class for Metropolis updater.
+//! @details This class is used to update the state of the system using the Metropolis method.
 class MetropolisUpdater {
    
 public:
+   //! @brief Constructor of MetropolisUpdater.
+   //! @param max_num_state Maximum number of states.
    MetropolisUpdater(const std::int32_t max_num_state): max_num_state_(max_num_state), dist_real_(0, 1) {}
 
+   //! @brief Function to update the state of the system.
+   //! @tparam SystemType Type of the system.
+   //! @param system Pointer to the system.
+   //! @param index Index of the site.
+   //! @param beta Inverse temperature.
+   //! @return New state number.
    template<class SystemType>
    std::int32_t GetNewState(SystemType *system, const std::int32_t index, const double beta) {
       const std::int32_t candidate_state = system->GenerateCandidateState(index);
@@ -43,25 +52,43 @@ public:
       }
    }
    
+   //! @brief Function to decide whether to accept the new state or not.
+   //! @tparam RandType Type of the random number engine.
+   //! @param random_number_engine Pointer to the random number engine.
+   //! @param delta_energy Energy difference between the new state and the old state.
+   //! @param beta Inverse temperature.
+   //! @return True if the new state is accepted, false otherwise.
    template<typename RandType>
    bool DecideAcceptance(RandType *random_number_engine, const double delta_energy, const double beta) {
       return delta_energy <= 0.0 || std::exp(-beta*delta_energy) > dist_real_(*random_number_engine);
    }
    
 private:
+   //! @brief Maximum number of states.
    const std::int32_t max_num_state_;
+
+   //! @brief Uniform real distribution.
    std::uniform_real_distribution<double> dist_real_;
    
 };
 
-
+//! @brief Class for HeatBath updater.
+//! @details This class is used to update the state of the system using the HeatBath method.
 class HeatBathUpdater {
    
 public:
+   //! @brief Constructor of HeatBathUpdater.
+   //! @param max_num_state Maximum number of states.
    HeatBathUpdater(const std::int32_t max_num_state): max_num_state_(max_num_state), dist_real_(0, 1) {
       prob_list.resize(max_num_state_);
    }
    
+   //! @brief Function to update the state of the system.
+   //! @tparam SystemType Type of the system.
+   //! @param system Pointer to the system.
+   //! @param index Index of the site.
+   //! @param beta Inverse temperature.
+   //! @return New state number.
    template<class SystemType>
    std::int32_t GetNewState(SystemType *system, const std::int32_t index, const double beta) {
       const std::int32_t num_state = system->GetNumState(index);
@@ -82,27 +109,47 @@ public:
       return num_state - 1;
    }
    
+   //! @brief Function to decide whether to accept the new state or not.
+   //! @tparam RandType Type of the random number engine.
+   //! @param random_number_engine Pointer to the random number engine.
+   //! @param delta_energy Energy difference between the new state and the old state.
+   //! @param beta Inverse temperature.
+   //! @return True if the new state is accepted, false otherwise.
    template<typename RandType>
    bool DecideAcceptance(RandType *random_number_engine, const double delta_energy, const double beta) {
       return 1.0/(1.0 + std::exp(-beta*delta_energy)) > dist_real_(*random_number_engine);
    }
    
 private:
+   //! @brief Maximum number of states.
    const std::int32_t max_num_state_;
+
+   //! @brief Uniform real distribution.
    std::uniform_real_distribution<double> dist_real_;
+
+   //! @brief List of probabilities.
    std::vector<double> prob_list;
    
 };
 
-
+//! @brief Class for Suwa-Todo updater.
+//! @details This class is used to update the state of the system using the Suwa-Todo method.
 class SuwaTodoUpdater {
   
 public:
+   //! @brief Constructor of SuwaTodoUpdater.
+   //! @param max_num_state Maximum number of states.
    SuwaTodoUpdater(const std::int32_t max_num_state): max_num_state_(max_num_state), dist_real_(0, 1) {
       weight_list_.resize(max_num_state_);
       sum_weight_list_.resize(max_num_state_ + 1);
    }
    
+   //! @brief Function to update the state of the system.
+   //! @tparam SystemType Type of the system.
+   //! @param system Pointer to the system.
+   //! @param index Index of the site.
+   //! @param beta Inverse temperature.
+   //! @return New state number.
    template<class SystemType>
    std::int32_t GetNewState(SystemType *system, const std::int32_t index, const double beta) {
       const std::int32_t num_state = system->GetNumState(index);
@@ -136,15 +183,28 @@ public:
       return num_state - 1;
    }
    
+   //! @brief Function to decide whether to accept the new state or not.
+   //! @tparam RandType Type of the random number engine.
+   //! @param random_number_engine Pointer to the random number engine.
+   //! @param delta_energy Energy difference between the new state and the old state.
+   //! @param beta Inverse temperature.
+   //! @return True if the new state is accepted, false otherwise.
    template<typename RandType>
    bool DecideAcceptance(RandType *random_number_engine, const double delta_energy, const double beta) {
       return delta_energy <= 0.0 || std::exp(-beta*delta_energy) > dist_real_(*random_number_engine);
    }
    
 private:
+   //! @brief Maximum number of states.
    const std::int32_t max_num_state_;
+
+   //! @brief Uniform real distribution.
    std::uniform_real_distribution<double> dist_real_;
+
+   //! @brief List of weights.
    std::vector<double> weight_list_;
+
+   //! @brief List of sum of weights.
    std::vector<double> sum_weight_list_;
 
 };

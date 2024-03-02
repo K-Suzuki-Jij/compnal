@@ -60,7 +60,7 @@ public:
    //! @return True if the new state is accepted, false otherwise.
    template<typename RandType>
    bool DecideAcceptance(RandType *random_number_engine, const double delta_energy, const double beta) {
-      return delta_energy <= 0.0 || std::exp(-beta*delta_energy) > dist_real_(*random_number_engine);
+      return delta_energy <= 0.0 || std::exp(beta*delta_energy) > dist_real_(*random_number_engine);
    }
    
 private:
@@ -134,6 +134,7 @@ private:
 
 //! @brief Class for Suwa-Todo updater.
 //! @details This class is used to update the state of the system using the Suwa-Todo method.
+//! (H. Suwa and S. Todo, Phys. Rev. Lett. 105, 120603 (2010))
 class SuwaTodoUpdater {
   
 public:
@@ -191,7 +192,7 @@ public:
    //! @return True if the new state is accepted, false otherwise.
    template<typename RandType>
    bool DecideAcceptance(RandType *random_number_engine, const double delta_energy, const double beta) {
-      return delta_energy <= 0.0 || std::exp(-beta*delta_energy) > dist_real_(*random_number_engine);
+      return delta_energy <= 0.0 || std::exp(beta*delta_energy) > dist_real_(*random_number_engine);
    }
    
 private:

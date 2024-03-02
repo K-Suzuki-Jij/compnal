@@ -165,6 +165,12 @@ public:
       return energy_;
    }
    
+   //! @brief Get random number engine.
+   //! @return The random number engine.
+   RandType &GetRandomNumberEngine() {
+      return random_number_engine_;
+   }
+   
 protected:
    //! @brief The model.
    const ModelType &model_;

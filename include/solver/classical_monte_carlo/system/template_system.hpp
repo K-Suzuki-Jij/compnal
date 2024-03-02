@@ -115,6 +115,35 @@ public:
       return sample_[index].GetNumState();
    }
    
+   //! @brief Get the state number.
+   //! @param index The index of the variable.
+   //! @return The state number.
+   std::int32_t GetStateNumber(const std::int32_t index) const {
+      return sample_[index].GetStateNumber();
+   }
+   
+   //! @brief Get the state number, which has the maximum Boltzmann Weight: exp(-beta ΔE).
+   //! @param index The index of the variable.
+   //! @return The state number.
+   std::int32_t GetMaxBoltzmannWeightStateNumber(const std::int32_t index) const {
+      if (d_E_[index] >= 0) {
+         return 0;
+      }
+      else {
+         return sample_[index].GetNumState() - 1;
+      }
+   }
+   
+   //! @brief Get the max number of state.
+   //! @return The max number of state.
+   std::int32_t GetMaxNumState() const {
+      std::int32_t max_num_state = 0;
+      for (std::int32_t i = 0; i < system_size_; i++) {
+         max_num_state = std::max(max_num_state, this->GetNumState(i));
+      }
+      return max_num_state;
+   }
+   
    //! @brief Generate candidate state.
    //! @param index The index of the variable.
    //! @return The candidate state.
@@ -134,6 +163,12 @@ public:
    //! @return The energy.
    double GetEnergy() const {
       return energy_;
+   }
+   
+   //! @brief Get random number engine.
+   //! @return The random number engine.
+   RandType &GetRandomNumberEngine() {
+      return random_number_engine_;
    }
    
 protected:

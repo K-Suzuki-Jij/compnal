@@ -84,8 +84,8 @@ TEST(SolverClassicalMonteCarloSF, IsingOnChain) {
                                         solver::RandomNumberEngine::MT,
                                         solver::SpinSelectionMethod::RANDOM));
       
-      EXPECT_NO_THROW(cmc.RunSingleFlip(ising, 500, 10, 2, 0.1, 0,
-                                        solver::StateUpdateMethod::HEAT_BATH,
+      EXPECT_NO_THROW(cmc.RunSingleFlip(ising, 500, 10, 1, 0.1, 0,
+                                        solver::StateUpdateMethod::SUWA_TODO,
                                         solver::RandomNumberEngine::XORSHIFT,
                                         solver::SpinSelectionMethod::RANDOM));
       
@@ -121,7 +121,7 @@ TEST(SolverClassicalMonteCarloSF, IsingOnSquare) {
                                         solver::SpinSelectionMethod::RANDOM));
       
       EXPECT_NO_THROW(cmc.RunSingleFlip(ising, 500, 10, 2, 0.1, 0,
-                                        solver::StateUpdateMethod::HEAT_BATH,
+                                        solver::StateUpdateMethod::SUWA_TODO,
                                         solver::RandomNumberEngine::XORSHIFT,
                                         solver::SpinSelectionMethod::RANDOM));
       
@@ -157,7 +157,7 @@ TEST(SolverClassicalMonteCarloSF, IsingOnCubic) {
                                         solver::SpinSelectionMethod::RANDOM));
       
       EXPECT_NO_THROW(cmc.RunSingleFlip(ising, 500, 10, 2, 0.1, 0,
-                                        solver::StateUpdateMethod::HEAT_BATH,
+                                        solver::StateUpdateMethod::SUWA_TODO,
                                         solver::RandomNumberEngine::XORSHIFT,
                                         solver::SpinSelectionMethod::RANDOM));
       
@@ -192,7 +192,7 @@ TEST(SolverClassicalMonteCarloSF, IsingOnInfiniteRange) {
                                      solver::SpinSelectionMethod::RANDOM));
    
    EXPECT_NO_THROW(cmc.RunSingleFlip(ising, 500, 10, 2, 0.1, 0,
-                                     solver::StateUpdateMethod::HEAT_BATH,
+                                     solver::StateUpdateMethod::SUWA_TODO,
                                      solver::RandomNumberEngine::XORSHIFT,
                                      solver::SpinSelectionMethod::RANDOM));
    
@@ -228,7 +228,7 @@ TEST(SolverClassicalMonteCarloSF, PolyIsingOnChain) {
                                         solver::SpinSelectionMethod::RANDOM));
       
       EXPECT_NO_THROW(cmc.RunSingleFlip(poly_ising, 500, 10, 2, 0.1, 0,
-                                        solver::StateUpdateMethod::HEAT_BATH,
+                                        solver::StateUpdateMethod::SUWA_TODO,
                                         solver::RandomNumberEngine::XORSHIFT,
                                         solver::SpinSelectionMethod::RANDOM));
       
@@ -264,7 +264,7 @@ TEST(SolverClassicalMonteCarloSF, PolyIsingOnSquare) {
                                         solver::SpinSelectionMethod::RANDOM));
       
       EXPECT_NO_THROW(cmc.RunSingleFlip(poly_ising, 500, 10, 2, 0.1, 0,
-                                        solver::StateUpdateMethod::HEAT_BATH,
+                                        solver::StateUpdateMethod::SUWA_TODO,
                                         solver::RandomNumberEngine::XORSHIFT,
                                         solver::SpinSelectionMethod::RANDOM));
       
@@ -300,7 +300,7 @@ TEST(SolverClassicalMonteCarloSF, PolyIsingOnCubic) {
                                         solver::SpinSelectionMethod::RANDOM));
       
       EXPECT_NO_THROW(cmc.RunSingleFlip(poly_ising, 50, 10, 2, 0.1, 0,
-                                        solver::StateUpdateMethod::HEAT_BATH,
+                                        solver::StateUpdateMethod::SUWA_TODO,
                                         solver::RandomNumberEngine::XORSHIFT,
                                         solver::SpinSelectionMethod::RANDOM));
       
@@ -335,17 +335,17 @@ TEST(SolverClassicalMonteCarloSF, PolyIsingOnInfiniteRange) {
                                      solver::SpinSelectionMethod::RANDOM));
    
    EXPECT_NO_THROW(cmc.RunSingleFlip(poly_ising, 50, 10, 2, 0.1, 0,
-                                     solver::StateUpdateMethod::HEAT_BATH,
+                                     solver::StateUpdateMethod::SUWA_TODO,
                                      solver::RandomNumberEngine::XORSHIFT,
                                      solver::SpinSelectionMethod::RANDOM));
    
    EXPECT_NO_THROW(cmc.RunSingleFlip(poly_ising, 50, 10, 2, 0.1, 0,
-                                     solver::StateUpdateMethod::HEAT_BATH,
+                                     solver::StateUpdateMethod::SUWA_TODO,
                                      solver::RandomNumberEngine::MT_64,
                                      solver::SpinSelectionMethod::RANDOM));
    
    EXPECT_NO_THROW(cmc.RunSingleFlip(poly_ising, 50, 10, 2, 0.1, 0,
-                                     solver::StateUpdateMethod::HEAT_BATH,
+                                     solver::StateUpdateMethod::SUWA_TODO,
                                      solver::RandomNumberEngine::MT_64,
                                      solver::SpinSelectionMethod::SEQUENTIAL));
 }

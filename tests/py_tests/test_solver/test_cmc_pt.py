@@ -26,6 +26,7 @@ def test_cmc_pt_ising_chain():
     state_update_method_list = [
         StateUpdateMethod.METROPOLIS,
         StateUpdateMethod.HEAT_BATH,
+        StateUpdateMethod.SUWA_TODO
     ]
     random_number_engine_list = [
         RandomNumberEngine.MT,
@@ -131,6 +132,7 @@ def test_cmc_pt_ising_square():
     state_update_method_list = [
         StateUpdateMethod.METROPOLIS,
         StateUpdateMethod.HEAT_BATH,
+        StateUpdateMethod.SUWA_TODO
     ]
     random_number_engine_list = [
         RandomNumberEngine.MT,
@@ -228,6 +230,7 @@ def test_cmc_pt_ising_cubic():
     state_update_method_list = [
         StateUpdateMethod.METROPOLIS,
         StateUpdateMethod.HEAT_BATH,
+        StateUpdateMethod.SUWA_TODO
     ]
     random_number_engine_list = [
         RandomNumberEngine.MT,
@@ -327,6 +330,7 @@ def test_cmc_pt_ising_infinite_range():
     state_update_method_list = [
         StateUpdateMethod.METROPOLIS,
         StateUpdateMethod.HEAT_BATH,
+        StateUpdateMethod.SUWA_TODO
     ]
     random_number_engine_list = [
         RandomNumberEngine.MT,
@@ -433,6 +437,7 @@ def test_cmc_pt_poly_ising_chain():
     state_update_method_list = [
         StateUpdateMethod.METROPOLIS,
         StateUpdateMethod.HEAT_BATH,
+        StateUpdateMethod.SUWA_TODO
     ]
     random_number_engine_list = [
         RandomNumberEngine.MT,
@@ -537,6 +542,7 @@ def test_cmc_pt_poly_ising_square():
     state_update_method_list = [
         StateUpdateMethod.METROPOLIS,
         StateUpdateMethod.HEAT_BATH,
+        StateUpdateMethod.SUWA_TODO
     ]
     random_number_engine_list = [
         RandomNumberEngine.MT,
@@ -633,6 +639,7 @@ def test_cmc_pt_poly_ising_cubic():
     state_update_method_list = [
         StateUpdateMethod.METROPOLIS,
         StateUpdateMethod.HEAT_BATH,
+        StateUpdateMethod.SUWA_TODO
     ]
     random_number_engine_list = [
         RandomNumberEngine.MT,
@@ -731,6 +738,7 @@ def test_cmc_pt_poly_ising_infinite_range():
     state_update_method_list = [
         StateUpdateMethod.METROPOLIS,
         StateUpdateMethod.HEAT_BATH,
+        StateUpdateMethod.SUWA_TODO
     ]
     random_number_engine_list = [
         RandomNumberEngine.MT,

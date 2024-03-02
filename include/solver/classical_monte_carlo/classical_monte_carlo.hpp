@@ -25,10 +25,8 @@
 #include "../../utility/random.hpp"
 #include "../parameter_class.hpp"
 #include "system/all.hpp"
-#include "metropolis_ssf.hpp"
-#include "metropolis_pt.hpp"
-#include "heat_bath_ssf.hpp"
-#include "heat_bath_pt.hpp"
+#include "single_spin_flip.hpp"
+#include "single_spin_flip_updater.hpp"
 #include <random>
 #include <Eigen/Dense>
 
@@ -213,11 +211,9 @@ private:
       using E2DType = Eigen::Matrix<PHQType, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
       E2DType samples(num_samples, model.GetLattice().GetSystemSize());
       std::vector<RType> system_seed(num_samples);
-      std::vector<RType> updater_seed(num_samples);
       RandType rand(static_cast<RType>(seed));
       for (std::int32_t i = 0; i < num_samples; ++i) {
          system_seed[i] = rand();
-         updater_seed[i] = rand();
       }
 
       if (initial_sample_list.size() != 0 && initial_sample_list.rows() != num_samples) {
@@ -230,11 +226,15 @@ private:
          if (initial_sample_list.size() != 0) {
             system.SetSampleByValue(initial_sample_list.row(i));
          }
+         
          if (updater == StateUpdateMethod::METROPOLIS) {
-            MetropolisSSF<SystemType, RandType>(&system, num_sweeps, 1.0/temperature, updater_seed[i], spin_selector);
+            SingleSpinFlip<SystemType, RandType, MetropolisUpdater>(&system, num_sweeps, 1.0/temperature, spin_selector);
          }
          else if (updater == StateUpdateMethod::HEAT_BATH) {
-            HeatBathSSF<SystemType, RandType>(&system, num_sweeps, 1.0/temperature, updater_seed[i], spin_selector);
+            SingleSpinFlip<SystemType, RandType, HeatBathUpdater>(&system, num_sweeps, 1.0/temperature, spin_selector);
+         }
+         else if (updater == StateUpdateMethod::SUWA_TODO) {
+            SingleSpinFlip<SystemType, RandType, SuwaTodoUpdater>(&system, num_sweeps, 1.0/temperature, spin_selector);
          }
          else {
             throw std::invalid_argument("Unknown updater");
@@ -283,11 +283,9 @@ private:
             
       Eigen::Vector<PHQType, Eigen::Dynamic> samples(num_replicas*num_samples*system_size);
       std::vector<std::vector<RType>> system_seed(num_samples, std::vector<RType>(num_replicas));
-      std::vector<RType> updater_seed(num_samples);
       RandType rand(static_cast<RType>(seed));
       
       for (std::int64_t i = 0; i < num_samples; ++i) {
-         updater_seed[i] = rand();
          for (std::int64_t j = 0; j < num_replicas; ++j) {
             system_seed[i][j] = rand();
          }
@@ -308,16 +306,19 @@ private:
          }
          
          if (updater == StateUpdateMethod::METROPOLIS) {
-            MetropolisPT<SystemType, RandType>(&system_list_pointer,
-                                               num_sweeps, num_swaps,
-                                               updater_seed[sample_count], 
-                                               beta_list, spin_selector);
+            ParallelTempering<SystemType, RandType, MetropolisUpdater>(&system_list_pointer,
+                                                                       num_sweeps, num_swaps,
+                                                                       beta_list, spin_selector);
          }
          else if (updater == StateUpdateMethod::HEAT_BATH) {
-            HeatBathPT<SystemType, RandType>(&system_list_pointer,
-                                             num_sweeps, num_swaps,
-                                             updater_seed[sample_count],
-                                             beta_list, spin_selector);
+            ParallelTempering<SystemType, RandType, HeatBathUpdater>(&system_list_pointer,
+                                                                       num_sweeps, num_swaps,
+                                                                       beta_list, spin_selector);
+         }
+         else if (updater == StateUpdateMethod::SUWA_TODO) {
+            ParallelTempering<SystemType, RandType, SuwaTodoUpdater>(&system_list_pointer,
+                                                                     num_sweeps, num_swaps,
+                                                                     beta_list, spin_selector);
          }
          else {
             throw std::invalid_argument("Unknown updater");

@@ -26,51 +26,53 @@ namespace solver {
 namespace classical_monte_carlo {
 
 
-template<class SystemType, typename RandType>
 class MetropolisUpdater {
    
 public:
-   MetropolisUpdater(SystemType *system, const double beta):
-   system_(system), beta_(beta), dist_real_(0, 1) {}
-   
-   std::int32_t GetNewState(const std::int32_t index) {
-      const std::int32_t candidate_state = system_->GenerateCandidateState(index);
-      const double delta_energy = system_->GetEnergyDifference(index, candidate_state);
-      if (delta_energy <= 0.0 || std::exp(-beta_*delta_energy) > dist_real_(system_->GetRandomNumberEngine())) {
+   MetropolisUpdater(const std::int32_t max_num_state): max_num_state_(max_num_state), dist_real_(0, 1) {}
+
+   template<class SystemType>
+   std::int32_t GetNewState(SystemType *system, const std::int32_t index, const double beta) {
+      const std::int32_t candidate_state = system->GenerateCandidateState(index);
+      const double delta_energy = system->GetEnergyDifference(index, candidate_state);
+      if (delta_energy <= 0.0 || std::exp(-beta*delta_energy) > dist_real_(system->GetRandomNumberEngine())) {
          return candidate_state;
       }
       else {
-         return system_->GetStateNumber(index);
+         return system->GetStateNumber(index);
       }
    }
    
+   template<typename RandType>
+   bool DecideAcceptance(RandType *random_number_engine, const double delta_energy, const double beta) {
+      return delta_energy <= 0.0 || std::exp(-beta*delta_energy) > dist_real_(*random_number_engine);
+   }
+   
 private:
-   SystemType *system_;
-   const double beta_;
+   const std::int32_t max_num_state_;
    std::uniform_real_distribution<double> dist_real_;
    
 };
 
 
-template<class SystemType, typename RandType>
 class HeatBathUpdater {
    
 public:
-   HeatBathUpdater(SystemType *system, const double beta):
-   system_(system), beta_(beta), dist_real_(0, 1) {
-      prob_list.resize(system_->GetMaxNumState());
+   HeatBathUpdater(const std::int32_t max_num_state): max_num_state_(max_num_state), dist_real_(0, 1) {
+      prob_list.resize(max_num_state_);
    }
    
-   std::int32_t GetNewState(const std::int32_t index) {
-      const std::int32_t num_state = system_->GetNumState(index);
+   template<class SystemType>
+   std::int32_t GetNewState(SystemType *system, const std::int32_t index, const double beta) {
+      const std::int32_t num_state = system->GetNumState(index);
       double z = 0.0;
       for (std::int32_t state = 0; state < num_state; ++state) {
-         prob_list[state] = std::exp(-beta_*system_->GetEnergyDifference(index, state));
+         prob_list[state] = std::exp(-beta*system->GetEnergyDifference(index, state));
          z += prob_list[state];
       }
       z = 1.0/z;
       double prob_sum = 0.0;
-      const double dist = dist_real_(system_->GetRandomNumberEngine());
+      const double dist = dist_real_(system->GetRandomNumberEngine());
       for (std::int32_t state = 0; state < num_state; ++state) {
          prob_sum += z*prob_list[state];
          if (dist < prob_sum) {
@@ -80,48 +82,50 @@ public:
       return num_state - 1;
    }
    
+   template<typename RandType>
+   bool DecideAcceptance(RandType *random_number_engine, const double delta_energy, const double beta) {
+      return 1.0/(1.0 + std::exp(-beta*delta_energy)) > dist_real_(*random_number_engine);
+   }
+   
 private:
-   SystemType *system_;
-   const double beta_;
+   const std::int32_t max_num_state_;
    std::uniform_real_distribution<double> dist_real_;
    std::vector<double> prob_list;
    
 };
 
 
-template<class SystemType, typename RandType>
 class SuwaTodoUpdater {
   
 public:
-   SuwaTodoUpdater(SystemType *system, const double beta):
-   system_(system), beta_(beta), dist_real_(0, 1) {
-      const std::int32_t max_num_state = system_->GetMaxNumState();
-      weight_list_.resize(max_num_state);
-      sum_weight_list_.resize(max_num_state + 1);
+   SuwaTodoUpdater(const std::int32_t max_num_state): max_num_state_(max_num_state), dist_real_(0, 1) {
+      weight_list_.resize(max_num_state_);
+      sum_weight_list_.resize(max_num_state_ + 1);
    }
    
-   std::int32_t GetNewState(const std::int32_t index) {
-      const std::int32_t num_state = system_->GetNumState(index);
-      const std::int32_t max_weight_state = system_->GetMaxBoltzmannWeightStateNumber(index);
+   template<class SystemType>
+   std::int32_t GetNewState(SystemType *system, const std::int32_t index, const double beta) {
+      const std::int32_t num_state = system->GetNumState(index);
+      const std::int32_t max_weight_state = system->GetMaxBoltzmannWeightStateNumber(index);
       
-      weight_list_[0] = std::exp(-beta_*system_->GetEnergyDifference(index, max_weight_state));
+      weight_list_[0] = std::exp(-beta*system->GetEnergyDifference(index, max_weight_state));
       sum_weight_list_[1] = weight_list_[0];
       
       for (std::int32_t state = 1; state < num_state; ++state) {
          if (state == max_weight_state) {
-            weight_list_[state] = std::exp(-beta_*system_->GetEnergyDifference(index, 0));
+            weight_list_[state] = std::exp(-beta*system->GetEnergyDifference(index, 0));
          }
          else {
-            weight_list_[state] = std::exp(-beta_*system_->GetEnergyDifference(index, state));
+            weight_list_[state] = std::exp(-beta*system->GetEnergyDifference(index, state));
          }
          sum_weight_list_[state + 1] = sum_weight_list_[state] + weight_list_[state];
       }
       sum_weight_list_[0] = sum_weight_list_[num_state];
       
-      const std::int32_t temp = system_->GetStateNumber(index);
+      const std::int32_t temp = system->GetStateNumber(index);
       const std::int32_t now_state = (temp == 0) ? max_weight_state : ((temp == max_weight_state) ? 0 : temp);
       double prob_sum = 0.0;
-      const double dist = dist_real_(system_->GetRandomNumberEngine());
+      const double dist = dist_real_(system->GetRandomNumberEngine());
       for (std::int32_t j = 0; j < num_state; ++j) {
          const double d_ij = sum_weight_list_[now_state + 1] - sum_weight_list_[j] + sum_weight_list_[1];
          prob_sum += std::max(0.0, std::min({d_ij, 1.0 + weight_list_[j] - d_ij, 1.0, weight_list_[j]}));
@@ -132,9 +136,13 @@ public:
       return num_state - 1;
    }
    
+   template<typename RandType>
+   bool DecideAcceptance(RandType *random_number_engine, const double delta_energy, const double beta) {
+      return delta_energy <= 0.0 || std::exp(-beta*delta_energy) > dist_real_(*random_number_engine);
+   }
+   
 private:
-   SystemType *system_;
-   const double beta_;
+   const std::int32_t max_num_state_;
    std::uniform_real_distribution<double> dist_real_;
    std::vector<double> weight_list_;
    std::vector<double> sum_weight_list_;

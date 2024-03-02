@@ -33,7 +33,7 @@ namespace classical_monte_carlo {
 //! @param num_sweeps The number of sweeps.
 //! @param beta Inverse temperature.
 //! @param spin_selector Spin selection method.
-template<class SystemType, typename RandType, template<class, typename> class Updater>
+template<class SystemType, typename RandType, class Updater>
 void SingleSpinFlip(SystemType *system,
                     const std::int32_t num_sweeps,
                     const double beta,
@@ -43,19 +43,19 @@ void SingleSpinFlip(SystemType *system,
    
    if (spin_selector == SpinSelectionMethod::RANDOM) {
       std::uniform_int_distribution<std::int32_t> dist_system_size(0, system_size - 1);
-      auto updater = Updater<SystemType, RandType>(system, beta);
+      auto updater = Updater(system->GetMaxNumState());
       for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
          for (std::int32_t i = 0; i < system_size; i++) {
             const std::int32_t index = dist_system_size(system->GetRandomNumberEngine());
-            system->Flip(index, updater.GetNewState(index));
+            system->Flip(index, updater.GetNewState(system, index, beta));
          }
       }
    }
    else if (spin_selector == SpinSelectionMethod::SEQUENTIAL) {
-      auto updater = Updater<SystemType, RandType>(system, beta);
+      auto updater = Updater(system->GetMaxNumState());
       for (std::int32_t sweep_count = 0; sweep_count < num_sweeps; sweep_count++) {
          for (std::int32_t i = 0; i < system_size; i++) {
-            system->Flip(i, updater.GetNewState(i));
+            system->Flip(i, updater.GetNewState(system, i, beta));
          }
       }
    }

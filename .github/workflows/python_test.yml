@@ -33,7 +33,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       
       - name: Install requirements on MacOS
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-14' || matrix.os == 'macos-latest'
         run: |
           brew install libomp
 

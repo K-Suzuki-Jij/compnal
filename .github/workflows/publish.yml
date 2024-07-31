@@ -27,7 +27,7 @@ jobs:
           pip install cibuildwheel twine
 
       - name: Install libomp on MacOS
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-14' || matrix.os == 'macos-latest'
         run: |
           brew install libomp
 

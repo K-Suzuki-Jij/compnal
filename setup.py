@@ -20,7 +20,7 @@ except ImportError:
     from setuptools import setup
 
 setup_requires = [
-    "numpy",
+    "numpy < 1.27.0",
     "psutil",
     "h5py",
     "pybind11 >=2.11.0, < 2.12.0",

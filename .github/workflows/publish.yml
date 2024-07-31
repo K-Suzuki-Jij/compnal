@@ -49,6 +49,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           CIBW_BUILD: cp310-macosx_x86_64 cp311-macosx_x86_64 cp312-macosx_x86_64
           CIBW_BUILD_VERBOSITY: 3
+          CIBW_ENVIRONMENT: MACOSX_DEPLOYMENT_TARGET=14.0
         run: |
           cibuildwheel --output-dir wheelhouse
           twine upload wheelhouse/* --repository pypi
@@ -60,6 +61,7 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
           CIBW_BUILD: cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
           CIBW_BUILD_VERBOSITY: 3 
+          CIBW_ENVIRONMENT: MACOSX_DEPLOYMENT_TARGET=14.0
         run: |
           cibuildwheel --output-dir wheelhouse
           twine upload wheelhouse/* --repository pypi

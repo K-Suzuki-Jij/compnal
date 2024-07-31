@@ -15,11 +15,8 @@ jobs:
   python-test:
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12']
         os: [ubuntu-latest, macos-13, macos-14]
-        exclude:
-          - os: macos-14
-            python-version: '3.9' # Python 3.9 is not available on MacOS 14 (M1 mac)
 
     runs-on: ${{ matrix.os }}
 
